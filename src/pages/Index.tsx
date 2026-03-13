@@ -176,6 +176,8 @@ const Index = () => {
 
     await Promise.all(photos.map(analyzeOne));
 
+    setIsAnalyzing(false);
+
     // Save to IndexedDB so state survives OAuth redirects
     setPhotos((current) => {
       savePhotosSession(current).catch((err) => {
