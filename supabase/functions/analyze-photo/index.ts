@@ -1,30 +1,56 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { AI_MODEL, SYSTEM_PROMPT, USER_PROMPT_WITH_CONTEXT, USER_PROMPT_DEFAULT } from "./prompts.ts";
 
-// Allowed origins for CORS
+// --- Rate limiting (in-memory, per-instance, best-effort) ---
+const RATE_LIMIT_MAX = 20;       // max requests per window per IP
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const MAX_PAYLOAD_BYTES = 30 * 1024 * 1024; // 30 MB hard limit
+
+const ipBuckets = new Map<string, number[]>();
+
+function isRateLimited(ip: string): { limited: boolean; retryAfterSec: number } {
+  const now = Date.now();
+  const cutoff = now - RATE_LIMIT_WINDOW_MS;
+  let timestamps = ipBuckets.get(ip) ?? [];
+  timestamps = timestamps.filter((t) => t > cutoff);
+  ipBuckets.set(ip, timestamps);
+
+  if (timestamps.length >= RATE_LIMIT_MAX) {
+    const retryAfterSec = Math.ceil((timestamps[0] + RATE_LIMIT_WINDOW_MS - now) / 1000);
+    return { limited: true, retryAfterSec };
+  }
+  timestamps.push(now);
+  return { limited: false, retryAfterSec: 0 };
+}
+
+// Periodically clean up stale entries (every 5 minutes)
+setInterval(() => {
+  const cutoff = Date.now() - RATE_LIMIT_WINDOW_MS;
+  for (const [ip, timestamps] of ipBuckets.entries()) {
+    const active = timestamps.filter((t) => t > cutoff);
+    if (active.length === 0) ipBuckets.delete(ip);
+    else ipBuckets.set(ip, active);
+  }
+}, 5 * 60_000);
+
+// --- CORS ---
 const ALLOWED_ORIGINS = [
-  "http://localhost:5173", // Local development (Vite default)
-  "http://localhost:4173", // Local preview
-  "http://127.0.0.1:5173", // Local development (alternative)
-  "http://127.0.0.1:4173", // Local preview (alternative)
-  // Production URLs will be added by Lovable deployment
-  // Pattern: https://*.lovableproject.com or custom domain
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:4173",
 ];
 
-// Get CORS headers based on request origin
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") || "";
-  
-  // Check if origin is allowed
   const isAllowed = ALLOWED_ORIGINS.includes(origin) || 
                     origin.endsWith(".lovableproject.com") ||
                     origin.endsWith(".lovable.app");
-  
   return {
     "Access-Control-Allow-Origin": isAllowed ? origin : ALLOWED_ORIGINS[0],
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Max-Age": "86400", // 24 hours
+    "Access-Control-Max-Age": "86400",
   };
 }
 
@@ -36,6 +62,34 @@ serve(async (req) => {
   }
 
   try {
+    // --- Server-side rate limiting ---
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+                     req.headers.get("cf-connecting-ip") ||
+                     "unknown";
+    const { limited, retryAfterSec } = isRateLimited(clientIp);
+    if (limited) {
+      return new Response(
+        JSON.stringify({ error: `Too many requests. Try again in ${retryAfterSec}s.` }),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": String(retryAfterSec),
+          },
+        }
+      );
+    }
+
+    // --- Payload size check ---
+    const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
+    if (contentLength > MAX_PAYLOAD_BYTES) {
+      return new Response(
+        JSON.stringify({ error: "Request too large" }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Parse and validate request body
     let body;
     try {
@@ -49,7 +103,6 @@ serve(async (req) => {
     
     const { imageBase64, exifData } = body;
     
-    // Validate required fields
     if (!imageBase64 || typeof imageBase64 !== "string") {
       return new Response(
         JSON.stringify({ error: "Invalid request: imageBase64 is required and must be a string" }),
@@ -57,7 +110,6 @@ serve(async (req) => {
       );
     }
     
-    // Validate base64 format (basic check)
     if (!/^[A-Za-z0-9+/=]+$/.test(imageBase64)) {
       return new Response(
         JSON.stringify({ error: "Invalid request: imageBase64 contains invalid characters" }),
@@ -65,7 +117,6 @@ serve(async (req) => {
       );
     }
     
-    // Validate exifData if provided
     if (exifData !== undefined && exifData !== null && typeof exifData !== "object") {
       return new Response(
         JSON.stringify({ error: "Invalid request: exifData must be an object" }),
