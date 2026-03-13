@@ -135,7 +135,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
             height="100"
             viewBox="0 0 260 180"
             fill="none"
-            className="text-muted-foreground shrink-0 -ml-1"
+            className="text-primary shrink-0 -ml-1"
             overflow="visible"
           >
             {/* Path: starts mid-left at text midpoint height, loops, then goes up */}
