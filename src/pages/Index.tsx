@@ -50,6 +50,13 @@ const Index = () => {
     });
   }, []);
 
+  const handleClearAll = useCallback(() => {
+    setPhotos((prev) => {
+      prev.forEach((p) => URL.revokeObjectURL(p.preview));
+      return [];
+    });
+  }, []);
+
   const handleUpdateAltText = useCallback((id: string, text: string) => {
     setPhotos((prev) =>
       prev.map((p) => (p.id === id ? { ...p, altText: text } : p))
@@ -150,6 +157,7 @@ const Index = () => {
               photos={photos}
               onAddPhotos={handleAddPhotos}
               onRemovePhoto={handleRemovePhoto}
+              onClearAll={handleClearAll}
             />
 
             {/* Generate button */}
