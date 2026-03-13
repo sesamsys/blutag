@@ -30,3 +30,9 @@ export const BLUESKY_IMAGE_JPEG_QUALITY_MIN = 0.50;
 
 /** Quality step decrement when iteratively compressing */
 export const BLUESKY_IMAGE_JPEG_QUALITY_STEP = 0.05;
+
+/** Maximum number of analysis API calls allowed per window */
+export const RATE_LIMIT_MAX_CALLS = 10;
+
+/** Rate-limit sliding window duration in milliseconds (1 minute) */
+export const RATE_LIMIT_WINDOW_MS = 60_000;

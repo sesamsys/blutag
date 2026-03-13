@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Sparkles, Github, Linkedin } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import AltTextResult from "@/components/AltTextResult";
@@ -11,10 +11,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
-import { MAX_PHOTOS } from "@/lib/constants";
+import { MAX_PHOTOS, RATE_LIMIT_MAX_CALLS, RATE_LIMIT_WINDOW_MS } from "@/lib/constants";
 import { savePhotosSession, loadPhotosSession, clearPhotosSession } from "@/lib/session-persistence";
 import { ERROR_MESSAGES, getErrorMessage, logError, ErrorType, AppError } from "@/lib/error-messages";
 import { retryWithTimeout } from "@/lib/retry";
+import { createRateLimiter } from "@/lib/rate-limiter";
 
 function generateId() {
   return Math.random().toString(36).slice(2, 10);
@@ -35,6 +36,12 @@ function fileToBase64(file: File): Promise<string> {
 const Index = () => {
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
   const [hasResults, setHasResults] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const rateLimiter = useMemo(
+    () => createRateLimiter({ maxCalls: RATE_LIMIT_MAX_CALLS, windowMs: RATE_LIMIT_WINDOW_MS }),
+    []
+  );
 
   // Restore session from IndexedDB (survives OAuth redirects)
   useEffect(() => {
@@ -84,8 +91,17 @@ const Index = () => {
   }, []);
 
   const analyzePhotos = async () => {
-    if (photos.length === 0) return;
+    if (photos.length === 0 || isAnalyzing) return;
 
+    // Client-side rate limiting
+    if (!rateLimiter.canProceed()) {
+      const waitSec = Math.ceil(rateLimiter.msUntilNextSlot() / 1000);
+      toast.error(`Too many requests. Please try again in ${waitSec}s.`);
+      return;
+    }
+    rateLimiter.record();
+
+    setIsAnalyzing(true);
     setHasResults(true);
     setPhotos((prev) => prev.map((p) => ({ ...p, analyzing: true })));
 
@@ -159,6 +175,8 @@ const Index = () => {
     };
 
     await Promise.all(photos.map(analyzeOne));
+
+    setIsAnalyzing(false);
 
     // Save to IndexedDB so state survives OAuth redirects
     setPhotos((current) => {
@@ -242,10 +260,11 @@ const Index = () => {
               <div className="flex justify-center">
                 <button
                   onClick={analyzePhotos}
-                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-opacity"
+                  disabled={isAnalyzing}
+                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   <Sparkles className="w-5 h-5" />
-                  Generate alt text
+                  {isAnalyzing ? "Analyzing…" : "Generate alt text"}
                 </button>
               </div>
             )}
