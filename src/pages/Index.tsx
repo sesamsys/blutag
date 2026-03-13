@@ -11,6 +11,7 @@ import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
 import { MAX_PHOTOS } from "@/lib/constants";
+import { savePhotosSession, loadPhotosSession, clearPhotosSession } from "@/lib/session-persistence";
 
 function generateId() {
   return Math.random().toString(36).slice(2, 10);
