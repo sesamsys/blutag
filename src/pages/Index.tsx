@@ -91,8 +91,17 @@ const Index = () => {
   }, []);
 
   const analyzePhotos = async () => {
-    if (photos.length === 0) return;
+    if (photos.length === 0 || isAnalyzing) return;
 
+    // Client-side rate limiting
+    if (!rateLimiter.canProceed()) {
+      const waitSec = Math.ceil(rateLimiter.msUntilNextSlot() / 1000);
+      toast.error(`Too many requests. Please try again in ${waitSec}s.`);
+      return;
+    }
+    rateLimiter.record();
+
+    setIsAnalyzing(true);
     setHasResults(true);
     setPhotos((prev) => prev.map((p) => ({ ...p, analyzing: true })));
 
