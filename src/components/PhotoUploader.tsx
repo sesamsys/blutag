@@ -124,7 +124,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       {isEmpty && (
         <div className="pointer-events-none select-none flex items-center justify-center gap-4 mt-3">
           <span
-            className="text-muted-foreground text-2xl sm:text-3xl -rotate-2 shrink-0 leading-none"
+            className="text-primary text-2xl sm:text-3xl -rotate-2 shrink-0 leading-none"
             style={{ fontFamily: "'Caveat', cursive" }}
           >
             Drag photos here
