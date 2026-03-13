@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Transparent background -->
+  
+  <!-- Tag icon (scaled and centered) -->
+  <path 
+    d="M16 4L4 4L4 16L16.387 28.387C17.366 29.366 18.951 29.366 19.93 28.387L27.387 20.93C28.366 19.951 28.366 18.366 27.387 17.387L16 4Z" 
+    stroke="hsl(220 90% 56%)" 
+    stroke-width="2.5" 
+    stroke-linecap="round" 
+    stroke-linejoin="round"
+    fill="none"
+  />
+  
+  <!-- Tag hole dot -->
+  <circle 
+    cx="10" 
+    cy="10" 
+    r="2" 
+    fill="hsl(220 90% 56%)"
+  />
+</svg>
