@@ -260,10 +260,11 @@ const Index = () => {
               <div className="flex justify-center">
                 <button
                   onClick={analyzePhotos}
-                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-opacity"
+                  disabled={isAnalyzing}
+                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   <Sparkles className="w-5 h-5" />
-                  Generate alt text
+                  {isAnalyzing ? "Analyzing…" : "Generate alt text"}
                 </button>
               </div>
             )}
