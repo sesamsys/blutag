@@ -12,3 +12,21 @@ export const MAX_ALT_TEXT_LENGTH = 2000;
 
 /** Duration in ms to show the "Copied" confirmation */
 export const COPY_FEEDBACK_DURATION_MS = 2000;
+
+/** Maximum character length for a Bluesky post */
+export const BLUESKY_POST_MAX_LENGTH = 300;
+
+/** Maximum image size in bytes for Bluesky uploads (1 MB) */
+export const BLUESKY_IMAGE_MAX_BYTES = 1_000_000;
+
+/** Maximum dimension (px) for the longest edge when compressing for Bluesky */
+export const BLUESKY_IMAGE_MAX_DIMENSION = 2048;
+
+/** Initial JPEG quality for Bluesky image compression */
+export const BLUESKY_IMAGE_JPEG_QUALITY = 0.80;
+
+/** Minimum JPEG quality floor when iteratively compressing */
+export const BLUESKY_IMAGE_JPEG_QUALITY_MIN = 0.50;
+
+/** Quality step decrement when iteratively compressing */
+export const BLUESKY_IMAGE_JPEG_QUALITY_STEP = 0.05;
