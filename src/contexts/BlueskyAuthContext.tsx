@@ -84,11 +84,22 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
   }, [establishSession]);
 
   const signIn = useCallback(async (inputHandle: string) => {
-    const client = await getClient();
-    await client.signIn(inputHandle, {
-      state: "login",
-    });
-    // Redirects to Bluesky — execution stops here
+    try {
+      const client = await getClient();
+      await client.signIn(inputHandle, {
+        state: "login",
+      });
+      // Redirects to Bluesky — execution stops here
+    } catch (err: any) {
+      console.error("OAuth signIn error:", err);
+      const message =
+        err?.message?.includes("client_metadata")
+          ? "Unable to verify app identity. The app may need to be published to a stable domain first."
+          : err?.message?.includes("resolve")
+            ? `Could not resolve handle "${inputHandle}". Check that it's correct.`
+            : `Sign-in failed: ${err?.message || "Unknown error"}`;
+      throw new Error(message);
+    }
   }, []);
 
   const logout = useCallback(async () => {
