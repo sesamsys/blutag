@@ -148,7 +148,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
             />
             {/* Arrowhead: two lines forming a V-shape at the end */}
             <path
-              d="M212,-66 L222.83,-80 M233.66,-66 L222.83,-80"
+              d="M209.29,-62.5 L222.83,-80 M236.37,-62.5 L222.83,-80"
               stroke="currentColor"
               strokeWidth="5"
               strokeLinecap="round"
