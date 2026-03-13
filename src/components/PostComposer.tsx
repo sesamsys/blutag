@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Send, ExternalLink } from "lucide-react";
+import { Send, ExternalLink, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useBlueskyAuth } from "@/contexts/BlueskyAuthContext";
+import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
+import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import { compressImageForBluesky } from "@/lib/image-compress";
 import { toast } from "sonner";
 import { BLUESKY_POST_MAX_LENGTH } from "@/lib/constants";
@@ -18,10 +20,23 @@ export default function PostComposer({ photos }: PostComposerProps) {
   const [posting, setPosting] = useState(false);
   const [postUrl, setPostUrl] = useState<string | null>(null);
 
-  if (!isLoggedIn || !agent) return null;
-
   const photosWithAltText = photos.filter((p) => p.altText && !p.analyzing);
   if (photosWithAltText.length === 0) return null;
+
+  if (!isLoggedIn || !agent) {
+    return (
+      <div className="flex flex-col items-center gap-3 p-6 bg-card rounded-2xl border border-border text-center">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <BlueskyIcon className="w-5 h-5 text-primary" />
+        </div>
+        <p className="font-semibold">Post to Bluesky with alt text</p>
+        <p className="text-sm text-muted-foreground max-w-sm">
+          Sign in to post your photos with the generated alt text directly to Bluesky.
+        </p>
+        <BlueskyLoginButton />
+      </div>
+    );
+  }
 
   const handlePost = async () => {
     setPosting(true);
