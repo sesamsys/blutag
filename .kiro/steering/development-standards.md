@@ -77,3 +77,9 @@
 - No direct server or deployment access
 - Infrastructure fully managed by Lovable
 - Automatic deployment on code changes
+
+### Package Manager
+- **Use npm exclusively** - Lovable's CD pipeline uses npm internally
+- Do not use Bun, Yarn, or pnpm to avoid dependency mismatches
+- Always use `npm install`, `npm run`, etc.
+- Commit `package-lock.json` to ensure consistent builds
