@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { AI_MODEL, SYSTEM_PROMPT, USER_PROMPT_WITH_CONTEXT, USER_PROMPT_DEFAULT } from "./prompts.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,50 +24,16 @@ serve(async (req) => {
       }
     }
 
-    const systemPrompt = `You are an expert at writing alternative text (alt text) for images, specifically for use on Bluesky social media. The photographer is posting their own photos — they know what's in them. Your job is to describe the image for people who cannot see it.
-
-Accuracy:
-- State what is clearly visible. Do NOT speculate or infer things that aren't obvious (e.g., don't guess the season from grass color, don't infer mood from ambiguous expressions).
-- If EXIF metadata provides the date/time or location context, use that as ground truth rather than guessing from visual clues. But do NOT include raw metadata values (coordinates, timestamps) in the alt text.
-- Do NOT include precise location information such as coordinates, street names, or exact addresses.
-- Only mention time of day or weather if it's visually dominant (e.g., "at sunset with orange sky", "in heavy rain"). Don't mention it if it's just incidental.
-
-Conciseness:
-- Focus on the main subject and what's happening. Skip minor background details like ground texture, scattered objects, or incidental elements.
-- Write 1-2 sentences for simple images, up to 3 for complex scenes. Maximum 2000 characters.
-- Don't start with "A photo of" or "An image of" — just describe what's there.
-- Don't describe things the poster already knows and that don't help a visually impaired reader (e.g., exact color of grass, type of pavement).
-- Don't mention technical camera details or metadata.
-
-Completeness:
-- Capture the primary subject, action, and general setting.
-- Mention the number of people or key objects when it matters.
-- Note any prominent readable text, signs, or logos.
-
-Accessibility best practices:
-- Write naturally, as if briefly telling someone what they'd see.
-- Use plain language — no jargon or overly descriptive prose.
-- For people, describe actions and context, not assumptions about identity or characteristics.
-- Describe atmosphere only when it's a defining feature of the image.`;
-
     const userContent: any[] = [
       {
         type: "image_url",
         image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
       },
+      {
+        type: "text",
+        text: contextInfo ? USER_PROMPT_WITH_CONTEXT(contextInfo) : USER_PROMPT_DEFAULT,
+      },
     ];
-
-    if (contextInfo) {
-      userContent.push({
-        type: "text",
-        text: `Additional context from photo metadata: ${contextInfo}\n\nPlease write concise alt text for this image, focusing on the main theme.`,
-      });
-    } else {
-      userContent.push({
-        type: "text",
-        text: "Please write concise alt text for this image, focusing on the main theme.",
-      });
-    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -75,9 +42,9 @@ Accessibility best practices:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: AI_MODEL,
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userContent },
         ],
       }),

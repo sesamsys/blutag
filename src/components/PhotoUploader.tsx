@@ -2,10 +2,7 @@ import { useCallback, useRef } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import type { PhotoFile } from "@/types/photo";
-
-const MAX_FILES = 4;
-const MAX_SIZE_MB = 25;
-const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES } from "@/lib/constants";
 
 interface PhotoUploaderProps {
   photos: PhotoFile[];
@@ -15,7 +12,7 @@ interface PhotoUploaderProps {
 
 export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const remaining = MAX_FILES - photos.length;
+  const remaining = MAX_PHOTOS - photos.length;
 
   const handleFiles = useCallback(
     (fileList: FileList | null) => {
@@ -25,12 +22,12 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: Ph
       const allValid: File[] = [];
       Array.from(fileList).forEach((f) => {
         if (!f.type.startsWith("image/")) return;
-        if (f.size > MAX_SIZE_BYTES) return;
+        if (f.size > MAX_FILE_SIZE_BYTES) return;
         allValid.push(f);
       });
 
       if (allValid.length > remaining) {
-        toast.warning(`You can only add up to ${MAX_FILES} photos. ${allValid.length - remaining} photo${allValid.length - remaining === 1 ? " was" : "s were"} not added.`);
+        toast.warning(`You can only add up to ${MAX_PHOTOS} photos. ${allValid.length - remaining} photo${allValid.length - remaining === 1 ? " was" : "s were"} not added.`);
       }
 
       const accepted = allValid.slice(0, remaining);
@@ -47,7 +44,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: Ph
     [handleFiles]
   );
 
-  const slots = Array.from({ length: MAX_FILES }, (_, i) => photos[i] ?? null);
+  const slots = Array.from({ length: MAX_PHOTOS }, (_, i) => photos[i] ?? null);
 
   return (
     <div className="w-full">
@@ -83,7 +80,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: Ph
         )}
       </div>
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Up to {MAX_FILES} photos · {MAX_SIZE_MB}MB max each
+        Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each
       </p>
       <input
         ref={inputRef}
