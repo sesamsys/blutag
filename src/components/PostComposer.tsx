@@ -124,7 +124,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
         }),
         {
           maxAttempts: 3,
-          onRetry: (error, attempt) => {
+          onRetry: (_error, attempt) => {
             toast.info(`Retrying post (attempt ${attempt + 1}/3)...`);
           },
         }
