@@ -6,6 +6,7 @@ import { extractExif } from "@/lib/exif";
 import { supabase } from "@/integrations/supabase/client";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
+import { MAX_PHOTOS } from "@/lib/constants";
 
 function generateId() {
   return Math.random().toString(36).slice(2, 10);
@@ -33,7 +34,7 @@ const Index = () => {
       file,
       preview: URL.createObjectURL(file),
     }));
-    setPhotos((prev) => [...prev, ...newPhotos].slice(0, 4));
+    setPhotos((prev) => [...prev, ...newPhotos].slice(0, MAX_PHOTOS));
   }, []);
 
   const handleRemovePhoto = useCallback((index: number) => {
