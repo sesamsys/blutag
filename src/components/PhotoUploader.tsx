@@ -30,7 +30,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: Ph
       });
 
       if (allValid.length > remaining) {
-        toast.warning(`Only ${remaining} photo slot${remaining === 1 ? "" : "s"} remaining — extra photos were not added.`);
+        toast.warning(`You can only add up to ${MAX_FILES} photos. ${allValid.length - remaining} photo${allValid.length - remaining === 1 ? " was" : "s were"} not added.`);
       }
 
       const accepted = allValid.slice(0, remaining);
