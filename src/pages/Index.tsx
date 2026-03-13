@@ -4,6 +4,7 @@ import PhotoUploader from "@/components/PhotoUploader";
 import AltTextResult from "@/components/AltTextResult";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import PostComposer from "@/components/PostComposer";
+import FooterLink from "@/components/FooterLink";
 import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import { extractExif } from "@/lib/exif";
 import { supabase } from "@/integrations/supabase/client";
@@ -284,12 +285,27 @@ const Index = () => {
           <p className="text-xs text-muted-foreground">
             Photos are only kept temporarily for analysis and deleted after your session.
           </p>
+          <p className="text-xs text-muted-foreground">
+            Created by{" "}
+            <FooterLink href={metaData.bluesky} ariaLabel="Bluesky">
+              @sesam.hu on Bluesky
+            </FooterLink>{" "}
+            using{" "}
+            <FooterLink href={metaData.lovable} ariaLabel="Lovable">
+              💖 Lovable
+            </FooterLink>{" "}
+            and{" "}
+            <FooterLink href={metaData.kiro} ariaLabel="Kiro">
+              👻 Kiro
+            </FooterLink>
+            .
+          </p>
           <div className="flex items-center gap-4">
             <a
               href={metaData.bluesky}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-primary transition-colors"
               aria-label="Bluesky"
             >
               <BlueskyIcon className="w-5 h-5" />
@@ -298,7 +314,7 @@ const Index = () => {
               href={metaData.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-primary transition-colors"
               aria-label="GitHub"
             >
               <Github className="w-5 h-5" />
