@@ -264,10 +264,11 @@ const Index = () => {
             </div>
 
             <div className="flex flex-col gap-4">
-              {photos.map((photo) => (
+              {photos.map((photo, i) => (
                 <AltTextResult
                   key={photo.id}
                   photo={photo}
+                  index={i}
                   onUpdateAltText={handleUpdateAltText}
                 />
               ))}

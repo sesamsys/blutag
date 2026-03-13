@@ -25,36 +25,27 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       const errors: string[] = [];
       
       Array.from(fileList).forEach((f) => {
-        // Validate MIME type
         if (!f.type.startsWith("image/")) {
           errors.push(`${f.name}: Not an image file`);
           return;
         }
-        
-        // Validate file size
         if (f.size > MAX_FILE_SIZE_BYTES) {
           errors.push(`${f.name}: Exceeds ${MAX_FILE_SIZE_MB}MB limit`);
           return;
         }
-        
-        // Validate file size is not zero
         if (f.size === 0) {
           errors.push(`${f.name}: File is empty`);
           return;
         }
-        
-        // Validate file extension matches MIME type
         const ext = f.name.split('.').pop()?.toLowerCase();
         const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'];
         if (!ext || !validExtensions.includes(ext)) {
           errors.push(`${f.name}: Unsupported file type`);
           return;
         }
-        
         allValid.push(f);
       });
       
-      // Show validation errors
       if (errors.length > 0) {
         toast.error(`Some files were rejected:\n${errors.slice(0, 3).join('\n')}${errors.length > 3 ? `\n...and ${errors.length - 3} more` : ''}`);
       }
@@ -97,7 +88,8 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         {photos.length > 0 && onClearAll && (
           <button
             onClick={onClearAll}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            aria-label="Clear all photos"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <X className="w-3.5 h-3.5" />
             Clear all
@@ -105,9 +97,10 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         )}
       </div>
 
-      {/* Wrapper for drag-and-drop + annotation */}
       <div className="relative">
         <div
+          role="region"
+          aria-label="Photo upload area"
           onDrop={onDropZone}
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
@@ -127,8 +120,8 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
                 />
                 <button
                   onClick={() => onRemovePhoto(i)}
-                  className="absolute top-2 right-2 p-1 rounded-full bg-foreground/70 text-background hover:bg-foreground/90 transition-colors"
-                  aria-label="Remove photo"
+                  className="absolute top-2 right-2 p-1 rounded-full bg-foreground/70 text-background hover:bg-foreground/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  aria-label={`Remove photo ${i + 1}`}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -137,7 +130,8 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
               <button
                 key={`empty-${i}`}
                 onClick={() => inputRef.current?.click()}
-                className="aspect-square rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer"
+                aria-label={`Add photo, slot ${i + 1} of ${MAX_PHOTOS}`}
+                className="aspect-square rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <ImagePlus className="w-6 h-6 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground font-medium">Add photo</span>
@@ -147,11 +141,17 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         </div>
       </div>
 
+      {/* Live region for screen readers */}
+      <span className="sr-only" aria-live="polite">
+        {photos.length > 0
+          ? `${photos.length} of ${MAX_PHOTOS} photos added`
+          : "No photos added"}
+      </span>
+
       <p className="text-xs text-muted-foreground mt-2 text-center">
         Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each
       </p>
 
-      {/* Handwritten annotation below info text — only when no photos */}
       {isEmpty && (
         <div className="pointer-events-none select-none flex items-center justify-center gap-4 mt-3">
           <span
@@ -160,7 +160,6 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           >
             Drag photos here
           </span>
-          {/* Loopy arrow: starts from text midpoint, loops, then curves upward */}
           <svg
             width="100"
             height="100"
@@ -168,8 +167,8 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
             fill="none"
             className="text-primary shrink-0 -ml-1"
             overflow="visible"
+            aria-hidden="true"
           >
-            {/* Path: starts mid-left at text midpoint height, loops, then goes up */}
             <path
               d="M3,90c117.55-1.32,145.35-55.27,126.78-88.72-16.81-30.27-53.04-1.85-33.04,21.18,23.82,27.42,122.95,20.47,126.09-96.39"
               stroke="currentColor"
@@ -177,7 +176,6 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
               strokeLinecap="round"
               fill="none"
             />
-            {/* Arrowhead: two lines forming a V-shape at the end */}
             <path
               d="M209.29,-62.5 L222.83,-80 M236.37,-62.5 L222.83,-80"
               stroke="currentColor"
@@ -194,6 +192,8 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         accept="image/*"
         multiple
         className="hidden"
+        aria-hidden="true"
+        tabIndex={-1}
         onChange={(e) => {
           handleFiles(e.target.files);
           e.target.value = "";
