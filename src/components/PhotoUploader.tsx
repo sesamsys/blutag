@@ -132,8 +132,8 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           {/* Loopy arrow: starts from text baseline, loops, then curves upward */}
           <svg
             width="100"
-            height="120"
-            viewBox="0 0 100 120"
+            height="70"
+            viewBox="0 0 100 70"
             fill="none"
             className="text-muted-foreground shrink-0"
             overflow="visible"
