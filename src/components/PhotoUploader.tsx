@@ -140,13 +140,13 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           >
             {/* Path: starts mid-left, loops, then goes up */}
             <path
-              d="M2 55 C12 50, 25 45, 35 38 C45 31, 52 24, 50 16 C48 8, 36 6, 34 14 C32 22, 42 28, 52 24 C62 20, 68 12, 72 6 C74 2, 75 0, 75 0"
+              d="M2 35 C12 32, 25 28, 35 22 C45 16, 52 10, 50 5 C48 -2, 36 -2, 34 5 C32 12, 42 16, 52 12 C62 8, 68 4, 72 2 C74 1, 75 0, 75 0"
               stroke="currentColor"
               strokeWidth="2.5"
               strokeLinecap="round"
               fill="none"
             />
-            {/* Arrowhead pointing up */}
+            {/* Arrowhead pointing up, aligned with path end */}
             <path
               d="M69 6 L75 0 L81 6"
               stroke="currentColor"
