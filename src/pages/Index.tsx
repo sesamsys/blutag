@@ -33,6 +33,17 @@ const Index = () => {
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
   const [hasResults, setHasResults] = useState(false);
 
+  // Restore session from IndexedDB (survives OAuth redirects)
+  useEffect(() => {
+    loadPhotosSession().then((restored) => {
+      if (restored && restored.length > 0) {
+        setPhotos(restored);
+        const hasAltText = restored.some((p) => p.altText);
+        if (hasAltText) setHasResults(true);
+      }
+    });
+  }, []);
+
   const handleAddPhotos = useCallback((files: File[]) => {
     const newPhotos: PhotoFile[] = files.map((file) => ({
       id: generateId(),
