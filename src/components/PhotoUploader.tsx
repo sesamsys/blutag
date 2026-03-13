@@ -122,37 +122,36 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
 
       {/* Handwritten annotation below info text — only when no photos */}
       {isEmpty && (
-        <div className="pointer-events-none select-none flex items-center justify-center gap-2 mt-3">
+        <div className="pointer-events-none select-none flex items-center justify-center gap-4 mt-3">
           <span
             className="text-muted-foreground text-2xl sm:text-3xl -rotate-2 shrink-0 leading-none"
             style={{ fontFamily: "'Caveat', cursive" }}
           >
             Drag photos here
           </span>
-          {/* Loopy arrow: starts from text baseline, loops, then curves upward */}
+          {/* Loopy arrow: starts from text midpoint, loops, then curves upward */}
           <svg
             width="100"
-            height="120"
-            viewBox="0 0 100 120"
+            height="100"
+            viewBox="0 0 260 180"
             fill="none"
             className="text-muted-foreground shrink-0 -ml-1"
             overflow="visible"
           >
-            {/* Path: starts mid-left at baseline height, loops, then goes up */}
+            {/* Path: starts mid-left at text midpoint height, loops, then goes up */}
             <path
-              d="M2 65 C12 60, 25 55, 35 48 C45 41, 52 34, 50 26 C48 18, 36 16, 34 24 C32 32, 42 38, 52 34 C62 30, 68 22, 72 14 C74 8, 75 4, 75 0"
+              d="M3,90c117.55-1.32,145.35-55.27,126.78-88.72-16.81-30.27-53.04-1.85-33.04,21.18,23.82,27.42,122.95,20.47,126.09-96.39"
               stroke="currentColor"
-              strokeWidth="2.5"
+              strokeWidth="5"
               strokeLinecap="round"
               fill="none"
             />
-            {/* Arrowhead pointing up */}
+            {/* Arrowhead: two lines forming a V-shape at the end */}
             <path
-              d="M69 6 L75 0 L81 6"
+              d="M212,-66 L222.83,-80 M233.66,-66 L222.83,-80"
               stroke="currentColor"
-              strokeWidth="2.5"
+              strokeWidth="5"
               strokeLinecap="round"
-              strokeLinejoin="round"
               fill="none"
             />
           </svg>
