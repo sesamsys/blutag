@@ -80,15 +80,16 @@ export default function PostComposer({ photos }: PostComposerProps) {
             () => agent.uploadBlob(compressed, { encoding: "image/jpeg" }),
             {
               maxAttempts: 3,
-              onRetry: (error, attempt) => {
+              onRetry: (_error, attempt) => {
                 toast.info(`Retrying image upload (attempt ${attempt + 1}/3)...`);
               },
             }
           );
 
+          const blob = response.data.blob;
           embeddedImages.push({
             alt: photo.altText || "",
-            image: response.data.blob,
+            image: { $type: "blob", ref: { $link: (blob as any).ref.$link ?? (blob as any).ref.toString() }, mimeType: blob.mimeType, size: blob.size },
           });
         } catch (uploadError) {
           logError(uploadError, { context: "image_upload", photoId: photo.id });
@@ -123,7 +124,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
         }),
         {
           maxAttempts: 3,
-          onRetry: (error, attempt) => {
+          onRetry: (_error, attempt) => {
             toast.info(`Retrying post (attempt ${attempt + 1}/3)...`);
           },
         }
