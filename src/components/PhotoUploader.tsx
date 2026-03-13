@@ -8,9 +8,10 @@ interface PhotoUploaderProps {
   photos: PhotoFile[];
   onAddPhotos: (files: File[]) => void;
   onRemovePhoto: (index: number) => void;
+  onClearAll?: () => void;
 }
 
-export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: PhotoUploaderProps) {
+export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onClearAll }: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const remaining = MAX_PHOTOS - photos.length;
 
@@ -48,6 +49,17 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: Ph
 
   return (
     <div className="w-full">
+      {photos.length > 0 && onClearAll && (
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={onClearAll}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+            Clear all
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {slots.map((photo, i) =>
           photo ? (
@@ -59,7 +71,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: Ph
               />
               <button
                 onClick={() => onRemovePhoto(i)}
-                className="absolute top-2 right-2 p-1 rounded-full bg-foreground/70 text-background opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-2 right-2 p-1 rounded-full bg-foreground/70 text-background hover:bg-foreground/90 transition-colors"
                 aria-label="Remove photo"
               >
                 <X className="w-4 h-4" />
