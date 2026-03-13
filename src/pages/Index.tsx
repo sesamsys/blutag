@@ -125,6 +125,7 @@ const Index = () => {
     photos.forEach((p) => URL.revokeObjectURL(p.preview));
     setPhotos([]);
     setHasResults(false);
+    clearPhotosSession();
   };
 
   return (
