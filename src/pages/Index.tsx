@@ -5,6 +5,7 @@ import AltTextResult from "@/components/AltTextResult";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import PostComposer from "@/components/PostComposer";
 import FooterLink from "@/components/FooterLink";
+import AboutDialog from "@/components/AboutDialog";
 import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import { extractExif } from "@/lib/exif";
 import { supabase } from "@/integrations/supabase/client";
@@ -302,9 +303,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="w-full border-t border-border">
         <div className="max-w-2xl mx-auto px-4 py-4 flex flex-col items-center gap-3">
-          <p className="text-xs text-muted-foreground">
-            Photos are only kept temporarily for analysis and deleted after your session.
-          </p>
+          <AboutDialog />
           <p className="text-xs text-muted-foreground">
             Created by{" "}
             <FooterLink href={metaData.bluesky} ariaLabel="Bluesky">
