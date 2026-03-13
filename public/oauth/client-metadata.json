@@ -1,12 +1,12 @@
 {
-  "client_id": "https://id-preview--9c2eda88-df4c-4dad-a4b4-ddefaebf6d48.lovable.app/oauth/client-metadata.json",
+  "client_id": "https://blutag.lovable.app/oauth/client-metadata.json",
   "application_type": "web",
   "client_name": "Blutag",
-  "client_uri": "https://id-preview--9c2eda88-df4c-4dad-a4b4-ddefaebf6d48.lovable.app",
+  "client_uri": "https://blutag.lovable.app",
   "dpop_bound_access_tokens": true,
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
-  "redirect_uris": ["https://id-preview--9c2eda88-df4c-4dad-a4b4-ddefaebf6d48.lovable.app/oauth/callback"],
+  "redirect_uris": ["https://blutag.lovable.app/oauth/callback"],
   "scope": "atproto transition:generic",
   "token_endpoint_auth_method": "none"
 }
