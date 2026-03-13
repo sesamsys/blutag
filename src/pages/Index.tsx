@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Sparkles, Github, Linkedin } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import AltTextResult from "@/components/AltTextResult";
@@ -11,10 +11,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
-import { MAX_PHOTOS } from "@/lib/constants";
+import { MAX_PHOTOS, RATE_LIMIT_MAX_CALLS, RATE_LIMIT_WINDOW_MS } from "@/lib/constants";
 import { savePhotosSession, loadPhotosSession, clearPhotosSession } from "@/lib/session-persistence";
 import { ERROR_MESSAGES, getErrorMessage, logError, ErrorType, AppError } from "@/lib/error-messages";
 import { retryWithTimeout } from "@/lib/retry";
+import { createRateLimiter } from "@/lib/rate-limiter";
 
 function generateId() {
   return Math.random().toString(36).slice(2, 10);
