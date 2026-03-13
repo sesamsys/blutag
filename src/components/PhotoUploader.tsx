@@ -22,11 +22,42 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       if (remaining <= 0) return;
 
       const allValid: File[] = [];
+      const errors: string[] = [];
+      
       Array.from(fileList).forEach((f) => {
-        if (!f.type.startsWith("image/")) return;
-        if (f.size > MAX_FILE_SIZE_BYTES) return;
+        // Validate MIME type
+        if (!f.type.startsWith("image/")) {
+          errors.push(`${f.name}: Not an image file`);
+          return;
+        }
+        
+        // Validate file size
+        if (f.size > MAX_FILE_SIZE_BYTES) {
+          errors.push(`${f.name}: Exceeds ${MAX_FILE_SIZE_MB}MB limit`);
+          return;
+        }
+        
+        // Validate file size is not zero
+        if (f.size === 0) {
+          errors.push(`${f.name}: File is empty`);
+          return;
+        }
+        
+        // Validate file extension matches MIME type
+        const ext = f.name.split('.').pop()?.toLowerCase();
+        const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'];
+        if (!ext || !validExtensions.includes(ext)) {
+          errors.push(`${f.name}: Unsupported file type`);
+          return;
+        }
+        
         allValid.push(f);
       });
+      
+      // Show validation errors
+      if (errors.length > 0) {
+        toast.error(`Some files were rejected:\n${errors.slice(0, 3).join('\n')}${errors.length > 3 ? `\n...and ${errors.length - 3} more` : ''}`);
+      }
 
       if (allValid.length > remaining) {
         toast.warning(`You can only add up to ${MAX_PHOTOS} photos. ${allValid.length - remaining} photo${allValid.length - remaining === 1 ? " was" : "s were"} not added.`);

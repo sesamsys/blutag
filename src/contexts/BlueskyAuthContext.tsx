@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, type React
 import { BrowserOAuthClient } from "@atproto/oauth-client-browser";
 import { Agent } from "@atproto/api";
 import { toast } from "sonner";
+import { ERROR_MESSAGES, AppError, ErrorType, getErrorMessage, logError } from "@/lib/error-messages";
 
 interface BlueskyAuthContextValue {
   agent: Agent | null;
@@ -35,18 +36,29 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
   const [did, setDid] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const establishSession = useCallback(async (oauthSession: { did: string }) => {
-    const newAgent = new Agent(oauthSession as any);
-    setAgent(newAgent);
-    setDid(oauthSession.did);
-
-    // Resolve handle from profile
+  const establishSession = useCallback(async (oauthSession: { did: string; [key: string]: unknown }) => {
     try {
-      const profile = await newAgent.getProfile({ actor: oauthSession.did });
-      setHandle(profile.data.handle);
-    } catch {
-      // Fallback to DID if profile fetch fails
-      setHandle(oauthSession.did);
+      // Type assertion needed as Agent constructor expects internal session type
+      const newAgent = new Agent(oauthSession as Parameters<typeof Agent>[0]);
+      setAgent(newAgent);
+      setDid(oauthSession.did);
+
+      // Resolve handle from profile
+      try {
+        const profile = await newAgent.getProfile({ actor: oauthSession.did });
+        setHandle(profile.data.handle);
+      } catch (profileError) {
+        // Fallback to DID if profile fetch fails (non-critical)
+        logError(profileError, { context: "profile_fetch", did: oauthSession.did });
+        setHandle(oauthSession.did);
+      }
+    } catch (error) {
+      logError(error, { context: "establish_session" });
+      throw new AppError(
+        ERROR_MESSAGES.AUTH_FAILED,
+        ErrorType.AUTHENTICATION,
+        error
+      );
     }
   }, []);
 
@@ -69,10 +81,11 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
             window.dispatchEvent(new PopStateEvent("popstate"));
           }
 
-          toast.success(`Signed in to Bluesky`);
+          toast.success("Signed in to Bluesky");
         }
       } catch (err) {
-        console.error("OAuth init failed:", err);
+        logError(err, { context: "oauth_init" });
+        // Don't show error toast on init - user might not be trying to sign in
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -90,15 +103,21 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
         state: "login",
       });
       // Redirects to Bluesky — execution stops here
-    } catch (err: any) {
-      console.error("OAuth signIn error:", err);
-      const message =
-        err?.message?.includes("client_metadata")
-          ? "Unable to verify app identity. The app may need to be published to a stable domain first."
-          : err?.message?.includes("resolve")
-            ? `Could not resolve handle "${inputHandle}". Check that it's correct.`
-            : `Sign-in failed: ${err?.message || "Unknown error"}`;
-      throw new Error(message);
+    } catch (err) {
+      logError(err, { context: "oauth_signin", handle: inputHandle });
+      
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      let message: string;
+      
+      if (errorMessage.includes("client_metadata")) {
+        message = ERROR_MESSAGES.AUTH_CLIENT_METADATA_ERROR;
+      } else if (errorMessage.includes("resolve")) {
+        message = ERROR_MESSAGES.AUTH_INVALID_HANDLE(inputHandle);
+      } else {
+        message = getErrorMessage(err);
+      }
+      
+      throw new AppError(message, ErrorType.AUTHENTICATION, err);
     }
   }, []);
 
@@ -108,7 +127,8 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
         const client = await getClient();
         await client.revoke(did);
       } catch (err) {
-        console.error("Revoke failed:", err);
+        logError(err, { context: "oauth_revoke", did });
+        // Don't throw - logout should always succeed locally even if revoke fails
       }
     }
     setAgent(null);
