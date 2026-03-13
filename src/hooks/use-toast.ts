@@ -19,7 +19,7 @@ const _actionTypes = {
   REMOVE_TOAST: "REMOVE_TOAST",
 } as const;
 
-type ActionType = typeof _actionTypes;
+type ActionType = typeof _actionTypes; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 let count = 0;
 
@@ -28,7 +28,7 @@ function genId() {
   return count.toString();
 }
 
-type ActionType = typeof actionTypes;
+// ActionType already defined above
 
 type Action =
   | {
