@@ -133,6 +133,14 @@ const handle = profile.data.handle;
 - Sessions survive page refreshes
 - IndexedDB persists until explicitly revoked
 
+### App State Persistence Across OAuth Redirects
+- Photos and generated alt text are saved to IndexedDB before the OAuth redirect
+- On app load, saved state is restored from IndexedDB automatically
+- If restored photos have alt text, the results screen is shown immediately
+- Saved session is cleared on "Start over" (reset) or after a successful post
+- Uses a separate IndexedDB store (`blutag-session`) from the OAuth token storage
+- Implementation: `src/lib/session-persistence.ts` with `savePhotosSession()`, `loadPhotosSession()`, `clearPhotosSession()`
+
 ### Restoration
 - On app load, `client.init()` checks for existing session
 - If valid session exists, automatically restores Agent
