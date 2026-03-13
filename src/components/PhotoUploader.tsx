@@ -49,8 +49,8 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
 
   return (
     <div className="w-full">
-      {photos.length > 0 && onClearAll && (
-        <div className="flex justify-end mb-2">
+      <div className="flex justify-end mb-2 h-7">
+        {photos.length > 0 && onClearAll && (
           <button
             onClick={onClearAll}
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
@@ -58,8 +58,8 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
             <X className="w-3.5 h-3.5" />
             Clear all
           </button>
-        </div>
-      )}
+        )}
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {slots.map((photo, i) =>
           photo ? (
