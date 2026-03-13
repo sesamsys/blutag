@@ -113,6 +113,12 @@ const Index = () => {
     };
 
     await Promise.all(photos.map(analyzeOne));
+
+    // Save to IndexedDB so state survives OAuth redirects
+    setPhotos((current) => {
+      savePhotosSession(current);
+      return current;
+    });
   };
 
   const handleReset = () => {
