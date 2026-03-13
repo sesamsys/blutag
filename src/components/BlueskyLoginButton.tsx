@@ -39,9 +39,9 @@ export default function BlueskyLoginButton() {
     setSigningIn(true);
     try {
       await signIn(trimmed);
-    } catch (err: any) {
+    } catch (err) {
       const msg =
-        err?.message || "Sign-in failed. Please try again.";
+        err instanceof Error ? err.message : "Sign-in failed. Please try again.";
       toast.error(msg);
       setSigningIn(false);
     }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, ExternalLink, LogIn } from "lucide-react";
+import { Send, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useBlueskyAuth } from "@/contexts/BlueskyAuthContext";
@@ -9,6 +9,8 @@ import { compressImageForBluesky } from "@/lib/image-compress";
 import { toast } from "sonner";
 import { BLUESKY_POST_MAX_LENGTH } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
+import { ERROR_MESSAGES, getErrorMessage, logError, AppError, ErrorType } from "@/lib/error-messages";
+import { retryWithBackoff } from "@/lib/retry";
 
 interface PostComposerProps {
   photos: PhotoFile[];
@@ -39,23 +41,63 @@ export default function PostComposer({ photos }: PostComposerProps) {
   }
 
   const handlePost = async () => {
+    // Validate post text length
+    if (text.length > BLUESKY_POST_MAX_LENGTH) {
+      toast.error(`Post text exceeds ${BLUESKY_POST_MAX_LENGTH} character limit`);
+      return;
+    }
+    
+    // Validate we have photos with alt text
+    if (photosWithAltText.length === 0) {
+      toast.error("No photos with alt text to post");
+      return;
+    }
+    
+    // Validate alt text lengths
+    const invalidAltText = photosWithAltText.find(p => 
+      !p.altText || p.altText.length === 0 || p.altText.length > 2000
+    );
+    if (invalidAltText) {
+      toast.error("All photos must have alt text (max 2000 characters)");
+      return;
+    }
+    
     setPosting(true);
     try {
       // Compress and upload all images
-      const embeddedImages: Array<{ alt: string; image: any; aspectRatio?: { width: number; height: number } }> = [];
+      const embeddedImages: Array<{ 
+        alt: string; 
+        image: { $type: string; ref: { $link: string }; mimeType: string; size: number }; 
+        aspectRatio?: { width: number; height: number } 
+      }> = [];
 
       for (const photo of photosWithAltText) {
-        const compressed = await compressImageForBluesky(photo.file);
+        try {
+          const compressed = await compressImageForBluesky(photo.file);
 
-        // Upload blob via agent
-        const response = await agent.uploadBlob(compressed, {
-          encoding: "image/jpeg",
-        });
+          // Upload blob with retry
+          const response = await retryWithBackoff(
+            () => agent.uploadBlob(compressed, { encoding: "image/jpeg" }),
+            {
+              maxAttempts: 3,
+              onRetry: (error, attempt) => {
+                toast.info(`Retrying image upload (attempt ${attempt + 1}/3)...`);
+              },
+            }
+          );
 
-        embeddedImages.push({
-          alt: photo.altText || "",
-          image: response.data.blob,
-        });
+          embeddedImages.push({
+            alt: photo.altText || "",
+            image: response.data.blob,
+          });
+        } catch (uploadError) {
+          logError(uploadError, { context: "image_upload", photoId: photo.id });
+          throw new AppError(
+            ERROR_MESSAGES.POST_IMAGE_UPLOAD_FAILED,
+            ErrorType.SERVICE,
+            uploadError
+          );
+        }
       }
 
       // Create the post
@@ -72,11 +114,20 @@ export default function PostComposer({ photos }: PostComposerProps) {
         };
       }
 
-      const result = await agent.com.atproto.repo.createRecord({
-        repo: agent.did!,
-        collection: "app.bsky.feed.post",
-        record,
-      });
+      // Post with retry
+      const result = await retryWithBackoff(
+        () => agent.com.atproto.repo.createRecord({
+          repo: agent.did!,
+          collection: "app.bsky.feed.post",
+          record,
+        }),
+        {
+          maxAttempts: 3,
+          onRetry: (error, attempt) => {
+            toast.info(`Retrying post (attempt ${attempt + 1}/3)...`);
+          },
+        }
+      );
 
       // Build URL from AT URI
       const atUri = result.data.uri;
@@ -86,9 +137,10 @@ export default function PostComposer({ photos }: PostComposerProps) {
       setPostUrl(url);
       toast.success("Posted to Bluesky!");
     } catch (err) {
-      console.error("Post failed:", err);
-      const message = err instanceof Error ? err.message : "Failed to post";
-      toast.error(message);
+      logError(err, { context: "bluesky_post", photoCount: photosWithAltText.length });
+      
+      const errorMessage = getErrorMessage(err);
+      toast.error(errorMessage);
     } finally {
       setPosting(false);
     }

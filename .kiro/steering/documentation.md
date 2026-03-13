@@ -37,9 +37,3 @@ All project documentation should be stored in the `/docs` directory at the root 
 - Remove outdated documentation promptly
 - Link related documentation together
 - Keep a changelog for significant project changes
-
-## Single Source of Truth
-- Constants and configuration belong in `/src/data` directory
-- Documentation references these sources rather than duplicating values
-- Profile information: `src/data/profile.ts`
-- Experience data: `src/data/experiences.ts`

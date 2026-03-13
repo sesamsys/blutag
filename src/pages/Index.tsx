@@ -12,6 +12,8 @@ import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
 import { MAX_PHOTOS } from "@/lib/constants";
 import { savePhotosSession, loadPhotosSession, clearPhotosSession } from "@/lib/session-persistence";
+import { ERROR_MESSAGES, getErrorMessage, logError, ErrorType, AppError } from "@/lib/error-messages";
+import { retryWithTimeout } from "@/lib/retry";
 
 function generateId() {
   return Math.random().toString(36).slice(2, 10);
@@ -35,13 +37,18 @@ const Index = () => {
 
   // Restore session from IndexedDB (survives OAuth redirects)
   useEffect(() => {
-    loadPhotosSession().then((restored) => {
-      if (restored && restored.length > 0) {
-        setPhotos(restored);
-        const hasAltText = restored.some((p) => p.altText);
-        if (hasAltText) setHasResults(true);
-      }
-    });
+    loadPhotosSession()
+      .then((restored) => {
+        if (restored && restored.length > 0) {
+          setPhotos(restored);
+          const hasAltText = restored.some((p) => p.altText);
+          if (hasAltText) setHasResults(true);
+        }
+      })
+      .catch((err) => {
+        logError(err, { context: "session_load" });
+        // Don't show error toast - this is a non-critical failure
+      });
   }, []);
 
   const handleAddPhotos = useCallback((files: File[]) => {
@@ -85,25 +92,63 @@ const Index = () => {
       try {
         const [base64, exifData] = await Promise.all([
           fileToBase64(photo.file),
-          extractExif(photo.file),
+          extractExif(photo.file).catch((err) => {
+            logError(err, { context: "exif_extraction", photoId: photo.id });
+            return {}; // Continue without EXIF data
+          }),
         ]);
 
-        const { data, error } = await supabase.functions.invoke("analyze-photo", {
-          body: { imageBase64: base64, exifData },
-        });
+        // Retry with timeout (30 seconds per request, up to 3 attempts)
+        const result = await retryWithTimeout(
+          async () => {
+            const { data, error } = await supabase.functions.invoke("analyze-photo", {
+              body: { imageBase64: base64, exifData },
+            });
 
-        if (error) throw error;
+            if (error) {
+              // Check for specific error types
+              if (error.message?.includes("429")) {
+                throw new AppError(
+                  ERROR_MESSAGES.ALT_TEXT_RATE_LIMIT,
+                  ErrorType.RATE_LIMIT,
+                  error
+                );
+              }
+              if (error.message?.includes("402")) {
+                throw new AppError(
+                  ERROR_MESSAGES.ALT_TEXT_QUOTA_EXCEEDED,
+                  ErrorType.QUOTA,
+                  error,
+                  false // Not retryable
+                );
+              }
+              throw error;
+            }
+
+            return data;
+          },
+          30000, // 30 second timeout
+          {
+            maxAttempts: 3,
+            onRetry: (error, attempt) => {
+              toast.info(`Retrying analysis (attempt ${attempt + 1}/3)...`);
+            },
+          }
+        );
 
         setPhotos((prev) =>
           prev.map((p) =>
             p.id === photo.id
-              ? { ...p, altText: data.altText, exifData, analyzing: false }
+              ? { ...p, altText: result.altText, exifData, analyzing: false }
               : p
           )
         );
       } catch (err) {
-        console.error("Analysis failed:", err);
-        toast.error(`Failed to analyze photo`);
+        logError(err, { context: "photo_analysis", photoId: photo.id });
+        
+        const errorMessage = getErrorMessage(err);
+        toast.error(errorMessage);
+        
         setPhotos((prev) =>
           prev.map((p) =>
             p.id === photo.id ? { ...p, analyzing: false } : p
@@ -116,7 +161,10 @@ const Index = () => {
 
     // Save to IndexedDB so state survives OAuth redirects
     setPhotos((current) => {
-      savePhotosSession(current);
+      savePhotosSession(current).catch((err) => {
+        logError(err, { context: "session_save" });
+        toast.warning(ERROR_MESSAGES.SESSION_SAVE_FAILED);
+      });
       return current;
     });
   };
@@ -125,8 +173,17 @@ const Index = () => {
     photos.forEach((p) => URL.revokeObjectURL(p.preview));
     setPhotos([]);
     setHasResults(false);
-    clearPhotosSession();
+    clearPhotosSession().catch((err) => {
+      logError(err, { context: "session_clear" });
+    });
   };
+
+  // Cleanup object URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      photos.forEach((p) => URL.revokeObjectURL(p.preview));
+    };
+  }, [photos]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
