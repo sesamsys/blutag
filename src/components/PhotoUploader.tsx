@@ -8,6 +8,7 @@ interface PhotoUploaderProps {
   photos: PhotoFile[];
   onAddPhotos: (files: File[]) => void;
   onRemovePhoto: (index: number) => void;
+  onClearAll?: () => void;
 }
 
 export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: PhotoUploaderProps) {
