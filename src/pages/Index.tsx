@@ -103,7 +103,19 @@ const Index = () => {
       <header className="w-full border-b border-border">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">B</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4 text-primary-foreground"
+            >
+              <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
+              <circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none" />
+            </svg>
           </div>
           <h1 className="text-lg font-bold tracking-tight">Blutag</h1>
         </div>
