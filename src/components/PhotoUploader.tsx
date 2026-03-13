@@ -132,21 +132,21 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           {/* Loopy arrow: starts from text baseline, loops, then curves upward */}
           <svg
             width="100"
-            height="70"
-            viewBox="0 0 100 70"
+            height="120"
+            viewBox="0 0 100 120"
             fill="none"
-            className="text-muted-foreground shrink-0"
+            className="text-muted-foreground shrink-0 -ml-1"
             overflow="visible"
           >
-            {/* Path: starts mid-left, loops, then goes up */}
+            {/* Path: starts mid-left at baseline height, loops, then goes up */}
             <path
-              d="M2 35 C12 32, 25 28, 35 22 C45 16, 52 10, 50 5 C48 -2, 36 -2, 34 5 C32 12, 42 16, 52 12 C62 8, 68 4, 72 2 C74 1, 75 0, 75 0"
+              d="M2 65 C12 60, 25 55, 35 48 C45 41, 52 34, 50 26 C48 18, 36 16, 34 24 C32 32, 42 38, 52 34 C62 30, 68 22, 72 14 C74 8, 75 4, 75 0"
               stroke="currentColor"
               strokeWidth="2.5"
               strokeLinecap="round"
               fill="none"
             />
-            {/* Arrowhead pointing up, aligned with path end */}
+            {/* Arrowhead pointing up */}
             <path
               d="M69 6 L75 0 L81 6"
               stroke="currentColor"
