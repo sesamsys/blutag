@@ -41,7 +41,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
   }
 
   const handlePost = async () => {
-    // Validate post text length
+    if (posting) return;
     if (text.length > BLUESKY_POST_MAX_LENGTH) {
       toast.error(`Post text exceeds ${BLUESKY_POST_MAX_LENGTH} character limit`);
       return;
