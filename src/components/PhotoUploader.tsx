@@ -122,32 +122,33 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
 
       {/* Handwritten annotation below info text — only when no photos */}
       {isEmpty && (
-        <div className="pointer-events-none select-none flex items-center justify-center gap-1 mt-3">
+        <div className="pointer-events-none select-none flex items-baseline justify-center mt-3">
           <span
-            className="text-muted-foreground text-2xl sm:text-3xl -rotate-2"
+            className="text-muted-foreground text-2xl sm:text-3xl -rotate-2 shrink-0"
             style={{ fontFamily: "'Caveat', cursive" }}
           >
             Drag photos here
           </span>
-          {/* Loopy arrow with loop, curving up-right to point at grid */}
+          {/* Loopy arrow: starts from text baseline, loops, then curves upward */}
           <svg
-            width="120"
-            height="110"
-            viewBox="0 0 120 110"
+            width="100"
+            height="120"
+            viewBox="0 0 100 120"
             fill="none"
-            className="text-muted-foreground -mt-2"
+            className="text-muted-foreground shrink-0 -ml-1"
+            overflow="visible"
           >
-            {/* Line: starts bottom-left, loops in the middle, exits top-right */}
+            {/* Path: starts mid-left at baseline height, loops, then goes up */}
             <path
-              d="M10 100 C15 80, 25 65, 35 58 C45 51, 55 48, 55 40 C55 32, 42 28, 38 36 C34 44, 45 50, 55 46 C65 42, 72 32, 80 22 C85 15, 92 8, 100 4"
+              d="M2 65 C12 60, 25 55, 35 48 C45 41, 52 34, 50 26 C48 18, 36 16, 34 24 C32 32, 42 38, 52 34 C62 30, 68 22, 72 14 C74 8, 75 4, 75 0"
               stroke="currentColor"
               strokeWidth="2.5"
               strokeLinecap="round"
               fill="none"
             />
-            {/* Arrowhead — aligned to the final curve direction (up-right) */}
+            {/* Arrowhead pointing up */}
             <path
-              d="M94 2 L100 4 L96 10"
+              d="M69 6 L75 0 L81 6"
               stroke="currentColor"
               strokeWidth="2.5"
               strokeLinecap="round"
