@@ -26,22 +26,54 @@
 
 ## Bluesky AT Protocol Integration
 
-### Authentication Flow
-1. User provides handle and app password
-2. Call `com.atproto.server.createSession`
-3. Store returned JWT tokens (accessJwt, refreshJwt)
-4. Use accessJwt for subsequent API calls
+### OAuth Authentication Flow
+1. User enters Bluesky handle (e.g., alice.bsky.social)
+2. `BrowserOAuthClient.signIn()` redirects to Bluesky authorization page
+3. User approves access on Bluesky's official page
+4. Redirected back to `/oauth/callback`
+5. `BrowserOAuthClient.init()` processes callback and establishes session
+6. Session stored in IndexedDB with DPoP-bound tokens
+7. Agent instance created for API calls
 
-### Image Upload Process
-1. Convert image to binary data from base64
-2. Upload via `com.atproto.repo.uploadBlob`
-3. Receive blob reference for embedding
-4. Include alt text in image embed
+### OAuth Client Configuration
+- Client metadata: `public/oauth/client-metadata.json`
+- Client ID: `${window.location.origin}/oauth/client-metadata.json`
+- Handle resolver: `https://bsky.social`
+- Library: `@atproto/oauth-client-browser`
 
-### Post Creation
-- Use `com.atproto.repo.createRecord` with collection `app.bsky.feed.post`
-- Include text content and image embeds
-- Return post URI and CID for URL construction
+### Direct API Calls via Agent
+All Bluesky API calls made client-side using authenticated Agent:
+
+**Image Upload:**
+```typescript
+const response = await agent.uploadBlob(compressedImage, {
+  encoding: "image/jpeg",
+});
+```
+
+**Post Creation:**
+```typescript
+await agent.com.atproto.repo.createRecord({
+  repo: agent.did,
+  collection: "app.bsky.feed.post",
+  record: {
+    $type: "app.bsky.feed.post",
+    text: postText,
+    createdAt: new Date().toISOString(),
+    embed: {
+      $type: "app.bsky.embed.images",
+      images: embeddedImages,
+    },
+  },
+});
+```
+
+### Security Features
+- **No passwords in app**: OAuth flow handled by Bluesky
+- **DPoP-bound tokens**: Prevents token replay attacks
+- **IndexedDB storage**: More secure than localStorage
+- **Automatic token refresh**: Handled by OAuth client library
+- **Token revocation**: Proper logout with `client.revoke(did)`
 
 ## AI Service Integration
 

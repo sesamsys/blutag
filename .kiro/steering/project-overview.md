@@ -7,7 +7,8 @@ Blutag is a web application that helps users generate AI-powered alternative tex
 - Upload up to 4 photos (max 25MB each)
 - AI-powered alt text generation using Google Gemini 2.5 Flash
 - EXIF metadata extraction for context (date, GPS, camera info)
-- Bluesky authentication and direct posting
+- Bluesky OAuth authentication (no passwords in app)
+- Direct posting to Bluesky via AT Protocol Agent
 - Client-side image compression for Bluesky compatibility
 - Editable alt text with copy functionality
 
@@ -24,14 +25,18 @@ Blutag is a web application that helps users generate AI-powered alternative tex
 - Accessibility-first alt text generation
 - EXIF-aware context for better descriptions
 - Direct Bluesky posting with image compression
-- App password authentication for security
+- OAuth authentication (no passwords ever enter the app)
+- DPoP-bound tokens for enhanced security
 - Responsive design with drag-and-drop upload
 
 ## Architecture
-Single-page React application with three Supabase Edge Functions:
-1. `bsky-login` - Bluesky authentication
-2. `analyze-photo` - AI alt text generation
-3. `bsky-post` - Create posts with images and alt text
+Single-page React application with client-side OAuth and one Supabase Edge Function:
+1. `analyze-photo` - AI alt text generation via Lovable AI Gateway
+
+Authentication and posting handled entirely client-side:
+- OAuth via `@atproto/oauth-client-browser`
+- Direct API calls to Bluesky PDS via AT Protocol Agent
+- Tokens stored in IndexedDB (DPoP-bound)
 
 ## Hosting & Deployment
 - **Hosting Platform**: Lovable (https://lovable.dev)
