@@ -78,39 +78,38 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       <div className="relative">
         {/* Handwritten annotation — only when no photos */}
         {isEmpty && (
-          <div className="absolute -top-2 -left-2 sm:-left-8 z-10 pointer-events-none select-none flex flex-col items-start">
-            <span
-              className="text-muted-foreground text-lg sm:text-xl -rotate-3"
-              style={{ fontFamily: "'Caveat', cursive" }}
-            >
-              Drag photos here
-            </span>
-            {/* Loopy arrow SVG */}
+          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 translate-y-full z-10 pointer-events-none select-none flex flex-col items-center mt-2">
+            {/* Loopy arrow SVG pointing up */}
             <svg
-              width="80"
-              height="60"
-              viewBox="0 0 80 60"
+              width="140"
+              height="100"
+              viewBox="0 0 140 100"
               fill="none"
-              className="text-muted-foreground ml-6 -mt-1"
-              style={{ transform: "rotate(12deg)" }}
+              className="text-muted-foreground"
             >
               <path
-                d="M4 4 C10 20, 20 30, 30 24 C40 18, 35 6, 25 10 C15 14, 22 28, 35 30 C48 32, 58 22, 68 34"
+                d="M70 95 C60 75, 40 70, 35 55 C30 40, 45 30, 55 38 C65 46, 50 58, 60 50 C70 42, 85 35, 75 20 C70 12, 70 8, 70 4"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 fill="none"
               />
-              {/* Arrowhead */}
+              {/* Arrowhead pointing up */}
               <path
-                d="M63 28 L68 34 L61 35"
+                d="M64 10 L70 2 L76 10"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 fill="none"
               />
             </svg>
+            <span
+              className="text-muted-foreground text-2xl sm:text-3xl -rotate-2 mt-1"
+              style={{ fontFamily: "'Caveat', cursive" }}
+            >
+              Drag photos here
+            </span>
           </div>
         )}
 
