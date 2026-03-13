@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useBlueskyAuth } from "@/contexts/BlueskyAuthContext";
 import { compressImageForBluesky } from "@/lib/image-compress";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { BLUESKY_POST_MAX_LENGTH } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
@@ -13,25 +12,13 @@ interface PostComposerProps {
   photos: PhotoFile[];
 }
 
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      resolve(result.split(",")[1]);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
 export default function PostComposer({ photos }: PostComposerProps) {
-  const { session } = useBlueskyAuth();
+  const { agent, isLoggedIn } = useBlueskyAuth();
   const [text, setText] = useState("");
   const [posting, setPosting] = useState(false);
   const [postUrl, setPostUrl] = useState<string | null>(null);
 
-  if (!session) return null;
+  if (!isLoggedIn || !agent) return null;
 
   const photosWithAltText = photos.filter((p) => p.altText && !p.analyzing);
   if (photosWithAltText.length === 0) return null;
@@ -39,32 +26,49 @@ export default function PostComposer({ photos }: PostComposerProps) {
   const handlePost = async () => {
     setPosting(true);
     try {
-      // Compress all images client-side
-      const images = await Promise.all(
-        photosWithAltText.map(async (photo) => {
-          const compressed = await compressImageForBluesky(photo.file);
-          const base64 = await blobToBase64(compressed);
-          return {
-            base64,
-            mimeType: "image/jpeg",
-            altText: photo.altText || "",
-          };
-        })
-      );
+      // Compress and upload all images
+      const embeddedImages: Array<{ alt: string; image: any; aspectRatio?: { width: number; height: number } }> = [];
 
-      const { data, error } = await supabase.functions.invoke("bsky-post", {
-        body: {
-          accessJwt: session.accessJwt,
-          did: session.did,
-          text,
-          images,
-        },
+      for (const photo of photosWithAltText) {
+        const compressed = await compressImageForBluesky(photo.file);
+
+        // Upload blob via agent
+        const response = await agent.uploadBlob(compressed, {
+          encoding: "image/jpeg",
+        });
+
+        embeddedImages.push({
+          alt: photo.altText || "",
+          image: response.data.blob,
+        });
+      }
+
+      // Create the post
+      const record: Record<string, unknown> = {
+        $type: "app.bsky.feed.post",
+        text: text || "",
+        createdAt: new Date().toISOString(),
+      };
+
+      if (embeddedImages.length > 0) {
+        record.embed = {
+          $type: "app.bsky.embed.images",
+          images: embeddedImages,
+        };
+      }
+
+      const result = await agent.com.atproto.repo.createRecord({
+        repo: agent.did!,
+        collection: "app.bsky.feed.post",
+        record,
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      // Build URL from AT URI
+      const atUri = result.data.uri;
+      const parts = atUri.replace("at://", "").split("/");
+      const url = `https://bsky.app/profile/${parts[0]}/post/${parts[2]}`;
 
-      setPostUrl(data.url);
+      setPostUrl(url);
       toast.success("Posted to Bluesky!");
     } catch (err) {
       console.error("Post failed:", err);

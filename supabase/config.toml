@@ -2,9 +2,3 @@ project_id = "kprynxuaedalxouhzadq"
 
 [functions.analyze-photo]
 verify_jwt = false
-
-[functions.bsky-login]
-verify_jwt = false
-
-[functions.bsky-post]
-verify_jwt = false

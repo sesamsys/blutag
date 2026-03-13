@@ -1,84 +1,120 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { BrowserOAuthClient } from "@atproto/oauth-client-browser";
+import { Agent } from "@atproto/api";
 import { toast } from "sonner";
 
-interface BlueskySession {
-  handle: string;
-  did: string;
-  accessJwt: string;
-  refreshJwt: string;
-}
-
 interface BlueskyAuthContextValue {
-  session: BlueskySession | null;
+  agent: Agent | null;
+  handle: string | null;
+  did: string | null;
   isLoggedIn: boolean;
-  isLoggingIn: boolean;
-  login: (identifier: string, appPassword: string) => Promise<void>;
+  isLoading: boolean;
+  signIn: (handle: string) => Promise<void>;
   logout: () => void;
 }
 
 const BlueskyAuthContext = createContext<BlueskyAuthContextValue | null>(null);
 
-const SESSION_KEY = "blutag_bsky_session";
+const CLIENT_ID = `${window.location.origin}/oauth/client-metadata.json`;
+
+let clientPromise: Promise<BrowserOAuthClient> | null = null;
+
+function getClient(): Promise<BrowserOAuthClient> {
+  if (!clientPromise) {
+    clientPromise = BrowserOAuthClient.load({
+      clientId: CLIENT_ID,
+      handleResolver: "https://bsky.social",
+    });
+  }
+  return clientPromise;
+}
 
 export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<BlueskySession | null>(() => {
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [handle, setHandle] = useState<string | null>(null);
+  const [did, setDid] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const establishSession = useCallback(async (oauthSession: { did: string }) => {
+    const newAgent = new Agent(oauthSession as any);
+    setAgent(newAgent);
+    setDid(oauthSession.did);
+
+    // Resolve handle from profile
     try {
-      const stored = sessionStorage.getItem(SESSION_KEY);
-      return stored ? JSON.parse(stored) : null;
+      const profile = await newAgent.getProfile({ actor: oauthSession.did });
+      setHandle(profile.data.handle);
     } catch {
-      return null;
+      // Fallback to DID if profile fetch fails
+      setHandle(oauthSession.did);
     }
-  });
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  }, []);
 
   useEffect(() => {
-    if (session) {
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    } else {
-      sessionStorage.removeItem(SESSION_KEY);
-    }
-  }, [session]);
+    let mounted = true;
 
-  const login = useCallback(async (identifier: string, appPassword: string) => {
-    setIsLoggingIn(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("bsky-login", {
-        body: { identifier, password: appPassword },
-      });
+    (async () => {
+      try {
+        const client = await getClient();
+        const result = await client.init();
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+        if (!mounted) return;
 
-      setSession({
-        handle: data.handle,
-        did: data.did,
-        accessJwt: data.accessJwt,
-        refreshJwt: data.refreshJwt,
-      });
-      toast.success(`Logged in as @${data.handle}`);
-    } catch (err) {
-      console.error("Bluesky login failed:", err);
-      const message = err instanceof Error ? err.message : "Login failed";
-      toast.error(message);
-      throw err;
-    } finally {
-      setIsLoggingIn(false);
-    }
+        if (result?.session) {
+          await establishSession(result.session);
+
+          // If this was a callback (has state), redirect to home
+          if (result.state != null && window.location.pathname !== "/") {
+            window.history.replaceState(null, "", "/");
+            window.dispatchEvent(new PopStateEvent("popstate"));
+          }
+
+          toast.success(`Signed in to Bluesky`);
+        }
+      } catch (err) {
+        console.error("OAuth init failed:", err);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [establishSession]);
+
+  const signIn = useCallback(async (inputHandle: string) => {
+    const client = await getClient();
+    await client.signIn(inputHandle, {
+      state: "login",
+    });
+    // Redirects to Bluesky — execution stops here
   }, []);
 
-  const logout = useCallback(() => {
-    setSession(null);
-    toast.success("Logged out of Bluesky");
-  }, []);
+  const logout = useCallback(async () => {
+    if (did) {
+      try {
+        const client = await getClient();
+        await client.revoke(did);
+      } catch (err) {
+        console.error("Revoke failed:", err);
+      }
+    }
+    setAgent(null);
+    setHandle(null);
+    setDid(null);
+    toast.success("Signed out of Bluesky");
+  }, [did]);
 
   return (
     <BlueskyAuthContext.Provider
       value={{
-        session,
-        isLoggedIn: !!session,
-        isLoggingIn,
-        login,
+        agent,
+        handle,
+        did,
+        isLoggedIn: !!agent,
+        isLoading,
+        signIn,
         logout,
       }}
     >
