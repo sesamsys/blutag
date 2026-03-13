@@ -19,24 +19,21 @@ serve(async (req) => {
     if (exifData) {
       if (exifData.dateTime) contextInfo += `Photo taken: ${exifData.dateTime}. `;
       if (exifData.latitude && exifData.longitude) {
-        contextInfo += `GPS coordinates: ${exifData.latitude}, ${exifData.longitude}. `;
-      }
-      if (exifData.make || exifData.model) {
-        contextInfo += `Camera: ${[exifData.make, exifData.model].filter(Boolean).join(" ")}. `;
+        contextInfo += `Photo has GPS data available. `;
       }
     }
 
     const systemPrompt = `You are an expert at writing alternative text (alt text) for images, specifically for use on Bluesky social media. Your alt text helps people with visual impairments understand and enjoy photos.
 
 Guidelines:
-- Describe the image clearly and concisely
-- Focus on what's most important: subjects, actions, setting, mood
-- If EXIF metadata provides date/time or GPS location, use that context naturally (e.g., "taken at sunset" or mentioning a recognizable location)
-- Be specific about colors, textures, expressions, and spatial relationships
-- Don't start with "A photo of" or "An image of" — just describe what's there
-- Maximum 2000 characters
-- Write in a natural, descriptive tone that paints a picture with words
-- Don't mention technical camera details unless artistically relevant`;
+- Be concise. Focus on the main subject and overall theme of the image, not minor background details.
+- Describe what matters most: the primary subject, the action or mood, and the general setting.
+- Do NOT include precise location information such as coordinates, street names, or exact addresses.
+- Do NOT include exact times of day. Only mention time or weather conditions if they are visually significant and affect the mood or understanding of the image (e.g., "at dusk with golden light", "during a heavy snowstorm").
+- Don't start with "A photo of" or "An image of" — just describe what's there.
+- Maximum 2000 characters, but aim for brevity — most alt text should be 1-3 sentences.
+- Write in a natural, descriptive tone.
+- Don't mention technical camera details.`;
 
     const userContent: any[] = [
       {
@@ -48,12 +45,12 @@ Guidelines:
     if (contextInfo) {
       userContent.push({
         type: "text",
-        text: `Additional context from photo metadata: ${contextInfo}\n\nPlease write alt text for this image.`,
+        text: `Additional context from photo metadata: ${contextInfo}\n\nPlease write concise alt text for this image, focusing on the main theme.`,
       });
     } else {
       userContent.push({
         type: "text",
-        text: "Please write alt text for this image.",
+        text: "Please write concise alt text for this image, focusing on the main theme.",
       });
     }
 
