@@ -76,43 +76,6 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
 
       {/* Wrapper for drag-and-drop + annotation */}
       <div className="relative">
-        {/* Handwritten annotation — only when no photos */}
-        {isEmpty && (
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 translate-y-full z-10 pointer-events-none select-none flex flex-col items-center mt-2">
-            {/* Loopy arrow SVG pointing up */}
-            <svg
-              width="140"
-              height="100"
-              viewBox="0 0 140 100"
-              fill="none"
-              className="text-muted-foreground"
-            >
-              <path
-                d="M70 95 C60 75, 40 70, 35 55 C30 40, 45 30, 55 38 C65 46, 50 58, 60 50 C70 42, 85 35, 75 20 C70 12, 70 8, 70 4"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                fill="none"
-              />
-              {/* Arrowhead pointing up */}
-              <path
-                d="M64 10 L70 2 L76 10"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                fill="none"
-              />
-            </svg>
-            <span
-              className="text-muted-foreground text-2xl sm:text-3xl -rotate-2 mt-1"
-              style={{ fontFamily: "'Caveat', cursive" }}
-            >
-              Drag photos here
-            </span>
-          </div>
-        )}
-
         <div
           onDrop={onDropZone}
           onDragOver={onDragOver}
@@ -156,6 +119,44 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       <p className="text-xs text-muted-foreground mt-2 text-center">
         Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each
       </p>
+
+      {/* Handwritten annotation below info text — only when no photos */}
+      {isEmpty && (
+        <div className="pointer-events-none select-none flex items-center justify-center gap-1 mt-3">
+          <span
+            className="text-muted-foreground text-2xl sm:text-3xl -rotate-2"
+            style={{ fontFamily: "'Caveat', cursive" }}
+          >
+            Drag photos here
+          </span>
+          {/* Loopy arrow with loop, curving up-right to point at grid */}
+          <svg
+            width="120"
+            height="110"
+            viewBox="0 0 120 110"
+            fill="none"
+            className="text-muted-foreground -mt-2"
+          >
+            {/* Line: starts bottom-left, loops in the middle, exits top-right */}
+            <path
+              d="M10 100 C15 80, 25 65, 35 58 C45 51, 55 48, 55 40 C55 32, 42 28, 38 36 C34 44, 45 50, 55 46 C65 42, 72 32, 80 22 C85 15, 92 8, 100 4"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              fill="none"
+            />
+            {/* Arrowhead — aligned to the final curve direction (up-right) */}
+            <path
+              d="M94 2 L100 4 L96 10"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </svg>
+        </div>
+      )}
       <input
         ref={inputRef}
         type="file"
