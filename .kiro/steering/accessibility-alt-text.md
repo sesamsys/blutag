@@ -36,6 +36,10 @@
 - Set character limits and formatting expectations
 - Include examples of good vs. poor alt text
 
+### Deterministic Output
+- Use `temperature: 0` in AI requests to ensure the same image always produces the same alt text
+- This prevents confusing variation when users re-analyze the same photo
+
 ### Context Integration
 - Use EXIF data to enhance descriptions when available
 - Provide separate prompts for images with/without metadata
