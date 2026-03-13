@@ -63,7 +63,8 @@
 ### Development Workflow
 - Make changes in local development environment
 - Test locally with `npm run dev`
-- Commit changes to version control
+- Use npm for all package management (Lovable uses npm internally)
+- Commit changes to version control (including package-lock.json)
 - Lovable handles automatic deployment to production
 
 ### Monitoring
