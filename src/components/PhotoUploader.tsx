@@ -71,7 +71,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
               />
               <button
                 onClick={() => onRemovePhoto(i)}
-                className="absolute top-2 right-2 p-1 rounded-full bg-foreground/70 text-background opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-2 right-2 p-1 rounded-full bg-foreground/70 text-background hover:bg-foreground/90 transition-colors"
                 aria-label="Remove photo"
               >
                 <X className="w-4 h-4" />
