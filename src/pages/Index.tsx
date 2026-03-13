@@ -157,6 +157,7 @@ const Index = () => {
               photos={photos}
               onAddPhotos={handleAddPhotos}
               onRemovePhoto={handleRemovePhoto}
+              onClearAll={handleClearAll}
             />
 
             {/* Generate button */}
