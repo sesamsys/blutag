@@ -131,7 +131,7 @@ const Index = () => {
           30000, // 30 second timeout
           {
             maxAttempts: 3,
-            onRetry: (error, attempt) => {
+            onRetry: (_error, attempt) => {
               toast.info(`Retrying analysis (attempt ${attempt + 1}/3)...`);
             },
           }
