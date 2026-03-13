@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { LogIn, LogOut, Loader2 } from "lucide-react";
 import { useBlueskyAuth } from "@/contexts/BlueskyAuthContext";
 import {
@@ -11,6 +11,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+
+function isValidHandle(value: string): boolean {
+  const trimmed = value.trim();
+  return (
+    trimmed.length >= 3 &&
+    trimmed.includes(".") &&
+    !trimmed.includes("@") &&
+    !trimmed.includes(" ")
+  );
+}
 
 export default function BlueskyLoginButton() {
   const { handle, isLoggedIn, isLoading, signIn, logout } = useBlueskyAuth();
@@ -18,15 +29,20 @@ export default function BlueskyLoginButton() {
   const [inputHandle, setInputHandle] = useState("");
   const [signingIn, setSigningIn] = useState(false);
 
+  const trimmed = inputHandle.trim();
+  const valid = useMemo(() => isValidHandle(trimmed), [trimmed]);
+  const showHint = trimmed.length > 0 && !valid;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputHandle.trim()) return;
+    if (!valid) return;
     setSigningIn(true);
     try {
-      await signIn(inputHandle.trim());
-      // Redirects away — won't reach here
-    } catch (err) {
-      console.error("Sign in error:", err);
+      await signIn(trimmed);
+    } catch (err: any) {
+      const msg =
+        err?.message || "Sign-in failed. Please try again.";
+      toast.error(msg);
       setSigningIn(false);
     }
   };
@@ -84,8 +100,15 @@ export default function BlueskyLoginButton() {
                 autoComplete="username"
                 disabled={signingIn}
               />
+              {showHint && (
+                <p className="text-sm text-destructive">
+                  {trimmed.includes("@")
+                    ? "Enter a handle, not an email (e.g. alice.bsky.social)"
+                    : "Enter a handle like alice.bsky.social"}
+                </p>
+              )}
             </div>
-            <Button type="submit" disabled={signingIn} className="w-full gap-2">
+            <Button type="submit" disabled={signingIn || !valid} className="w-full gap-2">
               {signingIn ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
