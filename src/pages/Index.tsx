@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Github } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import AltTextResult from "@/components/AltTextResult";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import PostComposer from "@/components/PostComposer";
+import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import { extractExif } from "@/lib/exif";
 import { supabase } from "@/integrations/supabase/client";
+import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
 import { MAX_PHOTOS } from "@/lib/constants";
@@ -194,10 +196,30 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="w-full border-t border-border">
-        <div className="max-w-2xl mx-auto px-4 py-4 text-center">
+        <div className="max-w-2xl mx-auto px-4 py-4 flex flex-col items-center gap-3">
           <p className="text-xs text-muted-foreground">
             Photos are only kept temporarily for analysis and deleted after your session.
           </p>
+          <div className="flex items-center gap-4">
+            <a
+              href={metaData.bluesky}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Bluesky"
+            >
+              <BlueskyIcon className="w-5 h-5" />
+            </a>
+            <a
+              href={metaData.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="GitHub"
+            >
+              <Github className="w-5 h-5" />
+            </a>
+          </div>
         </div>
       </footer>
     </div>
