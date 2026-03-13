@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Github } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import AltTextResult from "@/components/AltTextResult";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import PostComposer from "@/components/PostComposer";
+import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import { extractExif } from "@/lib/exif";
 import { supabase } from "@/integrations/supabase/client";
+import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
 import { MAX_PHOTOS } from "@/lib/constants";
