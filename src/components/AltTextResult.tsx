@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import type { PhotoFile } from "@/types/photo";
-
-const MAX_ALT_LENGTH = 2000;
+import { MAX_ALT_TEXT_LENGTH, COPY_FEEDBACK_DURATION_MS } from "@/lib/constants";
 
 interface AltTextResultProps {
   photo: PhotoFile;
@@ -16,7 +15,7 @@ export default function AltTextResult({ photo, onUpdateAltText }: AltTextResultP
     if (!photo.altText) return;
     await navigator.clipboard.writeText(photo.altText);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION_MS);
   };
 
   return (
@@ -38,15 +37,15 @@ export default function AltTextResult({ photo, onUpdateAltText }: AltTextResultP
           <>
             <textarea
               value={photo.altText ?? ""}
-              onChange={(e) => onUpdateAltText(photo.id, e.target.value.slice(0, MAX_ALT_LENGTH))}
+              onChange={(e) => onUpdateAltText(photo.id, e.target.value.slice(0, MAX_ALT_TEXT_LENGTH))}
               rows={3}
-              maxLength={MAX_ALT_LENGTH}
+              maxLength={MAX_ALT_TEXT_LENGTH}
               className="w-full resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="Alt text will appear here…"
             />
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
-                {(photo.altText?.length ?? 0).toLocaleString()}/{MAX_ALT_LENGTH.toLocaleString()}
+                {(photo.altText?.length ?? 0).toLocaleString()}/{MAX_ALT_TEXT_LENGTH.toLocaleString()}
               </span>
               <button
                 onClick={handleCopy}
