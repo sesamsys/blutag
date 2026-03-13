@@ -98,7 +98,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         ref={inputRef}
         type="file"
         accept="image/*"
-        multiple={remaining > 1}
+        multiple
         className="hidden"
         onChange={(e) => {
           handleFiles(e.target.files);
