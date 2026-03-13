@@ -11,7 +11,7 @@ interface PhotoUploaderProps {
   onClearAll?: () => void;
 }
 
-export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: PhotoUploaderProps) {
+export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onClearAll }: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const remaining = MAX_PHOTOS - photos.length;
 
