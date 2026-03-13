@@ -122,9 +122,9 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
 
       {/* Handwritten annotation below info text — only when no photos */}
       {isEmpty && (
-        <div className="pointer-events-none select-none flex items-baseline justify-center mt-3">
+        <div className="pointer-events-none select-none flex items-center justify-center mt-3">
           <span
-            className="text-muted-foreground text-2xl sm:text-3xl -rotate-2 shrink-0"
+            className="text-muted-foreground text-2xl sm:text-3xl -rotate-2 shrink-0 leading-none"
             style={{ fontFamily: "'Caveat', cursive" }}
           >
             Drag photos here
