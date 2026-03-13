@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import { Sparkles } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import AltTextResult from "@/components/AltTextResult";
+import BlueskyLoginButton from "@/components/BlueskyLoginButton";
+import PostComposer from "@/components/PostComposer";
 import { extractExif } from "@/lib/exif";
 import { supabase } from "@/integrations/supabase/client";
 import type { PhotoFile } from "@/types/photo";
@@ -102,23 +104,26 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="w-full border-b border-border">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-4 h-4 text-primary-foreground"
-            >
-              <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
-              <circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none" />
-            </svg>
+        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4 text-primary-foreground"
+              >
+                <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
+                <circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none" />
+              </svg>
+            </div>
+            <h1 className="text-lg font-bold tracking-tight">Blutag</h1>
           </div>
-          <h1 className="text-lg font-bold tracking-tight">Blutag</h1>
+          <BlueskyLoginButton />
         </div>
       </header>
 
@@ -180,6 +185,9 @@ const Index = () => {
                 />
               ))}
             </div>
+
+            {/* Post composer — visible when logged in */}
+            <PostComposer photos={photos} />
           </>
         )}
       </main>
