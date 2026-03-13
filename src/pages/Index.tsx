@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Sparkles, Github } from "lucide-react";
+import { Sparkles, Github, Linkedin } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import AltTextResult from "@/components/AltTextResult";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
