@@ -16,10 +16,12 @@
 
 ### File Organization
 - Components in `/src/components/` with PascalCase names
+- Pages in `/src/pages/` with PascalCase names
 - Custom hooks in `/src/hooks/` with `use-` prefix
 - Types in `/src/types/` with descriptive names
 - Utilities in `/src/lib/` with kebab-case names
 - Constants in `/src/lib/constants.ts`
+- OAuth metadata in `/public/oauth/client-metadata.json`
 
 ### Naming Conventions
 - Components: PascalCase (PhotoUploader.tsx)
@@ -58,16 +60,19 @@
 ## Security Best Practices
 
 ### Authentication
-- Use Bluesky App Passwords, never main passwords
-- Store tokens in sessionStorage (cleared on browser close)
-- Validate JWT tokens on backend before API calls
-- Implement proper logout functionality
+- Use OAuth flow via `@atproto/oauth-client-browser`
+- No passwords or app passwords ever enter the application
+- Tokens stored in IndexedDB (managed by OAuth client)
+- DPoP-bound tokens prevent replay attacks
+- Implement proper logout with token revocation
+- Sessions persist across tabs (same origin)
 
 ### Data Privacy
 - Never store user images on server
 - Process images in memory only
 - Clear sensitive data from state on logout
 - Use HTTPS for all API communications
+- OAuth tokens never exposed to application code directly
 
 ## Platform Constraints
 
