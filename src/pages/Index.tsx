@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Sparkles, Github } from "lucide-react";
+import { Sparkles, Github, Linkedin } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import AltTextResult from "@/components/AltTextResult";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
@@ -318,6 +318,15 @@ const Index = () => {
               aria-label="GitHub"
             >
               <Github className="w-5 h-5" />
+            </a>
+            <a
+              href={metaData.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+              aria-label="LinkedIn"
+            >
+              <Linkedin className="w-5 h-5" />
             </a>
           </div>
         </div>
