@@ -22,4 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-package-lock.json
+
+# Bun (not used - Lovable uses npm)
+bun.lockb
+bun.lock
