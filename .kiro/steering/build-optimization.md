@@ -22,30 +22,30 @@ The build is split into the following chunks:
    - Large but necessary for Bluesky integration
    - Only loaded when authentication features are used
 
-3. **ui-components** (~94 kB)
-   - Radix UI component library
-   - All shadcn/ui components
-   - Shared across the application
-
-4. **data-libs** (~212 kB)
+3. **data-libs** (~223 kB / ~61 kB gzipped)
    - Data fetching and backend integration
    - Packages: `@tanstack/react-query`, `@supabase/supabase-js`
    - Used for API calls and state management
 
-5. **image-libs** (~99 kB)
+4. **image-libs** (~99 kB / ~31 kB gzipped)
    - Image processing utilities
    - Packages: `exifreader`
    - Used for EXIF metadata extraction
 
-6. **forms** (~0.06 kB)
+5. **forms** (~0.06 kB)
    - Form handling libraries
    - Packages: `react-hook-form`, `@hookform/resolvers`, `zod`
    - Used for form validation
 
-7. **icons** (~5 kB)
+6. **icons** (~5 kB)
    - Icon library
    - Packages: `lucide-react`
    - Shared across components
+
+7. **index** (~165 kB / ~53 kB gzipped)
+   - Main application code and UI components
+   - Includes shadcn/ui components and Radix UI
+   - Application-specific logic and pages
 
 ### Why atproto Chunk is Large
 
@@ -63,14 +63,34 @@ The `@atproto/oauth-client-browser` package is comprehensive and includes:
 - Modern browsers handle this size efficiently
 - The library provides significant security benefits
 
-### Chunk Size Warning Limit
+## Circular Dependency Resolution
 
-Set to 1000 kB (1 MB) in `vite.config.ts`:
-```typescript
-chunkSizeWarningLimit: 1000
+### Issue
+During initial build optimization, a circular dependency warning appeared:
+```
+Circular chunk: ui-components -> data-libs -> ui-components
 ```
 
-This acknowledges that some chunks (like atproto) will be large but are necessary for the application's functionality.
+### Root Cause
+Attempting to manually separate UI components into their own chunk created a circular reference because:
+- Radix UI components have indirect dependencies on shared utilities
+- Data libraries (React Query, Supabase) are used throughout the application
+- The dependency graph created a cycle when trying to isolate these chunks
+
+### Solution
+Removed the separate `ui-components` chunk and let Vite handle UI component bundling automatically. This:
+- Eliminates the circular dependency warning
+- Bundles UI components with the main application code
+- Maintains reasonable chunk sizes (index chunk: ~165 kB uncompressed, ~53 kB gzipped)
+- Simplifies the chunk configuration
+- Improves build reliability
+
+### Result
+Clean build with no circular dependency warnings. The trade-off is slightly larger main chunk, but this is acceptable because:
+- UI components are needed immediately on page load
+- Bundling them together reduces HTTP requests
+- The gzipped size remains reasonable (~53 kB)
+- Eliminates complexity in chunk management
 
 ## Dynamic Import Opportunities
 
@@ -180,12 +200,16 @@ npm run preview
 
 ## Troubleshooting
 
-### Circular Chunk Warning
-If you see "Circular chunk" warnings during build:
-1. Review the manual chunk configuration
-2. Ensure dependencies don't cross-reference between chunks
-3. Move shared dependencies to a common chunk
-4. Consider splitting large chunks further
+### Circular Chunk Warning (RESOLVED)
+**Previous Issue:** "Circular chunk: ui-components -> data-libs -> ui-components"
+
+**Resolution:** Removed the separate ui-components chunk. UI components are now bundled with the main application code (index chunk). This:
+- Eliminates circular dependency warnings
+- Simplifies chunk configuration
+- Maintains reasonable bundle sizes
+- Improves build reliability
+
+**When to revisit:** If the index chunk grows beyond 300 kB gzipped, consider lazy loading specific pages or features.
 
 ### Chunk Size Still Too Large
 1. Identify the largest modules in the chunk
