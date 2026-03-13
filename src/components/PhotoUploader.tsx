@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import { ImagePlus, X } from "lucide-react";
+import { toast } from "sonner";
 import type { PhotoFile } from "@/types/photo";
 
 const MAX_FILES = 4;
@@ -14,22 +15,28 @@ interface PhotoUploaderProps {
 
 export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const remaining = MAX_FILES - photos.length;
 
   const handleFiles = useCallback(
     (fileList: FileList | null) => {
       if (!fileList) return;
-      const remaining = MAX_FILES - photos.length;
       if (remaining <= 0) return;
 
-      const valid: File[] = [];
-      Array.from(fileList).slice(0, remaining).forEach((f) => {
+      const allValid: File[] = [];
+      Array.from(fileList).forEach((f) => {
         if (!f.type.startsWith("image/")) return;
         if (f.size > MAX_SIZE_BYTES) return;
-        valid.push(f);
+        allValid.push(f);
       });
-      if (valid.length) onAddPhotos(valid);
+
+      if (allValid.length > remaining) {
+        toast.warning(`Only ${remaining} photo slot${remaining === 1 ? "" : "s"} remaining — extra photos were not added.`);
+      }
+
+      const accepted = allValid.slice(0, remaining);
+      if (accepted.length) onAddPhotos(accepted);
     },
-    [photos.length, onAddPhotos]
+    [remaining, onAddPhotos]
   );
 
   const onDrop = useCallback(
@@ -82,7 +89,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto }: Ph
         ref={inputRef}
         type="file"
         accept="image/*"
-        multiple
+        multiple={remaining > 1}
         className="hidden"
         onChange={(e) => {
           handleFiles(e.target.files);
