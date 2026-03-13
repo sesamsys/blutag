@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Sparkles, Github } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import AltTextResult from "@/components/AltTextResult";
@@ -11,6 +11,7 @@ import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
 import { MAX_PHOTOS } from "@/lib/constants";
+import { savePhotosSession, loadPhotosSession, clearPhotosSession } from "@/lib/session-persistence";
 
 function generateId() {
   return Math.random().toString(36).slice(2, 10);
@@ -31,6 +32,17 @@ function fileToBase64(file: File): Promise<string> {
 const Index = () => {
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
   const [hasResults, setHasResults] = useState(false);
+
+  // Restore session from IndexedDB (survives OAuth redirects)
+  useEffect(() => {
+    loadPhotosSession().then((restored) => {
+      if (restored && restored.length > 0) {
+        setPhotos(restored);
+        const hasAltText = restored.some((p) => p.altText);
+        if (hasAltText) setHasResults(true);
+      }
+    });
+  }, []);
 
   const handleAddPhotos = useCallback((files: File[]) => {
     const newPhotos: PhotoFile[] = files.map((file) => ({
@@ -101,12 +113,19 @@ const Index = () => {
     };
 
     await Promise.all(photos.map(analyzeOne));
+
+    // Save to IndexedDB so state survives OAuth redirects
+    setPhotos((current) => {
+      savePhotosSession(current);
+      return current;
+    });
   };
 
   const handleReset = () => {
     photos.forEach((p) => URL.revokeObjectURL(p.preview));
     setPhotos([]);
     setHasResults(false);
+    clearPhotosSession();
   };
 
   return (
