@@ -122,7 +122,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
 
       {/* Handwritten annotation below info text — only when no photos */}
       {isEmpty && (
-        <div className="pointer-events-none select-none flex items-center justify-center gap-2 mt-3">
+        <div className="pointer-events-none select-none flex items-center justify-center gap-8 mt-3">
           <span
             className="text-muted-foreground text-2xl sm:text-3xl -rotate-2 shrink-0 leading-none"
             style={{ fontFamily: "'Caveat', cursive" }}
@@ -135,12 +135,12 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
             height="120"
             viewBox="0 0 100 120"
             fill="none"
-            className="text-muted-foreground shrink-0 -ml-1"
+            className="text-muted-foreground shrink-0"
             overflow="visible"
           >
-            {/* Path: starts mid-left at baseline height, loops, then goes up */}
+            {/* Path: starts mid-left, loops, then goes up */}
             <path
-              d="M2 65 C12 60, 25 55, 35 48 C45 41, 52 34, 50 26 C48 18, 36 16, 34 24 C32 32, 42 38, 52 34 C62 30, 68 22, 72 14 C74 8, 75 4, 75 0"
+              d="M2 55 C12 50, 25 45, 35 38 C45 31, 52 24, 50 16 C48 8, 36 6, 34 14 C32 22, 42 28, 52 24 C62 20, 68 12, 72 6 C74 2, 75 0, 75 0"
               stroke="currentColor"
               strokeWidth="2.5"
               strokeLinecap="round"
