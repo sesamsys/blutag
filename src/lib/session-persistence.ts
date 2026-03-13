@@ -3,6 +3,7 @@ import type { PhotoFile, ExifInfo } from "@/types/photo";
 const DB_NAME = "blutag-session";
 const STORE_NAME = "session";
 const SESSION_KEY = "photos";
+const DB_VERSION = 1;
 
 interface StoredPhoto {
   id: string;
@@ -13,16 +14,44 @@ interface StoredPhoto {
   fileType: string;
 }
 
-function openDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
+// --- Singleton DB connection ---
+let dbInstance: IDBDatabase | null = null;
+let dbPromise: Promise<IDBDatabase> | null = null;
+
+function getDB(): Promise<IDBDatabase> {
+  if (dbInstance) return Promise.resolve(dbInstance);
+  if (dbPromise) return dbPromise;
+
+  dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
       req.result.createObjectStore(STORE_NAME);
     };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    req.onsuccess = () => {
+      dbInstance = req.result;
+      dbInstance.onclose = () => { dbInstance = null; dbPromise = null; };
+      resolve(dbInstance);
+    };
+    req.onerror = () => {
+      dbPromise = null;
+      reject(req.error);
+    };
   });
+
+  return dbPromise;
 }
+
+// --- Serialized queue to prevent concurrent read/write races ---
+let opQueue: Promise<unknown> = Promise.resolve();
+
+function enqueue<T>(fn: () => Promise<T>): Promise<T> {
+  const next = opQueue.then(fn, fn);
+  // Update the queue tail; swallow errors so the queue keeps flowing
+  opQueue = next.then(() => {}, () => {});
+  return next;
+}
+
+// --- Low-level IDB helpers ---
 
 function idbPut(db: IDBDatabase, key: string, value: unknown): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -60,9 +89,11 @@ function fileToArrayBuffer(file: File): Promise<ArrayBuffer> {
   });
 }
 
-export async function savePhotosSession(photos: PhotoFile[]): Promise<void> {
-  try {
-    const db = await openDB();
+// --- Public API (all operations are serialized through the queue) ---
+
+export function savePhotosSession(photos: PhotoFile[]): Promise<void> {
+  return enqueue(async () => {
+    const db = await getDB();
     const stored: StoredPhoto[] = await Promise.all(
       photos.map(async (p) => ({
         id: p.id,
@@ -74,17 +105,13 @@ export async function savePhotosSession(photos: PhotoFile[]): Promise<void> {
       }))
     );
     await idbPut(db, SESSION_KEY, stored);
-    db.close();
-  } catch (err) {
-    console.error("Failed to save session:", err);
-  }
+  });
 }
 
-export async function loadPhotosSession(): Promise<PhotoFile[] | null> {
-  try {
-    const db = await openDB();
+export function loadPhotosSession(): Promise<PhotoFile[] | null> {
+  return enqueue(async () => {
+    const db = await getDB();
     const stored = await idbGet<StoredPhoto[]>(db, SESSION_KEY);
-    db.close();
     if (!stored || stored.length === 0) return null;
 
     return stored.map((s) => {
@@ -97,18 +124,12 @@ export async function loadPhotosSession(): Promise<PhotoFile[] | null> {
         exifData: s.exifData,
       };
     });
-  } catch (err) {
-    console.error("Failed to load session:", err);
-    return null;
-  }
+  });
 }
 
-export async function clearPhotosSession(): Promise<void> {
-  try {
-    const db = await openDB();
+export function clearPhotosSession(): Promise<void> {
+  return enqueue(async () => {
+    const db = await getDB();
     await idbDelete(db, SESSION_KEY);
-    db.close();
-  } catch (err) {
-    console.error("Failed to clear session:", err);
-  }
+  });
 }
