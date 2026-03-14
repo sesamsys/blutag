@@ -1,73 +1,79 @@
-# Welcome to your Lovable project
+# Blutag — AI-Powered Alt Text for Bluesky
 
-## Project info
+Generate accurate, accessible alt text for your photos using AI, then post directly to [Bluesky](https://bsky.social).
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+🔗 **[Try it live → blutag.lovable.app](https://blutag.lovable.app)**
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- 📸 Upload up to 4 photos (max 25 MB each)
+- 🤖 AI-generated alt text powered by Google Gemini
+- 🗺️ EXIF-aware — uses date, location, and camera info for better descriptions
+- ✏️ Edit, copy, or regenerate alt text before posting
+- 🦋 Post directly to Bluesky via AT Protocol OAuth (your password never enters the app)
+- 🔒 Privacy-first — photos are processed in-memory and never stored
+- 📱 Responsive drag-and-drop interface
 
-**Use Lovable**
+## Getting Started
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Prerequisites
 
-Changes made via Lovable will be committed automatically to this repo.
+- [Node.js](https://nodejs.org/) 18+
+- npm
 
-**Use your preferred IDE**
+### Setup
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```bash
+# Clone the repository
+git clone https://github.com/sesamsys/blutag.git
+cd blutag
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# Install dependencies
+npm install
 
-Follow these steps:
+# Copy environment template and fill in your values
+cp .env.example .env
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the dev server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+See `.env.example` for the required environment variables. The app uses [Lovable Cloud](https://lovable.dev) as its backend (Supabase under the hood).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Running Tests
 
-**Use GitHub Codespaces**
+```bash
+npm test
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Tech Stack
 
-## What technologies are used for this project?
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, TypeScript, Vite |
+| UI | shadcn/ui, Tailwind CSS |
+| Backend | Supabase Edge Functions (Deno) |
+| AI | Google Gemini 2.5 Flash via Lovable AI Gateway |
+| Social | AT Protocol (`@atproto/oauth-client-browser`) |
+| Hosting | [Lovable](https://lovable.dev) |
 
-This project is built with:
+## Contributing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Contributions are welcome! Please:
 
-## How can I deploy this project?
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feat/my-feature`)
+3. Commit your changes (`git commit -m 'Add my feature'`)
+4. Push to the branch (`git push origin feat/my-feature`)
+5. Open a Pull Request
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## License
 
-## Can I connect a custom domain to my Lovable project?
+[MIT](LICENSE)
 
-Yes, you can!
+## Links
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- [Live App](https://blutag.lovable.app)
+- [Bluesky](https://bsky.app/profile/sesam.hu)
+- [GitHub](https://github.com/sesamsys)
+- [LinkedIn](https://linkedin.com/in/pszilagyi)
