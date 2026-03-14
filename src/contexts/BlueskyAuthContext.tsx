@@ -72,7 +72,7 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
         if (!mounted) return;
 
         if (result?.session) {
-          await establishSession(result.session as any);
+          await establishSession(result.session);
 
           // If this was a callback (has state), redirect to home
           if (result.state != null && window.location.pathname !== "/") {

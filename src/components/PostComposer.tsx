@@ -87,10 +87,9 @@ export default function PostComposer({ photos }: PostComposerProps) {
             }
           );
 
-          const blob = response.data.blob;
           embeddedImages.push({
             alt: photo.altText || "",
-            image: { $type: "blob", ref: { $link: (blob as any).ref.$link ?? (blob as any).ref.toString() }, mimeType: blob.mimeType, size: blob.size },
+            image: response.data.blob,
           });
         } catch (uploadError) {
           logError(uploadError, { context: "image_upload", photoId: photo.id });
