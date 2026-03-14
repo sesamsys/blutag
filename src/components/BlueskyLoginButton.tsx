@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { LogIn, LogOut, Loader2 } from "lucide-react";
 import { useBlueskyAuth } from "@/contexts/BlueskyAuthContext";
+import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import {
   Dialog,
   DialogContent,
