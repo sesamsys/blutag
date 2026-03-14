@@ -19,7 +19,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import type { PhotoFile } from "@/types/photo";
-import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES } from "@/lib/constants";
+import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES, DROP_ANIMATION_DURATION_MS } from "@/lib/constants";
 import SortablePhotoItem from "./SortablePhotoItem";
 
 interface PhotoUploaderProps {
