@@ -68,7 +68,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
       // Compress and upload all images
       const embeddedImages: Array<{ 
         alt: string; 
-        image: { $type: string; ref: { $link: string }; mimeType: string; size: number }; 
+        image: BlobRef; 
         aspectRatio?: { width: number; height: number } 
       }> = [];
 
