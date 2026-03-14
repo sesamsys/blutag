@@ -8,7 +8,7 @@ import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import { compressImageForBluesky } from "@/lib/image-compress";
 import type { BlobRef } from "@atproto/api";
 import { toast } from "sonner";
-import { BLUESKY_POST_MAX_LENGTH } from "@/lib/constants";
+import { BLUESKY_POST_MAX_LENGTH, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
 import { ERROR_MESSAGES, getErrorMessage, logError, AppError, ErrorType } from "@/lib/error-messages";
 import { retryWithBackoff } from "@/lib/retry";
@@ -80,9 +80,9 @@ export default function PostComposer({ photos }: PostComposerProps) {
           const response = await retryWithBackoff(
             () => agent.uploadBlob(compressed, { encoding: "image/jpeg" }),
             {
-              maxAttempts: 3,
+              maxAttempts: RETRY_MAX_ATTEMPTS,
               onRetry: (_error, attempt) => {
-                toast.info(`Retrying image upload (attempt ${attempt + 1}/3)...`);
+                toast.info(`Retrying image upload (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`);
               },
             }
           );
@@ -123,9 +123,9 @@ export default function PostComposer({ photos }: PostComposerProps) {
           record,
         }),
         {
-          maxAttempts: 3,
+          maxAttempts: RETRY_MAX_ATTEMPTS,
           onRetry: (_error, attempt) => {
-            toast.info(`Retrying post (attempt ${attempt + 1}/3)...`);
+            toast.info(`Retrying post (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`);
           },
         }
       );

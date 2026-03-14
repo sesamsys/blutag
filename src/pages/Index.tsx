@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
-import { MAX_PHOTOS, RATE_LIMIT_MAX_CALLS, RATE_LIMIT_WINDOW_MS } from "@/lib/constants";
+import { MAX_PHOTOS, RATE_LIMIT_MAX_CALLS, RATE_LIMIT_WINDOW_MS, ANALYSIS_TIMEOUT_MS, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
 import { arrayMove } from "@dnd-kit/sortable";
 import { savePhotosSession, loadPhotosSession, clearPhotosSession } from "@/lib/session-persistence";
 import { ERROR_MESSAGES, getErrorMessage, logError, ErrorType, AppError } from "@/lib/error-messages";
@@ -150,11 +150,11 @@ const Index = () => {
 
             return data;
           },
-          30000, // 30 second timeout
+          ANALYSIS_TIMEOUT_MS,
           {
-            maxAttempts: 3,
+            maxAttempts: RETRY_MAX_ATTEMPTS,
             onRetry: (_error, attempt) => {
-              toast.info(`Retrying analysis (attempt ${attempt + 1}/3)...`);
+              toast.info(`Retrying analysis (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`);
             },
           }
         );

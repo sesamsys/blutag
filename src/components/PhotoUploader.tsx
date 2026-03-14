@@ -19,7 +19,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import type { PhotoFile } from "@/types/photo";
-import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES } from "@/lib/constants";
+import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES, DROP_ANIMATION_DURATION_MS } from "@/lib/constants";
 import SortablePhotoItem from "./SortablePhotoItem";
 
 interface PhotoUploaderProps {
@@ -228,7 +228,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
             </div>
           </SortableContext>
 
-          <DragOverlay dropAnimation={{ duration: 200, easing: "ease" }}>
+          <DragOverlay dropAnimation={{ duration: DROP_ANIMATION_DURATION_MS, easing: "ease" }}>
             {activePhoto ? (
               <div className="aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg ring-2 ring-primary/50">
                 <img
