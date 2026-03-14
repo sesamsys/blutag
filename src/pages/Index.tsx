@@ -203,12 +203,13 @@ const Index = () => {
     });
   };
 
-  // Cleanup object URLs on unmount to prevent memory leaks
+  // Cleanup object URLs on unmount only to prevent memory leaks
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     return () => {
       photos.forEach((p) => URL.revokeObjectURL(p.preview));
     };
-  }, [photos]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
