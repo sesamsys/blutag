@@ -13,6 +13,7 @@ import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
 import { MAX_PHOTOS, RATE_LIMIT_MAX_CALLS, RATE_LIMIT_WINDOW_MS } from "@/lib/constants";
+import { arrayMove } from "@dnd-kit/sortable";
 import { savePhotosSession, loadPhotosSession, clearPhotosSession } from "@/lib/session-persistence";
 import { ERROR_MESSAGES, getErrorMessage, logError, ErrorType, AppError } from "@/lib/error-messages";
 import { retryWithTimeout } from "@/lib/retry";
@@ -83,6 +84,10 @@ const Index = () => {
       prev.forEach((p) => URL.revokeObjectURL(p.preview));
       return [];
     });
+  }, []);
+
+  const handleReorderPhotos = useCallback((oldIndex: number, newIndex: number) => {
+    setPhotos((prev) => arrayMove(prev, oldIndex, newIndex));
   }, []);
 
   const handleUpdateAltText = useCallback((id: string, text: string) => {
@@ -254,6 +259,7 @@ const Index = () => {
               onAddPhotos={handleAddPhotos}
               onRemovePhoto={handleRemovePhoto}
               onClearAll={handleClearAll}
+              onReorderPhotos={handleReorderPhotos}
             />
 
             {/* Generate button */}

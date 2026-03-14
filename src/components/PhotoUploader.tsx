@@ -1,20 +1,44 @@
 import { useCallback, useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  
+} from "@dnd-kit/sortable";
 import type { PhotoFile } from "@/types/photo";
 import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES } from "@/lib/constants";
+import SortablePhotoItem from "./SortablePhotoItem";
 
 interface PhotoUploaderProps {
   photos: PhotoFile[];
   onAddPhotos: (files: File[]) => void;
   onRemovePhoto: (index: number) => void;
   onClearAll?: () => void;
+  onReorderPhotos?: (oldIndex: number, newIndex: number) => void;
 }
 
-export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onClearAll }: PhotoUploaderProps) {
+export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onClearAll, onReorderPhotos }: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const remaining = MAX_PHOTOS - photos.length;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    })
+  );
 
   const handleFiles = useCallback(
     (fileList: FileList | null) => {
@@ -79,8 +103,33 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
     setIsDraggingOver(false);
   }, []);
 
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveDragId(event.active.id as string);
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setActiveDragId(null);
+      const { active, over } = event;
+      if (!over || active.id === over.id || !onReorderPhotos) return;
+
+      const oldIndex = photos.findIndex((p) => p.id === active.id);
+      const newIndex = photos.findIndex((p) => p.id === over.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onReorderPhotos(oldIndex, newIndex);
+      }
+    },
+    [photos, onReorderPhotos]
+  );
+
+  const handleDragCancel = useCallback(() => {
+    setActiveDragId(null);
+  }, []);
+
+  const activePhoto = activeDragId ? photos.find((p) => p.id === activeDragId) : null;
   const slots = Array.from({ length: MAX_PHOTOS }, (_, i) => photos[i] ?? null);
   const isEmpty = photos.length === 0;
+  const sortableIds = photos.map((p) => p.id);
 
   return (
     <div className="w-full">
@@ -98,47 +147,62 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       </div>
 
       <div className="relative">
-        <div
-          role="region"
-          aria-label="Photo upload area"
-          onDrop={onDropZone}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          className={`grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-2xl transition-all ${
-            isDraggingOver
-              ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-              : ""
-          }`}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
         >
-          {slots.map((photo, i) =>
-            photo ? (
-              <div key={photo.id} className="relative aspect-square rounded-2xl overflow-hidden bg-muted group">
+          <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
+            <div
+              role="region"
+              aria-label="Photo upload area"
+              onDrop={onDropZone}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              className={`grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-2xl transition-all ${
+                isDraggingOver
+                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
+                  : ""
+              }`}
+            >
+              {slots.map((photo, i) =>
+                photo ? (
+                  <SortablePhotoItem
+                    key={photo.id}
+                    id={photo.id}
+                    preview={photo.preview}
+                    index={i}
+                    onRemove={onRemovePhoto}
+                  />
+                ) : (
+                  <button
+                    key={`empty-${i}`}
+                    onClick={() => inputRef.current?.click()}
+                    aria-label={`Add photo, slot ${i + 1} of ${MAX_PHOTOS}`}
+                    className="aspect-square rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
+                    <ImagePlus className="w-6 h-6 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground font-medium">Add photo</span>
+                  </button>
+                )
+              )}
+            </div>
+          </SortableContext>
+
+          <DragOverlay>
+            {activePhoto ? (
+              <div className="aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg ring-2 ring-primary/50 w-full max-w-[150px]">
                 <img
-                  src={photo.preview}
-                  alt={`Upload ${i + 1}`}
+                  src={activePhoto.preview}
+                  alt="Dragging photo"
                   className="w-full h-full object-cover"
                 />
-                <button
-                  onClick={() => onRemovePhoto(i)}
-                  className="absolute top-2 right-2 p-1 rounded-full bg-foreground/70 text-background hover:bg-foreground/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                  aria-label={`Remove photo ${i + 1}`}
-                >
-                  <X className="w-4 h-4" />
-                </button>
               </div>
-            ) : (
-              <button
-                key={`empty-${i}`}
-                onClick={() => inputRef.current?.click()}
-                aria-label={`Add photo, slot ${i + 1} of ${MAX_PHOTOS}`}
-                className="aspect-square rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              >
-                <ImagePlus className="w-6 h-6 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground font-medium">Add photo</span>
-              </button>
-            )
-          )}
-        </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </div>
 
       {/* Live region for screen readers */}
