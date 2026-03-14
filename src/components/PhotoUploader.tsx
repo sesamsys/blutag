@@ -228,9 +228,9 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
             </div>
           </SortableContext>
 
-          <DragOverlay>
+          <DragOverlay dropAnimation={{ duration: 200, easing: "ease" }}>
             {activePhoto ? (
-              <div className="aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg ring-2 ring-primary/50 w-full max-w-[150px]">
+              <div className="aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg ring-2 ring-primary/50">
                 <img
                   src={activePhoto.preview}
                   alt="Dragging photo"
