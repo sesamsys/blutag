@@ -6,7 +6,7 @@ import { useBlueskyAuth } from "@/contexts/BlueskyAuthContext";
 import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import { compressImageForBluesky } from "@/lib/image-compress";
-import type { BlobRef } from "@atproto/api";
+import { RichText, type BlobRef } from "@atproto/api";
 import { toast } from "sonner";
 import { BLUESKY_POST_MAX_LENGTH, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
