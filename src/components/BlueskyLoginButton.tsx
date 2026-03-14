@@ -59,9 +59,14 @@ export default function BlueskyLoginButton() {
   if (isLoggedIn) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground truncate max-w-[140px]">
+        <a
+          href={`https://bsky.app/profile/${handle}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-muted-foreground hover:text-foreground truncate max-w-[140px] transition-colors"
+        >
           @{handle}
-        </span>
+        </a>
         <Button variant="ghost" size="sm" onClick={logout} className="gap-1.5">
           <LogOut className="w-4 h-4" />
           <span className="hidden sm:inline">Sign out</span>
