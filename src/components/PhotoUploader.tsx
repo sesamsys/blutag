@@ -14,7 +14,7 @@ import {
 import {
   SortableContext,
   rectSortingStrategy,
-  arrayMove,
+  
 } from "@dnd-kit/sortable";
 import type { PhotoFile } from "@/types/photo";
 import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES } from "@/lib/constants";

@@ -86,6 +86,10 @@ const Index = () => {
     });
   }, []);
 
+  const handleReorderPhotos = useCallback((oldIndex: number, newIndex: number) => {
+    setPhotos((prev) => arrayMove(prev, oldIndex, newIndex));
+  }, []);
+
   const handleUpdateAltText = useCallback((id: string, text: string) => {
     setPhotos((prev) =>
       prev.map((p) => (p.id === id ? { ...p, altText: text } : p))
