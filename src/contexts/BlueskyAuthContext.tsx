@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
-import { BrowserOAuthClient } from "@atproto/oauth-client-browser";
+import { BrowserOAuthClient, type OAuthSession } from "@atproto/oauth-client-browser";
 import { Agent } from "@atproto/api";
 import { toast } from "sonner";
 import { ERROR_MESSAGES, AppError, ErrorType, getErrorMessage, logError } from "@/lib/error-messages";
