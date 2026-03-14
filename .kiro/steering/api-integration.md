@@ -51,14 +51,24 @@ const response = await agent.uploadBlob(compressedImage, {
 });
 ```
 
-**Post Creation:**
+**Post Creation (with RichText facets):**
+
+The AT Protocol treats post text as plain text by default. To render URLs, @mentions, and #hashtags as clickable links, the post must include **facets** — rich text annotations with byte offsets. The `RichText` class from `@atproto/api` handles detection automatically:
+
 ```typescript
+import { RichText } from "@atproto/api";
+
+// Detect facets (links, mentions, hashtags)
+const richText = new RichText({ text: postText });
+await richText.detectFacets(agent); // resolves handles to DIDs
+
 await agent.com.atproto.repo.createRecord({
   repo: agent.did,
   collection: "app.bsky.feed.post",
   record: {
     $type: "app.bsky.feed.post",
-    text: postText,
+    text: richText.text,
+    facets: richText.facets, // undefined if no facets detected
     createdAt: new Date().toISOString(),
     embed: {
       $type: "app.bsky.embed.images",
@@ -67,6 +77,8 @@ await agent.com.atproto.repo.createRecord({
   },
 });
 ```
+
+**Important:** Without facets, URLs appear as plain text and mentions are not linked to profiles. Always use `RichText.detectFacets()` before creating posts.
 
 ### Security Features
 - **No passwords in app**: OAuth flow handled by Bluesky
