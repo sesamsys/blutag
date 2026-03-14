@@ -189,6 +189,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
+          accessibility={{ announcements }}
         >
           <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
             <div
