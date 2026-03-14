@@ -1,20 +1,22 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useMemo } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   DndContext,
   closestCenter,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
   DragOverlay,
   type DragStartEvent,
   type DragEndEvent,
+  type Announcements,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   rectSortingStrategy,
-  
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import type { PhotoFile } from "@/types/photo";
 import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES } from "@/lib/constants";
@@ -37,7 +39,38 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     })
+  );
+
+  const announcements: Announcements = useMemo(
+    () => ({
+      onDragStart({ active }) {
+        const idx = photos.findIndex((p) => p.id === active.id);
+        return `Picked up photo ${idx + 1} of ${photos.length}. Use arrow keys to move, space to drop.`;
+      },
+      onDragOver({ active, over }) {
+        if (!over) return "";
+        const oldIdx = photos.findIndex((p) => p.id === active.id);
+        const newIdx = photos.findIndex((p) => p.id === over.id);
+        return `Photo ${oldIdx + 1} is now over position ${newIdx + 1} of ${photos.length}.`;
+      },
+      onDragEnd({ active, over }) {
+        if (!over) return `Photo dropped in its original position.`;
+        const oldIdx = photos.findIndex((p) => p.id === active.id);
+        const newIdx = photos.findIndex((p) => p.id === over.id);
+        return oldIdx === newIdx
+          ? `Photo ${oldIdx + 1} returned to its original position.`
+          : `Photo moved from position ${oldIdx + 1} to position ${newIdx + 1}.`;
+      },
+      onDragCancel({ active }) {
+        const idx = photos.findIndex((p) => p.id === active.id);
+        return `Dragging cancelled. Photo ${idx + 1} returned to its original position.`;
+      },
+    }),
+    [photos]
   );
 
   const handleFiles = useCallback(
@@ -156,6 +189,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
+          accessibility={{ announcements }}
         >
           <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
             <div
