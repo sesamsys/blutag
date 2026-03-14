@@ -1,4 +1,10 @@
 import { isRetryableError, logError } from "./error-messages";
+import {
+  RETRY_MAX_ATTEMPTS,
+  RETRY_INITIAL_DELAY_MS,
+  RETRY_MAX_DELAY_MS,
+  RETRY_BACKOFF_MULTIPLIER,
+} from "./constants";
 
 export interface RetryOptions {
   maxAttempts?: number;
@@ -10,10 +16,10 @@ export interface RetryOptions {
 }
 
 const DEFAULT_OPTIONS: Required<RetryOptions> = {
-  maxAttempts: 3,
-  initialDelayMs: 1000,
-  maxDelayMs: 10000,
-  backoffMultiplier: 2,
+  maxAttempts: RETRY_MAX_ATTEMPTS,
+  initialDelayMs: RETRY_INITIAL_DELAY_MS,
+  maxDelayMs: RETRY_MAX_DELAY_MS,
+  backoffMultiplier: RETRY_BACKOFF_MULTIPLIER,
   shouldRetry: isRetryableError,
   onRetry: () => {},
 };
