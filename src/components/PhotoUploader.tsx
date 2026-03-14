@@ -6,7 +6,6 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
-  TouchSensor,
   useSensor,
   useSensors,
   DragOverlay,
@@ -40,9 +39,6 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
