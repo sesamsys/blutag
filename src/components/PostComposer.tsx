@@ -101,12 +101,20 @@ export default function PostComposer({ photos }: PostComposerProps) {
         }
       }
 
+      // Detect facets (links, mentions, hashtags) using RichText
+      const richText = new RichText({ text: text || "" });
+      await richText.detectFacets(agent);
+
       // Create the post
       const record: Record<string, unknown> = {
         $type: "app.bsky.feed.post",
-        text: text || "",
+        text: richText.text,
         createdAt: new Date().toISOString(),
       };
+
+      if (richText.facets && richText.facets.length > 0) {
+        record.facets = richText.facets;
+      }
 
       if (embeddedImages.length > 0) {
         record.embed = {
