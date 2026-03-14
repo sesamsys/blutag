@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { LogIn, LogOut, Loader2 } from "lucide-react";
 import { useBlueskyAuth } from "@/contexts/BlueskyAuthContext";
+import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import {
   Dialog,
   DialogContent,
@@ -63,8 +64,9 @@ export default function BlueskyLoginButton() {
           href={`https://bsky.app/profile/${handle}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-muted-foreground hover:text-foreground truncate max-w-[140px] transition-colors"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground truncate max-w-[160px] transition-colors"
         >
+          <BlueskyIcon className="w-3.5 h-3.5 shrink-0" />
           @{handle}
         </a>
         <Button variant="ghost" size="sm" onClick={logout} className="gap-1.5">
