@@ -39,3 +39,25 @@ export const RATE_LIMIT_MAX_CALLS = 10;
 
 /** Rate-limit sliding window duration in milliseconds (1 minute) */
 export const RATE_LIMIT_WINDOW_MS = 60_000;
+
+// ── Retry & timeout defaults ──────────────────────────────────────────
+
+/** Default maximum retry attempts for network requests */
+export const RETRY_MAX_ATTEMPTS = 3;
+
+/** Initial delay in ms before the first retry (exponential backoff base) */
+export const RETRY_INITIAL_DELAY_MS = 1_000;
+
+/** Maximum delay in ms between retries (backoff ceiling) */
+export const RETRY_MAX_DELAY_MS = 10_000;
+
+/** Exponential backoff multiplier applied per retry attempt */
+export const RETRY_BACKOFF_MULTIPLIER = 2;
+
+/** Timeout in ms for a single AI analysis request */
+export const ANALYSIS_TIMEOUT_MS = 30_000;
+
+// ── Animation ─────────────────────────────────────────────────────────
+
+/** Duration in ms of the drop animation when reordering photos */
+export const DROP_ANIMATION_DURATION_MS = 200;

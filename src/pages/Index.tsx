@@ -150,9 +150,9 @@ const Index = () => {
 
             return data;
           },
-          30000, // 30 second timeout
+          ANALYSIS_TIMEOUT_MS,
           {
-            maxAttempts: 3,
+            maxAttempts: RETRY_MAX_ATTEMPTS,
             onRetry: (_error, attempt) => {
               toast.info(`Retrying analysis (attempt ${attempt + 1}/3)...`);
             },

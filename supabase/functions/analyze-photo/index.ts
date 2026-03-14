@@ -1,10 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { AI_MODEL, SYSTEM_PROMPT, USER_PROMPT_WITH_CONTEXT, USER_PROMPT_DEFAULT } from "./prompts.ts";
 
-// --- Rate limiting (in-memory, per-instance, best-effort) ---
-const RATE_LIMIT_MAX = 20;       // max requests per window per IP
-const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
-const MAX_PAYLOAD_BYTES = 30 * 1024 * 1024; // 30 MB hard limit
+// --- Constants (edge functions can't import from src/) ---
+
+/** Maximum requests per IP per window */
+const RATE_LIMIT_MAX = 20;
+
+/** Rate-limit sliding window in milliseconds (1 minute) */
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
+/** Maximum request payload size in bytes (30 MB) */
+const MAX_PAYLOAD_BYTES = 30 * 1024 * 1024;
 
 const ipBuckets = new Map<string, number[]>();
 
