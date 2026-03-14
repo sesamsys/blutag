@@ -8,7 +8,7 @@ import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import { compressImageForBluesky } from "@/lib/image-compress";
 import type { BlobRef } from "@atproto/api";
 import { toast } from "sonner";
-import { BLUESKY_POST_MAX_LENGTH } from "@/lib/constants";
+import { BLUESKY_POST_MAX_LENGTH, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
 import { ERROR_MESSAGES, getErrorMessage, logError, AppError, ErrorType } from "@/lib/error-messages";
 import { retryWithBackoff } from "@/lib/retry";
