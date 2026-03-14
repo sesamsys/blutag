@@ -39,7 +39,38 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     })
+  );
+
+  const announcements: Announcements = useMemo(
+    () => ({
+      onDragStart({ active }) {
+        const idx = photos.findIndex((p) => p.id === active.id);
+        return `Picked up photo ${idx + 1} of ${photos.length}. Use arrow keys to move, space to drop.`;
+      },
+      onDragOver({ active, over }) {
+        if (!over) return "";
+        const oldIdx = photos.findIndex((p) => p.id === active.id);
+        const newIdx = photos.findIndex((p) => p.id === over.id);
+        return `Photo ${oldIdx + 1} is now over position ${newIdx + 1} of ${photos.length}.`;
+      },
+      onDragEnd({ active, over }) {
+        if (!over) return `Photo dropped in its original position.`;
+        const oldIdx = photos.findIndex((p) => p.id === active.id);
+        const newIdx = photos.findIndex((p) => p.id === over.id);
+        return oldIdx === newIdx
+          ? `Photo ${oldIdx + 1} returned to its original position.`
+          : `Photo moved from position ${oldIdx + 1} to position ${newIdx + 1}.`;
+      },
+      onDragCancel({ active }) {
+        const idx = photos.findIndex((p) => p.id === active.id);
+        return `Dragging cancelled. Photo ${idx + 1} returned to its original position.`;
+      },
+    }),
+    [photos]
   );
 
   const handleFiles = useCallback(
