@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { X, GripVertical } from "lucide-react";
+import { X } from "lucide-react";
 
 interface SortablePhotoItemProps {
   id: string;
@@ -30,26 +30,22 @@ export default function SortablePhotoItem({ id, preview, index, onRemove }: Sort
     <div
       ref={setNodeRef}
       style={style}
-      className="relative aspect-square rounded-2xl overflow-hidden bg-muted group"
+      {...attributes}
+      {...listeners}
+      className="relative aspect-square rounded-2xl overflow-hidden bg-muted group cursor-grab active:cursor-grabbing touch-none"
     >
       <img
         src={preview}
         alt={`Upload ${index + 1}`}
         draggable={false}
-        className="w-full h-full object-cover select-none"
+        className="w-full h-full object-cover select-none pointer-events-none"
       />
-      {/* Drag handle */}
       <button
-        {...attributes}
-        {...listeners}
-        className="absolute top-2 left-2 p-1 rounded-full bg-foreground/70 text-background hover:bg-foreground/90 transition-colors cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background opacity-0 group-hover:opacity-100"
-        aria-label={`Reorder photo ${index + 1}`}
-      >
-        <GripVertical className="w-4 h-4" />
-      </button>
-      {/* Remove button */}
-      <button
-        onClick={() => onRemove(index)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove(index);
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
         className="absolute top-2 right-2 p-1 rounded-full bg-foreground/70 text-background hover:bg-foreground/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label={`Remove photo ${index + 1}`}
       >
