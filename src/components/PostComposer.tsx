@@ -80,9 +80,9 @@ export default function PostComposer({ photos }: PostComposerProps) {
           const response = await retryWithBackoff(
             () => agent.uploadBlob(compressed, { encoding: "image/jpeg" }),
             {
-              maxAttempts: 3,
+              maxAttempts: RETRY_MAX_ATTEMPTS,
               onRetry: (_error, attempt) => {
-                toast.info(`Retrying image upload (attempt ${attempt + 1}/3)...`);
+                toast.info(`Retrying image upload (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`);
               },
             }
           );
