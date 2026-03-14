@@ -259,6 +259,7 @@ const Index = () => {
               onAddPhotos={handleAddPhotos}
               onRemovePhoto={handleRemovePhoto}
               onClearAll={handleClearAll}
+              onReorderPhotos={handleReorderPhotos}
             />
 
             {/* Generate button */}
