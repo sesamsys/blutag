@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
-import { BrowserOAuthClient } from "@atproto/oauth-client-browser";
+import { BrowserOAuthClient, type OAuthSession } from "@atproto/oauth-client-browser";
 import { Agent } from "@atproto/api";
 import { toast } from "sonner";
 import { ERROR_MESSAGES, AppError, ErrorType, getErrorMessage, logError } from "@/lib/error-messages";
@@ -36,7 +36,7 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
   const [did, setDid] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const establishSession = useCallback(async (oauthSession: any) => {
+  const establishSession = useCallback(async (oauthSession: OAuthSession) => {
     try {
       const newAgent = new Agent(oauthSession);
       setAgent(newAgent);
@@ -72,7 +72,7 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
         if (!mounted) return;
 
         if (result?.session) {
-          await establishSession(result.session as any);
+          await establishSession(result.session);
 
           // If this was a callback (has state), redirect to home
           if (result.state != null && window.location.pathname !== "/") {

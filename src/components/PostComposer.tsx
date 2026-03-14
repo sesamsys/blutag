@@ -6,6 +6,7 @@ import { useBlueskyAuth } from "@/contexts/BlueskyAuthContext";
 import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import { compressImageForBluesky } from "@/lib/image-compress";
+import type { BlobRef } from "@atproto/api";
 import { toast } from "sonner";
 import { BLUESKY_POST_MAX_LENGTH } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
@@ -67,7 +68,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
       // Compress and upload all images
       const embeddedImages: Array<{ 
         alt: string; 
-        image: { $type: string; ref: { $link: string }; mimeType: string; size: number }; 
+        image: BlobRef; 
         aspectRatio?: { width: number; height: number } 
       }> = [];
 
@@ -86,10 +87,9 @@ export default function PostComposer({ photos }: PostComposerProps) {
             }
           );
 
-          const blob = response.data.blob;
           embeddedImages.push({
             alt: photo.altText || "",
-            image: { $type: "blob", ref: { $link: (blob as any).ref.$link ?? (blob as any).ref.toString() }, mimeType: blob.mimeType, size: blob.size },
+            image: response.data.blob,
           });
         } catch (uploadError) {
           logError(uploadError, { context: "image_upload", photoId: photo.id });
