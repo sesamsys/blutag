@@ -36,7 +36,7 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
   const [did, setDid] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const establishSession = useCallback(async (oauthSession: any) => {
+  const establishSession = useCallback(async (oauthSession: OAuthSession) => {
     try {
       const newAgent = new Agent(oauthSession);
       setAgent(newAgent);
