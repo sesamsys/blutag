@@ -88,7 +88,10 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsDraggingOver(false);
-      handleFiles(e.dataTransfer.files);
+      // Only process if it's an actual file drop (not a dnd-kit reorder)
+      if (e.dataTransfer.files.length > 0) {
+        handleFiles(e.dataTransfer.files);
+      }
     },
     [handleFiles]
   );

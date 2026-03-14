@@ -35,7 +35,8 @@ export default function SortablePhotoItem({ id, preview, index, onRemove }: Sort
       <img
         src={preview}
         alt={`Upload ${index + 1}`}
-        className="w-full h-full object-cover"
+        draggable={false}
+        className="w-full h-full object-cover select-none"
       />
       {/* Drag handle */}
       <button
