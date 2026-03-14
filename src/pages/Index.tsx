@@ -154,7 +154,7 @@ const Index = () => {
           {
             maxAttempts: RETRY_MAX_ATTEMPTS,
             onRetry: (_error, attempt) => {
-              toast.info(`Retrying analysis (attempt ${attempt + 1}/3)...`);
+              toast.info(`Retrying analysis (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`);
             },
           }
         );
