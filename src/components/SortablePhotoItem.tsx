@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { X } from "lucide-react";
@@ -9,7 +10,7 @@ interface SortablePhotoItemProps {
   onRemove: (index: number) => void;
 }
 
-export default function SortablePhotoItem({ id, preview, index, onRemove }: SortablePhotoItemProps) {
+const SortablePhotoItem = memo(function SortablePhotoItem({ id, preview, index, onRemove }: SortablePhotoItemProps) {
   const {
     attributes,
     listeners,
@@ -46,11 +47,13 @@ export default function SortablePhotoItem({ id, preview, index, onRemove }: Sort
           onRemove(index);
         }}
         onPointerDown={(e) => e.stopPropagation()}
-        className="absolute top-2 right-2 p-1 rounded-full bg-foreground/70 text-background hover:bg-foreground/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="absolute top-1 right-1 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-foreground/70 text-background hover:bg-foreground/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label={`Remove photo ${index + 1}`}
       >
         <X className="w-4 h-4" />
       </button>
     </div>
   );
-}
+});
+
+export default SortablePhotoItem;
