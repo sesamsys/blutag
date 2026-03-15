@@ -11,7 +11,7 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) 18+
-- npm
+- [Bun](https://bun.sh/)
 
 ### Development Setup
 
@@ -21,20 +21,20 @@ git clone https://github.com/<your-username>/blutag.git
 cd blutag
 
 # Install dependencies
-npm install
+bun install
 
 # Copy the environment template
 cp .env.example .env
 # Fill in the values — see .env.example for details
 
 # Start the dev server
-npm run dev
+bun run dev
 ```
 
 ### Running Tests
 
 ```bash
-npm test
+bun test
 ```
 
 ## How to Contribute
