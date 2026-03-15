@@ -16,50 +16,63 @@ describe("retry utilities", () => {
     });
 
     it("should retry on failure and eventually succeed", async () => {
+      vi.useFakeTimers();
       const fn = vi.fn()
         .mockRejectedValueOnce(new Error("fail 1"))
         .mockRejectedValueOnce(new Error("fail 2"))
         .mockResolvedValue("success");
       
-      const result = await retryWithBackoff(fn, { 
+      const promise = retryWithBackoff(fn, { 
         maxAttempts: 3, 
         initialDelayMs: 1,
-        shouldRetry: () => true // Always retry for this test
+        shouldRetry: () => true
       });
+      
+      await vi.advanceTimersByTimeAsync(10);
+      const result = await promise;
       
       expect(result).toBe("success");
       expect(fn).toHaveBeenCalledTimes(3);
+      vi.useRealTimers();
     });
 
     it("should throw after max attempts", async () => {
+      vi.useFakeTimers();
       const fn = vi.fn().mockRejectedValue(new Error("always fails"));
       
-      await expect(
-        retryWithBackoff(fn, { 
-          maxAttempts: 2, 
-          initialDelayMs: 1,
-          shouldRetry: () => true // Always retry for this test
-        })
-      ).rejects.toThrow("always fails");
+      const promise = retryWithBackoff(fn, { 
+        maxAttempts: 2, 
+        initialDelayMs: 1,
+        shouldRetry: () => true
+      });
+
+      await vi.advanceTimersByTimeAsync(10);
       
+      await expect(promise).rejects.toThrow("always fails");
       expect(fn).toHaveBeenCalledTimes(2);
+      vi.useRealTimers();
     });
 
     it("should call onRetry callback", async () => {
+      vi.useFakeTimers();
       const fn = vi.fn()
         .mockRejectedValueOnce(new Error("fail"))
         .mockResolvedValue("success");
       const onRetry = vi.fn();
       
-      await retryWithBackoff(fn, { 
+      const promise = retryWithBackoff(fn, { 
         maxAttempts: 2, 
         initialDelayMs: 1,
-        shouldRetry: () => true, // Always retry for this test
+        shouldRetry: () => true,
         onRetry 
       });
       
+      await vi.advanceTimersByTimeAsync(10);
+      await promise;
+      
       expect(onRetry).toHaveBeenCalledTimes(1);
       expect(onRetry).toHaveBeenCalledWith(expect.any(Error), 1);
+      vi.useRealTimers();
     });
 
     it("should not retry non-retryable errors", async () => {
@@ -69,22 +82,26 @@ describe("retry utilities", () => {
         retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 1 })
       ).rejects.toThrow("quota exceeded");
       
-      // Should only be called once since quota errors aren't retryable
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
     it("should retry network errors by default", async () => {
+      vi.useFakeTimers();
       const fn = vi.fn()
         .mockRejectedValueOnce(new Error("network failed"))
         .mockResolvedValue("success");
       
-      const result = await retryWithBackoff(fn, { 
+      const promise = retryWithBackoff(fn, { 
         maxAttempts: 2, 
         initialDelayMs: 1
       });
       
+      await vi.advanceTimersByTimeAsync(10);
+      const result = await promise;
+      
       expect(result).toBe("success");
       expect(fn).toHaveBeenCalledTimes(2);
+      vi.useRealTimers();
     });
   });
 
@@ -98,50 +115,64 @@ describe("retry utilities", () => {
     });
 
     it("should reject if function exceeds timeout", async () => {
+      vi.useFakeTimers();
       const fn = vi.fn().mockImplementation(() => 
         new Promise(resolve => setTimeout(() => resolve("too slow"), 200))
       );
       
-      await expect(
-        withTimeout(fn, 50)
-      ).rejects.toThrow("Operation timed out");
+      const promise = withTimeout(fn, 50);
+      await vi.advanceTimersByTimeAsync(50);
+      
+      await expect(promise).rejects.toThrow("Operation timed out");
+      vi.useRealTimers();
     });
 
     it("should use custom timeout error", async () => {
+      vi.useFakeTimers();
       const fn = vi.fn().mockImplementation(() => 
         new Promise(resolve => setTimeout(() => resolve("too slow"), 200))
       );
       const customError = new Error("Custom timeout");
       
-      await expect(
-        withTimeout(fn, 50, customError)
-      ).rejects.toThrow("Custom timeout");
+      const promise = withTimeout(fn, 50, customError);
+      await vi.advanceTimersByTimeAsync(50);
+      
+      await expect(promise).rejects.toThrow("Custom timeout");
+      vi.useRealTimers();
     });
   });
 
   describe("retryWithTimeout", () => {
     it("should combine retry and timeout", async () => {
+      vi.useFakeTimers();
       const fn = vi.fn()
         .mockRejectedValueOnce(new Error("network failed"))
         .mockResolvedValue("success");
       
-      const result = await retryWithTimeout(fn, 1000, { 
+      const promise = retryWithTimeout(fn, 1000, { 
         maxAttempts: 2, 
         initialDelayMs: 1
       });
       
+      await vi.advanceTimersByTimeAsync(10);
+      const result = await promise;
+      
       expect(result).toBe("success");
       expect(fn).toHaveBeenCalledTimes(2);
+      vi.useRealTimers();
     });
 
     it("should timeout if function takes too long", async () => {
+      vi.useFakeTimers();
       const fn = vi.fn().mockImplementation(() => 
         new Promise(resolve => setTimeout(() => resolve("too slow"), 200))
       );
       
-      await expect(
-        retryWithTimeout(fn, 50, { maxAttempts: 1 })
-      ).rejects.toThrow("Operation timed out");
+      const promise = retryWithTimeout(fn, 50, { maxAttempts: 1 });
+      await vi.advanceTimersByTimeAsync(50);
+      
+      await expect(promise).rejects.toThrow("Operation timed out");
+      vi.useRealTimers();
     });
   });
 });
