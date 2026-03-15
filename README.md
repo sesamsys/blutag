@@ -19,7 +19,7 @@ Generate accurate, accessible alt text for your photos using AI, then post direc
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) 18+
-- npm
+- [Bun](https://bun.sh/)
 
 ### Setup
 
@@ -29,13 +29,13 @@ git clone https://github.com/sesamsys/blutag.git
 cd blutag
 
 # Install dependencies
-npm install
+bun install
 
 # Copy environment template and fill in your values
 cp .env.example .env
 
 # Start the dev server
-npm run dev
+bun run dev
 ```
 
 See `.env.example` for the required environment variables. The app uses [Lovable Cloud](https://lovable.dev) as its backend (Supabase under the hood).
@@ -43,7 +43,7 @@ See `.env.example` for the required environment variables. The app uses [Lovable
 ### Running Tests
 
 ```bash
-npm test
+bun test
 ```
 
 ## Tech Stack

@@ -116,13 +116,13 @@ Test Files  3 passed (3)
 
 ```bash
 # Run all tests once
-npm test
+bun test
 
 # Run tests in watch mode
-npm run test:watch
+bun run test:watch
 
 # Run with coverage
-npm run test:coverage
+bun run test:coverage
 ```
 
 ### Pre-commit Hook (Optional)
@@ -130,7 +130,7 @@ npm run test:coverage
 Add to `.git/hooks/pre-commit`:
 ```bash
 #!/bin/sh
-npm test
+bun test
 ```
 
 This prevents committing broken code.

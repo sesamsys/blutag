@@ -450,12 +450,12 @@ Client-side rate limiting for API calls.
 - No direct server or deployment access
 - Infrastructure fully managed by Lovable
 - Automatic deployment on code changes
-- Use npm exclusively (Lovable's CD pipeline uses npm)
+- Use Bun as the primary package manager (Lovable's CD pipeline uses Bun)
 
 ### Development Workflow
 - Make changes in local development environment
-- Test locally with `npm run dev`
-- Commit changes to version control (including package-lock.json)
+- Test locally with `bun run dev`
+- Commit changes to version control (including both `bun.lockb` and `package-lock.json`)
 - Lovable handles automatic deployment to production
 
 ---
