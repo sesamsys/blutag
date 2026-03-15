@@ -34,7 +34,7 @@ bun run dev
 ### Running Tests
 
 ```bash
-bun test
+bun run test
 ```
 
 ## How to Contribute
