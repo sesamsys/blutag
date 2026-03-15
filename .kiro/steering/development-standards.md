@@ -84,7 +84,7 @@
 - Automatic deployment on code changes
 
 ### Package Manager
-- **Use npm exclusively** - Lovable's CD pipeline uses npm internally
-- Do not use Bun, Yarn, or pnpm to avoid dependency mismatches
-- Always use `npm install`, `npm run`, etc.
-- Commit `package-lock.json` to ensure consistent builds
+- **Use Bun as the primary package manager** — Lovable's CD pipeline uses Bun internally
+- Standard commands: `bun install`, `bun run <script>`, `bun test`
+- Do not use Yarn or pnpm
+- Commit both `bun.lockb` and `package-lock.json` for compatibility with tools that expect npm lockfiles
