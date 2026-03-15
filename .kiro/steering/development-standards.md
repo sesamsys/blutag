@@ -85,6 +85,7 @@
 
 ### Package Manager
 - **Use Bun as the primary package manager** — Lovable's CD pipeline uses Bun internally
-- Standard commands: `bun install`, `bun run <script>`, `bun test`
+- Standard commands: `bun install`, `bun run <script>`, `bun run test`
+- **Important**: Always use `bun run test` (runs Vitest) instead of `bun test` (runs Bun's native test runner, which has incomplete Vitest compatibility)
 - Do not use Yarn or pnpm
 - Commit both `bun.lockb` and `package-lock.json` for compatibility with tools that expect npm lockfiles

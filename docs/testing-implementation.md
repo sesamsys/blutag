@@ -130,7 +130,7 @@ bun run test:coverage
 Add to `.git/hooks/pre-commit`:
 ```bash
 #!/bin/sh
-bun test
+bun run test
 ```
 
 This prevents committing broken code.
