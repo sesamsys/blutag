@@ -116,7 +116,7 @@ Test Files  3 passed (3)
 
 ```bash
 # Run all tests once
-bun test
+bun run test
 
 # Run tests in watch mode
 bun run test:watch
