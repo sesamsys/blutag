@@ -23,10 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Bun (not used - Lovable uses npm)
-bun.lockb
-bun.lock
-
 # Environment files
 .env
 .env.*
