@@ -116,7 +116,7 @@ Test Files  3 passed (3)
 
 ```bash
 # Run all tests once
-bun test
+bun run test
 
 # Run tests in watch mode
 bun run test:watch
@@ -130,7 +130,7 @@ bun run test:coverage
 Add to `.git/hooks/pre-commit`:
 ```bash
 #!/bin/sh
-bun test
+bun run test
 ```
 
 This prevents committing broken code.

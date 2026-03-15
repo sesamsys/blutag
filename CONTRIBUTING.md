@@ -34,7 +34,7 @@ bun run dev
 ### Running Tests
 
 ```bash
-bun test
+bun run test
 ```
 
 ## How to Contribute
@@ -67,7 +67,7 @@ Open an issue tagged **enhancement** describing:
 3. **Make your changes** — keep commits focused and atomic
 4. **Run tests** to make sure nothing is broken:
    ```bash
-   bun test
+   bun run test
    ```
 5. **Push** your branch and open a **Pull Request**
 

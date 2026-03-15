@@ -43,7 +43,7 @@ See `.env.example` for the required environment variables. The app uses [Lovable
 ### Running Tests
 
 ```bash
-bun test
+bun run test
 ```
 
 ## Tech Stack
