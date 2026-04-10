@@ -455,7 +455,7 @@ Client-side rate limiting for API calls.
 ### Development Workflow
 - Make changes in local development environment
 - Test locally with `bun run dev`
-- Commit changes to version control (including both `bun.lockb` and `package-lock.json`)
+- Commit changes to version control (including `bun.lock`)
 - Lovable handles automatic deployment to production
 
 ---
