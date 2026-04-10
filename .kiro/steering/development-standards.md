@@ -88,4 +88,4 @@
 - Standard commands: `bun install`, `bun run <script>`, `bun run test`
 - **Important**: Always use `bun run test` (runs Vitest) instead of `bun test` (runs Bun's native test runner, which has incomplete Vitest compatibility)
 - Do not use Yarn or pnpm
-- Commit both `bun.lockb` and `package-lock.json` for compatibility with tools that expect npm lockfiles
+- Commit `bun.lock` to version control
