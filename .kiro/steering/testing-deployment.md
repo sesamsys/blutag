@@ -33,7 +33,7 @@
 ## Development Workflow
 
 ### Local Development
-- Use `npm run dev` for development server
+- Use `bun run dev` for development server
 - Hot reload for rapid iteration
 - Use browser dev tools for debugging
 - Test with real images and EXIF data
