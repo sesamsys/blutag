@@ -242,7 +242,8 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
             <div
               role="region"
-              aria-label="Photo upload area"
+              aria-label="Photo upload area. Paste images with Cmd+V or Ctrl+V."
+              tabIndex={0}
               onDrop={onDropZone}
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
