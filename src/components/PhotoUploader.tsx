@@ -303,7 +303,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       </p>
 
       {isEmpty && (
-        <div className="pointer-events-none select-none flex items-center justify-center gap-4 mt-3">
+        <div className="pointer-events-none select-none flex items-center justify-center gap-4 mt-6">
           <span
             className="text-primary text-2xl sm:text-3xl -rotate-2 shrink-0 leading-none"
             style={{ fontFamily: "'Caveat', cursive" }}
