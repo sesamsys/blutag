@@ -117,6 +117,54 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
     [remaining, onAddPhotos]
   );
 
+  // Clipboard paste support: Cmd/Ctrl+V on desktop, OS paste menu on mobile
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target) {
+        const tag = target.tagName;
+        if (
+          tag === "INPUT" ||
+          tag === "TEXTAREA" ||
+          target.isContentEditable
+        ) {
+          return;
+        }
+      }
+
+      const items = e.clipboardData?.items;
+      if (!items || items.length === 0) return;
+
+      const files: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.kind !== "file" || !item.type.startsWith("image/")) continue;
+        const file = item.getAsFile();
+        if (!file) continue;
+        // Clipboard images (e.g. screenshots) often lack a proper filename
+        if (!file.name || file.name === "image.png" || !file.name.includes(".")) {
+          const ext = file.type.split("/")[1] || "png";
+          const renamed = new File([file], `pasted-image-${Date.now()}.${ext}`, {
+            type: file.type,
+            lastModified: file.lastModified,
+          });
+          files.push(renamed);
+        } else {
+          files.push(file);
+        }
+      }
+
+      if (files.length === 0) return;
+      e.preventDefault();
+      const dt = new DataTransfer();
+      files.forEach((f) => dt.items.add(f));
+      handleFiles(dt.files);
+    };
+
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [handleFiles]);
+
   const onDropZone = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
