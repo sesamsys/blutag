@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { Sparkles, Github, Linkedin } from "lucide-react";
+import { Sparkles, Github, Linkedin, RefreshCw } from "lucide-react";
+import { getLanguage } from "@/lib/languages";
 import PhotoUploader from "@/components/PhotoUploader";
 import AltTextResult from "@/components/AltTextResult";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
@@ -41,6 +42,7 @@ const Index = () => {
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
   const [hasResults, setHasResults] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [resultsLanguage, setResultsLanguage] = useState<string | null>(null);
   const { language } = useLanguage();
 
   const rateLimiter = useMemo(
@@ -99,8 +101,8 @@ const Index = () => {
     );
   }, []);
 
-  const analyzePhotos = async () => {
-    if (photos.length === 0 || isAnalyzing) return;
+  const runAnalysis = async (targetPhotos: PhotoFile[], targetLanguage: string) => {
+    if (targetPhotos.length === 0 || isAnalyzing) return;
 
     // Client-side rate limiting
     if (!rateLimiter.canProceed()) {
@@ -110,9 +112,14 @@ const Index = () => {
     }
     rateLimiter.record();
 
+    const targetIds = new Set(targetPhotos.map((p) => p.id));
+
     setIsAnalyzing(true);
     setHasResults(true);
-    setPhotos((prev) => prev.map((p) => ({ ...p, analyzing: true })));
+    setResultsLanguage(targetLanguage);
+    setPhotos((prev) =>
+      prev.map((p) => (targetIds.has(p.id) ? { ...p, analyzing: true } : p))
+    );
 
     const analyzeOne = async (photo: PhotoFile) => {
       try {
@@ -128,7 +135,7 @@ const Index = () => {
         const result = await retryWithTimeout(
           async () => {
             const { data, error } = await supabase.functions.invoke("analyze-photo", {
-              body: { imageBase64: base64, exifData, language },
+              body: { imageBase64: base64, exifData, language: targetLanguage },
             });
 
             if (error) {
@@ -171,10 +178,10 @@ const Index = () => {
         );
       } catch (err) {
         logError(err, { context: "photo_analysis", photoId: photo.id });
-        
+
         const errorMessage = getErrorMessage(err);
         toast.error(errorMessage);
-        
+
         setPhotos((prev) =>
           prev.map((p) =>
             p.id === photo.id ? { ...p, analyzing: false } : p
@@ -183,7 +190,7 @@ const Index = () => {
       }
     };
 
-    await Promise.all(photos.map(analyzeOne));
+    await Promise.all(targetPhotos.map(analyzeOne));
 
     setIsAnalyzing(false);
 
@@ -197,10 +204,15 @@ const Index = () => {
     });
   };
 
+  const analyzePhotos = () => runAnalysis(photos, language);
+
+  const handleRegenerate = () => runAnalysis(photos, language);
+
   const handleReset = () => {
     photos.forEach((p) => URL.revokeObjectURL(p.preview));
     setPhotos([]);
     setHasResults(false);
+    setResultsLanguage(null);
     clearPhotosSession().catch((err) => {
       logError(err, { context: "session_clear" });
     });
@@ -287,7 +299,7 @@ const Index = () => {
         ) : (
           <>
             {/* Results */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <h2 className="text-xl font-bold">Your alt text</h2>
               <button
                 onClick={handleReset}
@@ -295,6 +307,26 @@ const Index = () => {
               >
                 Start over
               </button>
+            </div>
+
+            {/* Language + regenerate row */}
+            <div className="flex flex-wrap items-center justify-between gap-2 -mt-4 px-1">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span>Output language:</span>
+                <LanguagePicker variant="compact" />
+              </div>
+              {resultsLanguage && resultsLanguage !== language && !isAnalyzing && (
+                <button
+                  onClick={handleRegenerate}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Regenerate in {getLanguage(language).nameEn}
+                </button>
+              )}
+              {isAnalyzing && (
+                <span className="text-xs text-muted-foreground">Regenerating…</span>
+              )}
             </div>
 
             <div className="flex flex-col gap-4">
