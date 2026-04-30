@@ -348,7 +348,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       </span>
 
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each · Paste with ⌘V / Ctrl+V
+        Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each · ⌘V / Ctrl+V or tap Paste
       </p>
 
       {isEmpty && (
