@@ -3,7 +3,9 @@ import { Send, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useBlueskyAuth } from "@/contexts/BlueskyAuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
+import LanguagePicker from "@/components/LanguagePicker";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import { compressImageForBluesky } from "@/lib/image-compress";
 import { RichText, type BlobRef } from "@atproto/api";
@@ -19,6 +21,7 @@ interface PostComposerProps {
 
 export default function PostComposer({ photos }: PostComposerProps) {
   const { agent, isLoggedIn } = useBlueskyAuth();
+  const { language } = useLanguage();
   const [text, setText] = useState("");
   const [posting, setPosting] = useState(false);
   const [postUrl, setPostUrl] = useState<string | null>(null);
