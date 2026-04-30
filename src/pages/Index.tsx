@@ -231,7 +231,15 @@ const Index = () => {
       {/* Header */}
       <header className="w-full border-b border-border">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              handleReset();
+            }}
+            className="flex items-center gap-3 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Blutag home"
+          >
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -248,7 +256,7 @@ const Index = () => {
               </svg>
             </div>
             <h1 className="text-lg font-bold tracking-tight">Blutag</h1>
-          </div>
+          </a>
           <BlueskyLoginButton />
         </div>
       </header>
