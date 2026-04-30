@@ -212,6 +212,7 @@ const Index = () => {
     photos.forEach((p) => URL.revokeObjectURL(p.preview));
     setPhotos([]);
     setHasResults(false);
+    setResultsLanguage(null);
     clearPhotosSession().catch((err) => {
       logError(err, { context: "session_clear" });
     });
