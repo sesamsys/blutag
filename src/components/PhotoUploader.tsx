@@ -210,6 +210,46 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
     setActiveDragId(null);
   }, []);
 
+  const pasteFromClipboard = useCallback(async () => {
+    if (remaining <= 0) {
+      toast.warning(`You've reached the ${MAX_PHOTOS} photo limit.`);
+      return;
+    }
+    if (!navigator.clipboard || typeof navigator.clipboard.read !== "function") {
+      toast.error("Your browser doesn't support pasting images. Try copying the image again or use the file picker.");
+      return;
+    }
+    try {
+      const items = await navigator.clipboard.read();
+      const files: File[] = [];
+      for (const item of items) {
+        const imageType = item.types.find((t) => t.startsWith("image/"));
+        if (!imageType) continue;
+        const blob = await item.getType(imageType);
+        const ext = imageType.split("/")[1] || "png";
+        files.push(
+          new File([blob], `pasted-image-${Date.now()}.${ext}`, { type: imageType })
+        );
+      }
+      if (files.length === 0) {
+        toast.error("No image found on the clipboard. Copy an image first, then tap Paste.");
+        return;
+      }
+      const dt = new DataTransfer();
+      files.forEach((f) => dt.items.add(f));
+      handleFiles(dt.files);
+    } catch (err) {
+      // User denied permission, or clipboard unreadable
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.toLowerCase().includes("denied") || msg.toLowerCase().includes("permission")) {
+        toast.error("Clipboard permission denied. Please allow clipboard access and try again.");
+      } else {
+        toast.error("Couldn't read the clipboard. Try copying the image again.");
+      }
+    }
+  }, [remaining, handleFiles]);
+
+
   const activePhoto = activeDragId ? photos.find((p) => p.id === activeDragId) : null;
   const slots = Array.from({ length: MAX_PHOTOS }, (_, i) => photos[i] ?? null);
   const isEmpty = photos.length === 0;
