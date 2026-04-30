@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { ImagePlus, X } from "lucide-react";
+import { ClipboardPaste, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   DndContext,
@@ -210,6 +210,46 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
     setActiveDragId(null);
   }, []);
 
+  const pasteFromClipboard = useCallback(async () => {
+    if (remaining <= 0) {
+      toast.warning(`You've reached the ${MAX_PHOTOS} photo limit.`);
+      return;
+    }
+    if (!navigator.clipboard || typeof navigator.clipboard.read !== "function") {
+      toast.error("Your browser doesn't support pasting images. Try copying the image again or use the file picker.");
+      return;
+    }
+    try {
+      const items = await navigator.clipboard.read();
+      const files: File[] = [];
+      for (const item of items) {
+        const imageType = item.types.find((t) => t.startsWith("image/"));
+        if (!imageType) continue;
+        const blob = await item.getType(imageType);
+        const ext = imageType.split("/")[1] || "png";
+        files.push(
+          new File([blob], `pasted-image-${Date.now()}.${ext}`, { type: imageType })
+        );
+      }
+      if (files.length === 0) {
+        toast.error("No image found on the clipboard. Copy an image first, then tap Paste.");
+        return;
+      }
+      const dt = new DataTransfer();
+      files.forEach((f) => dt.items.add(f));
+      handleFiles(dt.files);
+    } catch (err) {
+      // User denied permission, or clipboard unreadable
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.toLowerCase().includes("denied") || msg.toLowerCase().includes("permission")) {
+        toast.error("Clipboard permission denied. Please allow clipboard access and try again.");
+      } else {
+        toast.error("Couldn't read the clipboard. Try copying the image again.");
+      }
+    }
+  }, [remaining, handleFiles]);
+
+
   const activePhoto = activeDragId ? photos.find((p) => p.id === activeDragId) : null;
   const slots = Array.from({ length: MAX_PHOTOS }, (_, i) => photos[i] ?? null);
   const isEmpty = photos.length === 0;
@@ -217,7 +257,16 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
 
   return (
     <div className="w-full">
-      <div className="flex justify-end mb-2 h-7">
+      <div className="flex justify-end items-center gap-2 mb-2 h-7">
+        <button
+          type="button"
+          onClick={pasteFromClipboard}
+          aria-label="Paste image from clipboard"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <ClipboardPaste className="w-3.5 h-3.5" />
+          Paste
+        </button>
         {photos.length > 0 && onClearAll && (
           <button
             onClick={onClearAll}
@@ -299,7 +348,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       </span>
 
       <p className="text-xs text-muted-foreground mt-2 text-center">
-        Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each · Paste with ⌘V / Ctrl+V
+        Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each · ⌘V / Ctrl+V or tap Paste
       </p>
 
       {isEmpty && (
