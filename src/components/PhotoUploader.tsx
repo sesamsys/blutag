@@ -280,6 +280,44 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       </div>
 
       <div className="relative">
+        {/* Handwritten annotation — only when no photos */}
+        {isEmpty && (
+          <div className="absolute -top-2 -left-2 sm:-left-8 z-10 pointer-events-none select-none flex flex-col items-start">
+            <span
+              className="text-muted-foreground text-lg sm:text-xl -rotate-3"
+              style={{ fontFamily: "'Caveat', cursive" }}
+            >
+              Drag photos here
+            </span>
+            {/* Loopy arrow SVG */}
+            <svg
+              width="80"
+              height="60"
+              viewBox="0 0 80 60"
+              fill="none"
+              className="text-muted-foreground ml-6 -mt-1"
+              style={{ transform: "rotate(12deg)" }}
+              aria-hidden="true"
+            >
+              <path
+                d="M4 4 C10 20, 20 30, 30 24 C40 18, 35 6, 25 10 C15 14, 22 28, 35 30 C48 32, 58 22, 68 34"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                fill="none"
+              />
+              <path
+                d="M63 28 L68 34 L61 35"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+              />
+            </svg>
+          </div>
+        )}
+
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
