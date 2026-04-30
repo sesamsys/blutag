@@ -257,7 +257,16 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
 
   return (
     <div className="w-full">
-      <div className="flex justify-end mb-2 h-7">
+      <div className="flex justify-end items-center gap-2 mb-2 h-7">
+        <button
+          type="button"
+          onClick={pasteFromClipboard}
+          aria-label="Paste image from clipboard"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <ClipboardPaste className="w-3.5 h-3.5" />
+          Paste
+        </button>
         {photos.length > 0 && onClearAll && (
           <button
             onClick={onClearAll}
