@@ -324,7 +324,7 @@ const Index = () => {
                   Regenerate in {getLanguage(language).nameEn}
                 </button>
               )}
-              {isAnalyzing && (
+              {isAnalyzing && resultsLanguage && resultsLanguage !== language && (
                 <span className="text-xs text-muted-foreground">Regenerating…</span>
               )}
             </div>
