@@ -82,7 +82,11 @@ export default function LanguagePicker({
           <span>{current.nameEn}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 rounded-[0.75rem] p-0" align="end">
+      <PopoverContent
+        className="w-72 rounded-[0.75rem] p-0 overflow-hidden"
+        align="end"
+        style={{ ["--radius" as string]: "0.5rem" }}
+      >
         <Command>
           <CommandInput placeholder="Search languages…" />
           <CommandList className="max-h-72">
