@@ -299,7 +299,7 @@ const Index = () => {
         ) : (
           <>
             {/* Results */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <h2 className="text-xl font-bold">Your alt text</h2>
               <button
                 onClick={handleReset}
@@ -307,6 +307,26 @@ const Index = () => {
               >
                 Start over
               </button>
+            </div>
+
+            {/* Language + regenerate row */}
+            <div className="flex flex-wrap items-center justify-between gap-2 -mt-4 px-1">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span>Output language:</span>
+                <LanguagePicker variant="compact" />
+              </div>
+              {resultsLanguage && resultsLanguage !== language && !isAnalyzing && (
+                <button
+                  onClick={handleRegenerate}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Regenerate in {getLanguage(language).nameEn}
+                </button>
+              )}
+              {isAnalyzing && (
+                <span className="text-xs text-muted-foreground">Regenerating…</span>
+              )}
             </div>
 
             <div className="flex flex-col gap-4">
