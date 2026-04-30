@@ -6,6 +6,8 @@ import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import PostComposer from "@/components/PostComposer";
 import FooterLink from "@/components/FooterLink";
 import AboutDialog from "@/components/AboutDialog";
+import LanguagePicker from "@/components/LanguagePicker";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import { extractExif } from "@/lib/exif";
 import { supabase } from "@/integrations/supabase/client";
