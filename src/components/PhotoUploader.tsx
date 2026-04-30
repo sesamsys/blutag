@@ -280,44 +280,6 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       </div>
 
       <div className="relative">
-        {/* Handwritten annotation — only when no photos */}
-        {isEmpty && (
-          <div className="absolute -top-2 -left-2 sm:-left-8 z-10 pointer-events-none select-none flex flex-col items-start">
-            <span
-              className="text-muted-foreground text-lg sm:text-xl -rotate-3"
-              style={{ fontFamily: "'Caveat', cursive" }}
-            >
-              Drag photos here
-            </span>
-            {/* Loopy arrow SVG */}
-            <svg
-              width="80"
-              height="60"
-              viewBox="0 0 80 60"
-              fill="none"
-              className="text-muted-foreground ml-6 -mt-1"
-              style={{ transform: "rotate(12deg)" }}
-              aria-hidden="true"
-            >
-              <path
-                d="M4 4 C10 20, 20 30, 30 24 C40 18, 35 6, 25 10 C15 14, 22 28, 35 30 C48 32, 58 22, 68 34"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                fill="none"
-              />
-              <path
-                d="M63 28 L68 34 L61 35"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                fill="none"
-              />
-            </svg>
-          </div>
-        )}
-
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -389,6 +351,40 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each · ⌘V / Ctrl+V or tap Paste
       </p>
 
+      {isEmpty && (
+        <div className="pointer-events-none select-none flex items-center justify-center gap-4 mt-6">
+          <span
+            className="text-primary text-2xl sm:text-3xl -rotate-2 shrink-0 leading-none"
+            style={{ fontFamily: "'Caveat', cursive" }}
+          >
+            Drag photos here
+          </span>
+          <svg
+            width="100"
+            height="100"
+            viewBox="0 0 260 180"
+            fill="none"
+            className="text-primary shrink-0 -ml-1"
+            overflow="visible"
+            aria-hidden="true"
+          >
+            <path
+              d="M3,90c117.55-1.32,145.35-55.27,126.78-88.72-16.81-30.27-53.04-1.85-33.04,21.18,23.82,27.42,122.95,20.47,126.09-96.39"
+              stroke="currentColor"
+              strokeWidth="5"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <path
+              d="M209.29,-62.5 L222.83,-80 M236.37,-62.5 L222.83,-80"
+              stroke="currentColor"
+              strokeWidth="5"
+              strokeLinecap="round"
+              fill="none"
+            />
+          </svg>
+        </div>
+      )}
       <input
         ref={inputRef}
         type="file"
