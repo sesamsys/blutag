@@ -128,7 +128,7 @@ const Index = () => {
         const result = await retryWithTimeout(
           async () => {
             const { data, error } = await supabase.functions.invoke("analyze-photo", {
-              body: { imageBase64: base64, exifData },
+              body: { imageBase64: base64, exifData, language },
             });
 
             if (error) {
