@@ -100,8 +100,8 @@ const Index = () => {
     );
   }, []);
 
-  const analyzePhotos = async () => {
-    if (photos.length === 0 || isAnalyzing) return;
+  const runAnalysis = async (targetPhotos: PhotoFile[], targetLanguage: string) => {
+    if (targetPhotos.length === 0 || isAnalyzing) return;
 
     // Client-side rate limiting
     if (!rateLimiter.canProceed()) {
@@ -111,9 +111,14 @@ const Index = () => {
     }
     rateLimiter.record();
 
+    const targetIds = new Set(targetPhotos.map((p) => p.id));
+
     setIsAnalyzing(true);
     setHasResults(true);
-    setPhotos((prev) => prev.map((p) => ({ ...p, analyzing: true })));
+    setResultsLanguage(targetLanguage);
+    setPhotos((prev) =>
+      prev.map((p) => (targetIds.has(p.id) ? { ...p, analyzing: true } : p))
+    );
 
     const analyzeOne = async (photo: PhotoFile) => {
       try {
@@ -129,7 +134,7 @@ const Index = () => {
         const result = await retryWithTimeout(
           async () => {
             const { data, error } = await supabase.functions.invoke("analyze-photo", {
-              body: { imageBase64: base64, exifData, language },
+              body: { imageBase64: base64, exifData, language: targetLanguage },
             });
 
             if (error) {
@@ -172,10 +177,10 @@ const Index = () => {
         );
       } catch (err) {
         logError(err, { context: "photo_analysis", photoId: photo.id });
-        
+
         const errorMessage = getErrorMessage(err);
         toast.error(errorMessage);
-        
+
         setPhotos((prev) =>
           prev.map((p) =>
             p.id === photo.id ? { ...p, analyzing: false } : p
@@ -184,7 +189,7 @@ const Index = () => {
       }
     };
 
-    await Promise.all(photos.map(analyzeOne));
+    await Promise.all(targetPhotos.map(analyzeOne));
 
     setIsAnalyzing(false);
 
@@ -197,6 +202,10 @@ const Index = () => {
       return current;
     });
   };
+
+  const analyzePhotos = () => runAnalysis(photos, language);
+
+  const handleRegenerate = () => runAnalysis(photos, language);
 
   const handleReset = () => {
     photos.forEach((p) => URL.revokeObjectURL(p.preview));
