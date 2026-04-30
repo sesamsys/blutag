@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { ImagePlus, X } from "lucide-react";
+import { ClipboardPaste, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   DndContext,
