@@ -41,6 +41,7 @@ const Index = () => {
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
   const [hasResults, setHasResults] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [resultsLanguage, setResultsLanguage] = useState<string | null>(null);
   const { language } = useLanguage();
 
   const rateLimiter = useMemo(
