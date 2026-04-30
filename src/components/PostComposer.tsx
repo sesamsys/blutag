@@ -3,7 +3,9 @@ import { Send, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useBlueskyAuth } from "@/contexts/BlueskyAuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
+import LanguagePicker from "@/components/LanguagePicker";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import { compressImageForBluesky } from "@/lib/image-compress";
 import { RichText, type BlobRef } from "@atproto/api";
@@ -19,6 +21,7 @@ interface PostComposerProps {
 
 export default function PostComposer({ photos }: PostComposerProps) {
   const { agent, isLoggedIn } = useBlueskyAuth();
+  const { language } = useLanguage();
   const [text, setText] = useState("");
   const [posting, setPosting] = useState(false);
   const [postUrl, setPostUrl] = useState<string | null>(null);
@@ -110,6 +113,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
         $type: "app.bsky.feed.post",
         text: richText.text,
         createdAt: new Date().toISOString(),
+        langs: [language],
       };
 
       if (richText.facets && richText.facets.length > 0) {
@@ -187,7 +191,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
           rows={3}
           className="resize-none rounded-xl"
         />
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span
             className={`text-xs ${
               remaining < 20 ? "text-destructive" : "text-muted-foreground"
@@ -195,9 +199,12 @@ export default function PostComposer({ photos }: PostComposerProps) {
           >
             {remaining} characters remaining
           </span>
-          <span className="text-xs text-muted-foreground">
-            {photosWithAltText.length} photo{photosWithAltText.length !== 1 ? "s" : ""} attached
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              {photosWithAltText.length} photo{photosWithAltText.length !== 1 ? "s" : ""}
+            </span>
+            <LanguagePicker variant="pill" />
+          </div>
         </div>
       </div>
       <Button
