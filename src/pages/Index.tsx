@@ -268,7 +268,7 @@ const Index = () => {
 
             {/* Generate button */}
             {photos.length > 0 && (
-              <div className="flex justify-center">
+              <div className="flex flex-col items-center gap-3">
                 <button
                   onClick={analyzePhotos}
                   disabled={isAnalyzing}
@@ -277,6 +277,10 @@ const Index = () => {
                   <Sparkles className="w-5 h-5" />
                   {isAnalyzing ? "Analyzing…" : "Generate alt text"}
                 </button>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span>Output language:</span>
+                  <LanguagePicker variant="compact" />
+                </div>
               </div>
             )}
           </>
