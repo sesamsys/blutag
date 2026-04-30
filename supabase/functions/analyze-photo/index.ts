@@ -107,7 +107,7 @@ serve(async (req) => {
       );
     }
     
-    const { imageBase64, exifData } = body;
+    const { imageBase64, exifData, language: rawLanguage } = body;
     
     if (!imageBase64 || typeof imageBase64 !== "string") {
       return new Response(
@@ -128,6 +128,13 @@ serve(async (req) => {
         JSON.stringify({ error: "Invalid request: exifData must be an object" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Validate optional language code (BCP-47-ish: 2-3 letter primary, optional region).
+    // Normalize to the primary subtag. Default to "en" on missing/invalid input.
+    let language = "en";
+    if (typeof rawLanguage === "string" && /^[a-z]{2,3}(-[A-Z]{2})?$/.test(rawLanguage)) {
+      language = rawLanguage.split("-")[0].toLowerCase();
     }
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -157,7 +164,9 @@ serve(async (req) => {
       },
       {
         type: "text",
-        text: contextInfo ? USER_PROMPT_WITH_CONTEXT(contextInfo) : USER_PROMPT_DEFAULT,
+        text: contextInfo
+          ? USER_PROMPT_WITH_CONTEXT(contextInfo, language)
+          : USER_PROMPT_DEFAULT(language),
       },
     ];
 
