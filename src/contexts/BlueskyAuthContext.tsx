@@ -16,7 +16,22 @@ interface BlueskyAuthContextValue {
 
 const BlueskyAuthContext = createContext<BlueskyAuthContextValue | null>(null);
 
-const CLIENT_ID = `${window.location.origin}/oauth/client-metadata.json`;
+/**
+ * AT Protocol OAuth requires the `client_id` URL to exactly match the URL
+ * the metadata document is served from. We pin all production hosts
+ * (blutag.app, www.blutag.app, *.lovable.app previews) to the canonical
+ * `https://blutag.app/oauth/client-metadata.json` so OAuth always works
+ * regardless of which alias the user visits — the callback then lands on
+ * the canonical domain. For local development we fall back to the current
+ * origin (atproto's BrowserOAuthClient allows http://localhost in dev mode).
+ */
+const CANONICAL_CLIENT_ID = "https://blutag.app/oauth/client-metadata.json";
+const isLocalhost =
+  typeof window !== "undefined" &&
+  /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname);
+const CLIENT_ID = isLocalhost
+  ? `${window.location.origin}/oauth/client-metadata.json`
+  : CANONICAL_CLIENT_ID;
 
 let clientPromise: Promise<BrowserOAuthClient> | null = null;
 

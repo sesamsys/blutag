@@ -49,7 +49,9 @@ const ALLOWED_ORIGINS = [
 
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("origin") || "";
-  const isAllowed = ALLOWED_ORIGINS.includes(origin) || 
+  const isAllowed = ALLOWED_ORIGINS.includes(origin) ||
+                    origin === "https://blutag.app" ||
+                    origin === "https://www.blutag.app" ||
                     origin.endsWith(".lovableproject.com") ||
                     origin.endsWith(".lovable.app");
   return {
