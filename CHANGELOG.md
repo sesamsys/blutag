@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Bumped client rate limit from 10 to 20 calls/min so a full 10-photo session doesn't trip the limiter
 - Standardized all documentation to reference Bun (`bun run dev`, `bun run test`, `bun.lock`)
 - Replaced "Supabase dashboard" references with "Lovable Cloud" in steering docs
+- `PostComposer` now shows a toast warning when photos exceed the limit and are truncated before posting
 
 ## [0.3.0] - 2026-03-14
 
