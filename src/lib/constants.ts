@@ -1,5 +1,18 @@
 /** Maximum number of photos per session */
-export const MAX_PHOTOS = 4;
+export const MAX_PHOTOS = 10;
+
+/** Maximum images supported by the legacy `app.bsky.embed.images` embed */
+export const BLUESKY_IMAGES_EMBED_MAX = 4;
+
+/** Maximum images supported by the new `app.bsky.embed.gallery` embed (soft cap) */
+export const BLUESKY_GALLERY_MAX_IMAGES = 10;
+
+/**
+ * Feature flag for `app.bsky.embed.gallery`. When false, posts with more than
+ * BLUESKY_IMAGES_EMBED_MAX photos will be truncated to the first 4 at post time.
+ * Flip to false to quickly revert if the gallery lexicon rollout slips.
+ */
+export const BLUESKY_GALLERY_ENABLED = true;
 
 /** Maximum file size per photo in megabytes */
 export const MAX_FILE_SIZE_MB = 25;
@@ -35,7 +48,7 @@ export const BLUESKY_IMAGE_JPEG_QUALITY_STEP = 0.05;
 export const AI_MODEL_DISPLAY_NAME = "Google Gemini";
 
 /** Maximum number of analysis API calls allowed per window */
-export const RATE_LIMIT_MAX_CALLS = 10;
+export const RATE_LIMIT_MAX_CALLS = 20;
 
 /** Rate-limit sliding window duration in milliseconds (1 minute) */
 export const RATE_LIMIT_WINDOW_MS = 60_000;
