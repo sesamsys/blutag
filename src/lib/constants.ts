@@ -29,11 +29,11 @@ export const COPY_FEEDBACK_DURATION_MS = 2000;
 /** Maximum character length for a Bluesky post */
 export const BLUESKY_POST_MAX_LENGTH = 300;
 
-/** Maximum image size in bytes for Bluesky uploads (1 MB) */
-export const BLUESKY_IMAGE_MAX_BYTES = 1_000_000;
+/** Maximum image size in bytes for Bluesky uploads (2 MB — lexicon limit, raised Apr 2026) */
+export const BLUESKY_IMAGE_MAX_BYTES = 2_000_000;
 
 /** Maximum dimension (px) for the longest edge when compressing for Bluesky */
-export const BLUESKY_IMAGE_MAX_DIMENSION = 2048;
+export const BLUESKY_IMAGE_MAX_DIMENSION = 2560;
 
 /** Initial JPEG quality for Bluesky image compression */
 export const BLUESKY_IMAGE_JPEG_QUALITY = 0.80;

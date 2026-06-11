@@ -19,9 +19,10 @@ function loadImage(file: File): Promise<HTMLImageElement> {
 }
 
 /**
- * Compresses an image file to JPEG ≤ 1 MB, resizing the longest edge
- * to at most BLUESKY_IMAGE_MAX_DIMENSION px.  Iteratively reduces
- * quality if the first pass is still too large.
+ * Compresses an image file to JPEG ≤ 2 MB (Bluesky's lexicon limit since
+ * Apr 2026), resizing the longest edge to at most
+ * BLUESKY_IMAGE_MAX_DIMENSION px. Iteratively reduces quality if the
+ * first pass is still too large.
  */
 export async function compressImageForBluesky(file: File): Promise<Blob> {
   const img = await loadImage(file);
