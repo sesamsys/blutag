@@ -42,6 +42,11 @@ const SortablePhotoItem = memo(function SortablePhotoItem({ id, preview, index, 
         draggable={false}
         className="w-full h-full object-cover select-none pointer-events-none"
       />
+      {showNumber && (
+        <span className="absolute top-1 left-1 sm:top-2 sm:left-2 inline-flex items-center justify-center min-w-[24px] h-5 px-1.5 rounded-full bg-foreground/70 text-background text-[10px] font-semibold tabular-nums select-none">
+          {index + 1}
+        </span>
+      )}
       <button
         onClick={(e) => {
           e.stopPropagation();
