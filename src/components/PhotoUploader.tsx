@@ -19,7 +19,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import type { PhotoFile } from "@/types/photo";
-import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES, DROP_ANIMATION_DURATION_MS, BLUESKY_IMAGES_EMBED_MAX } from "@/lib/constants";
+import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES, DROP_ANIMATION_DURATION_MS, BLUESKY_IMAGES_EMBED_MAX, BLUESKY_GALLERY_ENABLED } from "@/lib/constants";
 import SortablePhotoItem from "./SortablePhotoItem";
 
 interface PhotoUploaderProps {
@@ -251,12 +251,24 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
 
 
   const activePhoto = activeDragId ? photos.find((p) => p.id === activeDragId) : null;
-  const slots = Array.from({ length: MAX_PHOTOS }, (_, i) => photos[i] ?? null);
   const isEmpty = photos.length === 0;
   const sortableIds = photos.map((p) => p.id);
-  const mode: "embed" | "gallery" = photos.length > BLUESKY_IMAGES_EMBED_MAX ? "gallery" : "embed";
-  const largeSlots = slots.slice(0, BLUESKY_IMAGES_EMBED_MAX);
-  const smallSlots = slots.slice(BLUESKY_IMAGES_EMBED_MAX);
+
+  // Memoize layout-derived values — mode also respects the gallery feature
+  // flag so the visual layout stays consistent with posting behaviour.
+  const { mode, slots, largeSlots, smallSlots } = useMemo(() => {
+    const m: "embed" | "gallery" =
+      BLUESKY_GALLERY_ENABLED && photos.length > BLUESKY_IMAGES_EMBED_MAX
+        ? "gallery"
+        : "embed";
+    const s = Array.from({ length: MAX_PHOTOS }, (_, i) => photos[i] ?? null);
+    return {
+      mode: m,
+      slots: s,
+      largeSlots: s.slice(0, BLUESKY_IMAGES_EMBED_MAX),
+      smallSlots: s.slice(BLUESKY_IMAGES_EMBED_MAX),
+    };
+  }, [photos]);
 
   const renderSlot = (photo: PhotoFile | null, i: number) =>
     photo ? (
