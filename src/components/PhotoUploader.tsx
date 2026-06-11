@@ -375,8 +375,13 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           : "No photos added"}
       </span>
 
-      <p className="text-xs text-muted-foreground mt-2 text-center">
-        Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each · ⌘V / Ctrl+V or tap Paste
+      <p className="text-xs text-muted-foreground mt-2 text-center" aria-live="polite">
+        {mode === "embed"
+          ? `Images post · up to ${BLUESKY_IMAGES_EMBED_MAX} photos shown larger`
+          : `Gallery post · ${BLUESKY_IMAGES_EMBED_MAX + 1}–${MAX_PHOTOS} photos, equal size`}
+        <span className="block sm:inline sm:before:content-['_·_']">
+          {MAX_FILE_SIZE_MB}MB max each · ⌘V / Ctrl+V or tap Paste
+        </span>
       </p>
 
       {isEmpty && (
