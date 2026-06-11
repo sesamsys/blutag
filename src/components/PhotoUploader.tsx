@@ -254,6 +254,30 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
   const slots = Array.from({ length: MAX_PHOTOS }, (_, i) => photos[i] ?? null);
   const isEmpty = photos.length === 0;
   const sortableIds = photos.map((p) => p.id);
+  const mode: "embed" | "gallery" = photos.length > BLUESKY_IMAGES_EMBED_MAX ? "gallery" : "embed";
+  const largeSlots = slots.slice(0, BLUESKY_IMAGES_EMBED_MAX);
+  const smallSlots = slots.slice(BLUESKY_IMAGES_EMBED_MAX);
+
+  const renderSlot = (photo: PhotoFile | null, i: number) =>
+    photo ? (
+      <SortablePhotoItem
+        key={photo.id}
+        id={photo.id}
+        preview={photo.preview}
+        index={i}
+        onRemove={onRemovePhoto}
+      />
+    ) : (
+      <button
+        key={`empty-${i}`}
+        onClick={() => inputRef.current?.click()}
+        aria-label={`Add photo, slot ${i + 1} of ${MAX_PHOTOS}`}
+        className="aspect-square w-full rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        <ImagePlus className="w-6 h-6 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-medium">Add photo</span>
+      </button>
+    );
 
   return (
     <div className="w-full">
