@@ -15,7 +15,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
-import { MAX_PHOTOS, RATE_LIMIT_MAX_CALLS, RATE_LIMIT_WINDOW_MS, ANALYSIS_TIMEOUT_MS, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
+import { MAX_PHOTOS, RATE_LIMIT_MAX_CALLS, RATE_LIMIT_WINDOW_MS, ANALYSIS_TIMEOUT_MS, ANALYSIS_CONCURRENCY, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
+import { compressImageForBluesky } from "@/lib/image-compress";
+import { runWithConcurrency } from "@/lib/concurrent";
 import { arrayMove } from "@dnd-kit/sortable";
 import { savePhotosSession, loadPhotosSession, clearPhotosSession } from "@/lib/session-persistence";
 import { ERROR_MESSAGES, getErrorMessage, logError, ErrorType, AppError } from "@/lib/error-messages";
@@ -26,7 +28,7 @@ function generateId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-function fileToBase64(file: File): Promise<string> {
+function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -34,7 +36,7 @@ function fileToBase64(file: File): Promise<string> {
       resolve(result.split(",")[1]);
     };
     reader.onerror = reject;
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(blob);
   });
 }
 
@@ -123,8 +125,13 @@ const Index = () => {
 
     const analyzeOne = async (photo: PhotoFile) => {
       try {
+        // Compress before base64-encoding so we don't blow past the edge
+        // function's 30MB payload cap with large originals (a 25MB source
+        // would inflate to ~33MB base64). The Bluesky-tuned compressor
+        // gives us ≤2MB JPEGs, more than enough quality for alt-text AI.
+        const compressed = await compressImageForBluesky(photo.file);
         const [base64, exifData] = await Promise.all([
-          fileToBase64(photo.file),
+          blobToBase64(compressed),
           extractExif(photo.file).catch((err) => {
             logError(err, { context: "exif_extraction", photoId: photo.id });
             return {}; // Continue without EXIF data
