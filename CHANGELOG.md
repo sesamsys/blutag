@@ -13,9 +13,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - Raised `MAX_PHOTOS` from 4 to 10
 - Uploader grid is now 3 cols on mobile, 4 on sm, 5 on md+ to fit 10 slots
+- `buildPostEmbed` now returns `{ embed, truncatedCount }` so callers can surface when photos are dropped
 - Bumped client rate limit from 10 to 20 calls/min so a full 10-photo session doesn't trip the limiter
 - Standardized all documentation to reference Bun (`bun run dev`, `bun run test`, `bun.lock`)
 - Replaced "Supabase dashboard" references with "Lovable Cloud" in steering docs
+- `PostComposer` now shows a toast warning when photos exceed the limit and are truncated before posting
 
 ## [0.3.0] - 2026-03-14
 
