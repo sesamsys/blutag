@@ -49,7 +49,7 @@
 - Compress images client-side before upload
 - Use object URLs for previews, revoke when done
 - Implement progressive loading for large images
-- Respect Bluesky's 1MB image limit
+- Respect Bluesky's 2MB image blob limit (lexicon raised from 1MB in Apr 2026)
 
 ### State Management
 - Use React Context for global state (auth, theme)
