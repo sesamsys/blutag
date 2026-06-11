@@ -315,40 +315,44 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
             <div
               role="region"
-              aria-label="Photo upload area. Paste images with Cmd+V or Ctrl+V."
+              aria-label={
+                mode === "embed"
+                  ? "Photo upload area, images embed layout. Paste images with Cmd+V or Ctrl+V."
+                  : "Photo upload area, gallery layout. Paste images with Cmd+V or Ctrl+V."
+              }
               tabIndex={0}
               onDrop={onDropZone}
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
-              className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 rounded-2xl transition-all ${
+              className={`grid gap-3 rounded-2xl transition-all ${
+                mode === "embed"
+                  ? "grid-cols-6 sm:grid-cols-12"
+                  : "grid-cols-3 sm:grid-cols-4 md:grid-cols-5"
+              } ${
                 isDraggingOver
                   ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
                   : ""
               }`}
             >
-              {slots.map((photo, i) =>
-                photo ? (
-                  <SortablePhotoItem
-                    key={photo.id}
-                    id={photo.id}
-                    preview={photo.preview}
-                    index={i}
-                    onRemove={onRemovePhoto}
-                  />
-                ) : (
-                  <button
-                    key={`empty-${i}`}
-                    onClick={() => inputRef.current?.click()}
-                    aria-label={`Add photo, slot ${i + 1} of ${MAX_PHOTOS}`}
-                    className="aspect-square rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                  >
-                    <ImagePlus className="w-6 h-6 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground font-medium">Add photo</span>
-                  </button>
-                )
+              {mode === "embed" ? (
+                <>
+                  {largeSlots.map((photo, i) => (
+                    <div key={photo ? photo.id : `empty-large-${i}`} className="col-span-3">
+                      {renderSlot(photo, i)}
+                    </div>
+                  ))}
+                  {smallSlots.map((photo, i) => (
+                    <div key={photo ? photo.id : `empty-small-${i}`} className="col-span-2">
+                      {renderSlot(photo, i + BLUESKY_IMAGES_EMBED_MAX)}
+                    </div>
+                  ))}
+                </>
+              ) : (
+                slots.map((photo, i) => renderSlot(photo, i))
               )}
             </div>
           </SortableContext>
+
 
           <DragOverlay dropAnimation={{ duration: DROP_ANIMATION_DURATION_MS, easing: "ease" }}>
             {activePhoto ? (
