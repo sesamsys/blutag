@@ -367,7 +367,7 @@ const Index = () => {
       <footer className="w-full border-t border-border">
         <div className="max-w-2xl mx-auto px-4 py-4 flex flex-col items-center gap-3">
           <AboutDialog />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground text-center">
             Created by{" "}
             <FooterLink href={metaData.bluesky} ariaLabel="Bluesky">
               @sesam.hu on Bluesky
