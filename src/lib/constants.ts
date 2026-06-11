@@ -70,6 +70,13 @@ export const RETRY_BACKOFF_MULTIPLIER = 2;
 /** Timeout in ms for a single AI analysis request */
 export const ANALYSIS_TIMEOUT_MS = 30_000;
 
+/**
+ * Maximum number of analyze-photo requests in flight concurrently.
+ * Caps browser uplink bandwidth and avoids hammering the AI gateway when
+ * users analyze the full 10-photo batch at once.
+ */
+export const ANALYSIS_CONCURRENCY = 3;
+
 // ── Animation ─────────────────────────────────────────────────────────
 
 /** Duration in ms of the drop animation when reordering photos */
