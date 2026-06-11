@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Send, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +11,7 @@ import { compressImageForBluesky } from "@/lib/image-compress";
 import { buildPostEmbed } from "@/lib/bluesky-embed";
 import { RichText, type BlobRef } from "@atproto/api";
 import { toast } from "sonner";
-import { BLUESKY_POST_MAX_LENGTH, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
+import { BLUESKY_POST_MAX_LENGTH, MAX_PHOTOS, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
 import { ERROR_MESSAGES, getErrorMessage, logError, AppError, ErrorType } from "@/lib/error-messages";
 import { retryWithBackoff } from "@/lib/retry";
@@ -27,7 +27,10 @@ export default function PostComposer({ photos }: PostComposerProps) {
   const [posting, setPosting] = useState(false);
   const [postUrl, setPostUrl] = useState<string | null>(null);
 
-  const photosWithAltText = photos.filter((p) => p.altText && !p.analyzing);
+  const photosWithAltText = useMemo(
+    () => photos.filter((p) => p.altText && !p.analyzing).slice(0, MAX_PHOTOS),
+    [photos],
+  );
   if (photosWithAltText.length === 0) return null;
 
   if (!isLoggedIn || !agent) {
@@ -121,7 +124,12 @@ export default function PostComposer({ photos }: PostComposerProps) {
         record.facets = richText.facets;
       }
 
-      const embed = buildPostEmbed(embeddedImages);
+      const { embed, truncatedCount } = buildPostEmbed(embeddedImages);
+      if (truncatedCount > 0) {
+        toast.warning(
+          `Gallery posting is temporarily unavailable. ${truncatedCount} photo${truncatedCount !== 1 ? "s" : ""} beyond the 4-image limit were not included in this post.`,
+        );
+      }
       if (embed) {
         record.embed = embed;
       }
