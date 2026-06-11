@@ -266,6 +266,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         preview={photo.preview}
         index={i}
         onRemove={onRemovePhoto}
+        showNumber={mode === "gallery"}
       />
     ) : (
       <button
