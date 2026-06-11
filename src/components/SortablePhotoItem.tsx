@@ -8,9 +8,10 @@ interface SortablePhotoItemProps {
   preview: string;
   index: number;
   onRemove: (index: number) => void;
+  showNumber?: boolean;
 }
 
-const SortablePhotoItem = memo(function SortablePhotoItem({ id, preview, index, onRemove }: SortablePhotoItemProps) {
+const SortablePhotoItem = memo(function SortablePhotoItem({ id, preview, index, onRemove, showNumber }: SortablePhotoItemProps) {
   const {
     attributes,
     listeners,
