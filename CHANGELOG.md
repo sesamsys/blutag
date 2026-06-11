@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- Raised Bluesky image compression cap from 1MB to 2MB and max dimension from 2048px to 2560px to match Bluesky's April 2026 lexicon update (better photo quality, fewer compression artifacts)
+
+
+
 ## [0.4.0] - 2026-06-11
 
 ### Added
