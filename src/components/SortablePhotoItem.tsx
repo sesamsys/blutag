@@ -74,7 +74,7 @@ const SortablePhotoItem = memo(function SortablePhotoItem({ id, preview, index, 
         className="absolute top-1 right-1 p-1 sm:top-2 sm:right-2 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center rounded-full bg-foreground/70 text-background hover:bg-foreground/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label={`Remove photo ${index + 1}`}
       >
-        <X className="w-4 h-4" />
+        <CloseIcon className="w-4 h-4" />
       </button>
     </div>
   );
