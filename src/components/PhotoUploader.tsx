@@ -19,7 +19,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import type { PhotoFile } from "@/types/photo";
-import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES, DROP_ANIMATION_DURATION_MS } from "@/lib/constants";
+import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES, DROP_ANIMATION_DURATION_MS, BLUESKY_IMAGES_EMBED_MAX } from "@/lib/constants";
 import SortablePhotoItem from "./SortablePhotoItem";
 
 interface PhotoUploaderProps {
@@ -254,6 +254,30 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
   const slots = Array.from({ length: MAX_PHOTOS }, (_, i) => photos[i] ?? null);
   const isEmpty = photos.length === 0;
   const sortableIds = photos.map((p) => p.id);
+  const mode: "embed" | "gallery" = photos.length > BLUESKY_IMAGES_EMBED_MAX ? "gallery" : "embed";
+  const largeSlots = slots.slice(0, BLUESKY_IMAGES_EMBED_MAX);
+  const smallSlots = slots.slice(BLUESKY_IMAGES_EMBED_MAX);
+
+  const renderSlot = (photo: PhotoFile | null, i: number) =>
+    photo ? (
+      <SortablePhotoItem
+        key={photo.id}
+        id={photo.id}
+        preview={photo.preview}
+        index={i}
+        onRemove={onRemovePhoto}
+      />
+    ) : (
+      <button
+        key={`empty-${i}`}
+        onClick={() => inputRef.current?.click()}
+        aria-label={`Add photo, slot ${i + 1} of ${MAX_PHOTOS}`}
+        className="aspect-square w-full rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        <ImagePlus className="w-6 h-6 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-medium">Add photo</span>
+      </button>
+    );
 
   return (
     <div className="w-full">
@@ -291,40 +315,44 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
             <div
               role="region"
-              aria-label="Photo upload area. Paste images with Cmd+V or Ctrl+V."
+              aria-label={
+                mode === "embed"
+                  ? "Photo upload area, images embed layout. Paste images with Cmd+V or Ctrl+V."
+                  : "Photo upload area, gallery layout. Paste images with Cmd+V or Ctrl+V."
+              }
               tabIndex={0}
               onDrop={onDropZone}
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
-              className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 rounded-2xl transition-all ${
+              className={`grid gap-3 rounded-2xl transition-all ${
+                mode === "embed"
+                  ? "grid-cols-6 sm:grid-cols-12"
+                  : "grid-cols-3 sm:grid-cols-4 md:grid-cols-5"
+              } ${
                 isDraggingOver
                   ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
                   : ""
               }`}
             >
-              {slots.map((photo, i) =>
-                photo ? (
-                  <SortablePhotoItem
-                    key={photo.id}
-                    id={photo.id}
-                    preview={photo.preview}
-                    index={i}
-                    onRemove={onRemovePhoto}
-                  />
-                ) : (
-                  <button
-                    key={`empty-${i}`}
-                    onClick={() => inputRef.current?.click()}
-                    aria-label={`Add photo, slot ${i + 1} of ${MAX_PHOTOS}`}
-                    className="aspect-square rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                  >
-                    <ImagePlus className="w-6 h-6 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground font-medium">Add photo</span>
-                  </button>
-                )
+              {mode === "embed" ? (
+                <>
+                  {largeSlots.map((photo, i) => (
+                    <div key={photo ? photo.id : `empty-large-${i}`} className="col-span-3">
+                      {renderSlot(photo, i)}
+                    </div>
+                  ))}
+                  {smallSlots.map((photo, i) => (
+                    <div key={photo ? photo.id : `empty-small-${i}`} className="col-span-2">
+                      {renderSlot(photo, i + BLUESKY_IMAGES_EMBED_MAX)}
+                    </div>
+                  ))}
+                </>
+              ) : (
+                slots.map((photo, i) => renderSlot(photo, i))
               )}
             </div>
           </SortableContext>
+
 
           <DragOverlay dropAnimation={{ duration: DROP_ANIMATION_DURATION_MS, easing: "ease" }}>
             {activePhoto ? (
@@ -347,8 +375,13 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           : "No photos added"}
       </span>
 
-      <p className="text-xs text-muted-foreground mt-2 text-center">
-        Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each · ⌘V / Ctrl+V or tap Paste
+      <p className="text-xs text-muted-foreground mt-2 text-center" aria-live="polite">
+        {mode === "embed"
+          ? `Images post · up to ${BLUESKY_IMAGES_EMBED_MAX} photos shown larger`
+          : `Gallery post · ${BLUESKY_IMAGES_EMBED_MAX + 1}–${MAX_PHOTOS} photos, equal size`}
+        <span className="block sm:inline sm:before:content-['_·_']">
+          {MAX_FILE_SIZE_MB}MB max each · ⌘V / Ctrl+V or tap Paste
+        </span>
       </p>
 
       {isEmpty && (
