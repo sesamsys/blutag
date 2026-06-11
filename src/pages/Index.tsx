@@ -197,7 +197,9 @@ const Index = () => {
       }
     };
 
-    await Promise.all(targetPhotos.map(analyzeOne));
+    // Throttle parallel fan-out so a full 10-photo batch doesn't saturate
+    // the browser uplink or overload the AI gateway.
+    await runWithConcurrency(targetPhotos, ANALYSIS_CONCURRENCY, analyzeOne);
 
     setIsAnalyzing(false);
 
