@@ -67,10 +67,10 @@ async function postAndGetEmbed(photoCount: number) {
   render(<PostComposer photos={makePhotos(photoCount)} />);
   fireEvent.click(screen.getByRole("button", { name: /post to bluesky/i }));
   await waitFor(() => expect(createRecord).toHaveBeenCalled());
-  const record = createRecord.mock.calls[0][0].record as {
-    embed?: { $type: string; images?: unknown[]; items?: unknown[] };
-  };
-  return record.embed;
+  const call = createRecord.mock.calls[0] as unknown as [
+    { record: { embed?: { $type: string; images?: unknown[]; items?: unknown[] } } }
+  ];
+  return call[0].record.embed;
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────
