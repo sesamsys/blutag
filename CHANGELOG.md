@@ -6,27 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-11
+
 ### Added
 - `runWithConcurrency` helper in `src/lib/concurrent.ts` with unit tests
 - `ANALYSIS_CONCURRENCY` constant (default 3) capping in-flight analyze-photo requests
+- Support for up to 10 photos per post using Bluesky's new `app.bsky.embed.gallery` embed (with fallback to `app.bsky.embed.images` for 1–4 photos)
+- `BLUESKY_GALLERY_ENABLED` feature flag in `src/lib/constants.ts` for quick rollback if the gallery lexicon rollout slips
 
 ### Changed
 - Raised Bluesky image compression cap from 1MB to 2MB and max dimension from 2048px to 2560px to match Bluesky's April 2026 lexicon update (better photo quality, fewer compression artifacts)
 - Alt-text analysis now compresses each photo before base64-encoding it for the edge function, so large (>~22MB) originals no longer trip the 30MB payload cap and uplink bandwidth drops dramatically
 - Analyze-photo requests are now throttled to at most 3 in flight (was: all 10 in parallel), avoiding browser uplink saturation and AI gateway pressure on full 10-photo batches
-- Photo uploader grid now has two visual modes mirroring Bluesky's render: an "images embed" layout (4 large + 6 smaller slots; mobile 2-2-3-3) for 1–4 photos and the uniform "gallery" grid for 5–10 photos. - Gallery-mode photos now show a small numbered badge (top-left pill) indicating their position in the sequence, matching Bluesky's gallery carousel numbering.
-
-
-
-
-
-## [0.4.0] - 2026-06-11
-
-### Added
-- Support for up to 10 photos per post using Bluesky's new `app.bsky.embed.gallery` embed (with fallback to `app.bsky.embed.images` for 1–4 photos)
-- `BLUESKY_GALLERY_ENABLED` feature flag in `src/lib/constants.ts` for quick rollback if the gallery lexicon rollout slips
-
-### Changed
+- Photo uploader grid now has two visual modes mirroring Bluesky's render: an "images embed" layout (4 large + 6 smaller slots; mobile 2-2-3-3) for 1–4 photos and the uniform "gallery" grid for 5–10 photos
+- Gallery-mode photos now show a small numbered badge (top-left circle) indicating their position in the sequence, matching Bluesky's gallery carousel numbering
 - Raised `MAX_PHOTOS` from 4 to 10
 - Uploader grid is now 3 cols on mobile, 4 on sm, 5 on md+ to fit 10 slots
 - `buildPostEmbed` now returns `{ embed, truncatedCount }` so callers can surface when photos are dropped
