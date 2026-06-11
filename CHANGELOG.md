@@ -6,8 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- `runWithConcurrency` helper in `src/lib/concurrent.ts` with unit tests
+- `ANALYSIS_CONCURRENCY` constant (default 3) capping in-flight analyze-photo requests
+
 ### Changed
 - Raised Bluesky image compression cap from 1MB to 2MB and max dimension from 2048px to 2560px to match Bluesky's April 2026 lexicon update (better photo quality, fewer compression artifacts)
+- Alt-text analysis now compresses each photo before base64-encoding it for the edge function, so large (>~22MB) originals no longer trip the 30MB payload cap and uplink bandwidth drops dramatically
+- Analyze-photo requests are now throttled to at most 3 in flight (was: all 10 in parallel), avoiding browser uplink saturation and AI gateway pressure on full 10-photo batches
+
+
 
 
 
