@@ -1,80 +1,81 @@
-## Goal
+## Context
 
-Let users pick the language used for both AI-generated alt text and the outgoing Bluesky post's language tag (`langs[]`). Default to English on first use, then remember the last chosen language. Signed-in Bluesky users get a hint pulled from their account's post language preferences. The picker shows a curated short list with a searchable "Other" expansion to the full ISO 639-1 set.
+Bluesky announced [`app.bsky.embed.gallery`](https://github.com/bluesky-social/atproto/discussions/5032) (Jun 2026) — a new embed type that supports up to 10 images (hard ceiling 20). The existing `app.bsky.embed.images` embed stays capped at 4 because bumping its `maxLength` would be a breaking lexicon change. Rollout is "in the next few weeks".
 
-## UX
+To let Blutag users post up to 10 photos, we need to (a) raise the in-app photo cap, (b) redesign the grid to fit 10 thumbnails, and (c) emit the new gallery embed when posting more than 4 photos (with a fallback to today's `images` embed for ≤4, so we keep working on AppViews that haven't ingested the new lexicon yet).
 
-- A new compact language pill button placed in the **PostComposer** card (next to the character counter) and a mirrored small selector in the **upload step** (above the "Generate alt text" button) so the language is visible *before* generation.
-  - Both controls are bound to one shared selection — changing in either updates the other.
-- Clicking the pill opens a popover containing:
-  - A search input
-  - A "Recent" section (up to 3 last-used languages) when present
-  - A "Common" section (curated ~15 languages, native + English name)
-  - When the search query has no curated match, results from the full ISO 639-1 list are shown under "Other".
-- Selected language is shown as e.g. `🌐 English` (globe icon, no flag — flags don't map cleanly to languages).
-- Empty/uploader hint text gets a trailing fragment: `· Generating in English` (clickable to open the picker).
+## Scope
 
-## Behaviour
+- Raise `MAX_PHOTOS` from 4 → 10.
+- Redesign the uploader grid to comfortably show up to 10 slots on mobile + desktop.
+- Update post composer to use `app.bsky.embed.gallery` when posting 5–10 photos, keep `app.bsky.embed.images` for 1–4.
+- Bump per-call rate limit so a full 10-photo session doesn't immediately trip the limiter.
+- Keep alt-text generation, reordering, paste, session persistence, and accessibility working identically with the new cap.
 
-### Defaulting
-1. First load: language = `en`.
-2. After any selection: persist to `localStorage` under `blutag.lang.last` and prepend to `blutag.lang.recent` (deduped, capped at 3).
-3. On Bluesky sign-in: call `agent.app.bsky.actor.getPreferences()`, look for the `app.bsky.actor.defs#postLanguagesPref` entry. If present and the user hasn't manually changed the language this session, set the active language to the first entry from that preference (and merge the rest into `recent`). Never overwrite an explicit user choice.
-4. On sign-out: keep the local recents but reset active to last local choice (or `en`).
+Out of scope: video embeds in gallery, license/attribution/exif fields, raising past 10 toward the 20 hard limit.
 
-### Alt text generation
-- Frontend passes `language` (BCP-47 code, e.g. `en`, `pt-BR` is normalized to `pt`) in the body to the `analyze-photo` edge function.
-- Edge function appends a language directive to the user prompt: `Write the alt text in {languageName} ({code}).` It also adds a hard rule to the system prompt: respond ONLY in the requested language, no translation/explanations.
-- Validation: code must match `^[a-z]{2,3}(-[A-Z]{2})?$`. Falls back to `en` on invalid input.
+## Changes
 
-### Bluesky posting
-- In `PostComposer.handlePost`, set `record.langs = [activeLang]` on the `app.bsky.feed.post` record. AT Proto supports up to 3 codes; we only send one (matches "One language for both" decision).
+### 1. Constants (`src/lib/constants.ts`)
+- `MAX_PHOTOS = 10`.
+- Add `BLUESKY_GALLERY_MAX_IMAGES = 10` and `BLUESKY_IMAGES_EMBED_MAX = 4` so the embed-selection logic has named thresholds.
+- Bump `RATE_LIMIT_MAX_CALLS` from 10 → 20 (one full 10-photo session is 10 calls; with retries and a quick second attempt, 10/min is too tight).
 
-## Technical notes
+### 2. Uploader grid (`src/components/PhotoUploader.tsx`)
+- Replace the fixed `grid-cols-2 sm:grid-cols-4` with a responsive layout that handles 10 slots:
+  - mobile: `grid-cols-3` (4 rows: 3-3-3-1)
+  - sm: `grid-cols-4` (3 rows: 4-4-2)
+  - md+: `grid-cols-5` (2 rows of 5)
+- Shrink the empty-state hint arrow + "Drag photos here" caption so it still fits below a taller grid on mobile.
+- Update the hint copy: `Up to {MAX_PHOTOS} photos · {MAX_FILE_SIZE_MB}MB max each · ⌘V / Ctrl+V or tap Paste` (already templated on `MAX_PHOTOS`, just verify it reads naturally with "10").
+- All aria-labels / live-region strings continue to interpolate `MAX_PHOTOS`; no string changes needed beyond the constant.
+- Confirm dnd-kit `SortableContext` + `rectSortingStrategy` still works at 10 items (it does; just visual QA needed).
 
-### New files
-- `src/lib/languages.ts` — exports:
-  - `CURATED_LANGUAGES`: array of `{ code, nameEn, nativeName }` (~15 entries: en, es, pt, fr, de, ja, ko, zh, it, nl, tr, pl, ru, ar, hi).
-  - `ALL_LANGUAGES`: array sourced from a small ISO 639-1 dataset (inline JSON, ~180 entries — keeps bundle <10KB; no new dep).
-  - Helpers: `getLanguageName(code)`, `normalizeLangCode(code)`, `isValidLangCode(code)`.
-- `src/lib/language-preference.ts` — small module wrapping localStorage:
-  - `getActiveLanguage()`, `setActiveLanguage(code)`, `getRecentLanguages()`, `addRecentLanguage(code)`.
-- `src/contexts/LanguageContext.tsx` — provider exposing `{ language, setLanguage, recent }`. Hydrates from localStorage on mount; subscribes to a custom `bluesky:preferences-loaded` event (or accepts `useBlueskyAuth` agent and reads preferences in an effect when `agent` becomes available and the user hasn't touched the picker yet).
-- `src/components/LanguagePicker.tsx` — popover-based combobox using existing shadcn `Popover` + `Command` components. Two visual variants: `"pill"` (used in composer) and `"compact"` (used in uploader hint).
+### 3. Post composer (`src/components/PostComposer.tsx`)
+Switch the embed shape based on count:
 
-### Edited files
-- `src/App.tsx` — wrap tree with `<LanguageProvider>` (inside `<BlueskyAuthProvider>` so it can read the agent).
-- `src/pages/Index.tsx`:
-  - Read `language` from context, pass it as `body.language` in the `supabase.functions.invoke("analyze-photo", ...)` call.
-  - Render `<LanguagePicker variant="compact" />` near the "Generate alt text" button.
-- `src/components/PostComposer.tsx`:
-  - Render `<LanguagePicker variant="pill" />` in the meta row.
-  - Add `record.langs = [language]` when building the post record.
-- `src/components/PhotoUploader.tsx` — append `· Generating in {language}` to the helper hint (clickable, opens the picker).
-- `supabase/functions/analyze-photo/index.ts`:
-  - Accept and validate optional `language` field on the request body (regex above, default `en`).
-  - Pass it to the prompt builders.
-- `supabase/functions/analyze-photo/prompts.ts`:
-  - Add a small `LANGUAGE_NAMES` map for the curated codes (so the model gets a human-readable name) with a generic fallback.
-  - Update `SYSTEM_PROMPT` with a clause: "Always respond in the requested output language. Do not translate, explain, or add notes in other languages."
-  - Update `USER_PROMPT_DEFAULT` and `USER_PROMPT_WITH_CONTEXT` to take a language argument and append `Write the alt text in {nativeName} ({code}).`.
+```ts
+if (embeddedImages.length > 0) {
+  if (embeddedImages.length <= BLUESKY_IMAGES_EMBED_MAX) {
+    record.embed = {
+      $type: "app.bsky.embed.images",
+      images: embeddedImages, // unchanged shape
+    };
+  } else {
+    record.embed = {
+      $type: "app.bsky.embed.gallery",
+      items: embeddedImages.map(img => ({
+        image: img.image,
+        alt: img.alt,
+        aspectRatio: img.aspectRatio,
+      })),
+    };
+  }
+}
+```
 
-### Backwards compatibility
-- The edge function still works when `language` is omitted (defaults to `en`).
-- Existing in-flight sessions in IndexedDB are unaffected — language is not stored on `PhotoFile`, only globally.
+Notes:
+- `createRecord` is called with a raw record object, so we don't need `@atproto/api` typings for the new lexicon — the JSON shape is what matters.
+- Final field names on `gallery` items will be confirmed against PR [#4827](https://github.com/bluesky-social/atproto/pull/4827) when we implement; the plan above is the shape implied by the announcement (image blob + alt + aspectRatio per item). If the merged lexicon uses a different field name (e.g. `media` instead of `items`), we adapt at implementation time.
+- Image upload + compression (`BLUESKY_IMAGE_MAX_BYTES`, `BLUESKY_IMAGE_MAX_DIMENSION`) is per-image and unchanged — it already handles N photos via the existing loop.
 
-### Out of scope (call out)
-- Translating UI strings (i18n of the app chrome). Only the *generated* alt text language changes.
-- Persisting the selection back to the user's Bluesky `postLanguagesPref` preference (read-only for now).
-- Multi-language post tagging.
+### 4. Rollout safety
+- Because gallery is rolling out "in the next few weeks", before shipping we'll do a one-shot manual test post with 5 photos from a real Bluesky account to confirm the lexicon is live on the PDS. If it's not yet accepted, we keep `MAX_PHOTOS = 4` behind a small `BLUESKY_GALLERY_ENABLED` flag in `constants.ts` that defaults to `true` and can be flipped off without touching components.
 
-## QA checklist
+### 5. Tests / QA
+- Unit: extend `PostComposer` logic (or extract `buildEmbed(images)` into `src/lib/bluesky-embed.ts` to make it unit-testable) — assert `images` embed for 1–4 photos, `gallery` embed for 5–10, no embed for 0.
+- Manual QA:
+  - Upload 10 photos via picker, drag-drop, and paste; verify grid layout on mobile (375px), tablet (768px), desktop.
+  - Reorder a 10-photo grid via mouse and keyboard.
+  - Generate alt text for all 10 (rate limit not tripped).
+  - Post 4 photos → renders as today on bsky.app. Post 7 photos → renders as a gallery on bsky.app.
+  - Session-restore a 10-photo draft after reload.
 
-- Default load shows `English` with no recents.
-- Pick `Japanese` → reload → still `Japanese`; recents shows `[Japanese]`.
-- Pick `Spanish`, then `French` → recents = `[French, Spanish]`, active = `French`.
-- Generate alt text in non-English language returns text in that language.
-- Posted skeet on Bluesky shows correct language indicator (visible in app.bsky.feed.post `langs` field via the public API).
-- Sign in with a Bluesky account that has post languages set → first sign-in of the session pre-selects the first one.
-- Search "swa" finds Swahili (sw) under "Other".
-- Picker is keyboard accessible and meets the 44px touch target rule on the pill trigger.
+### 6. CHANGELOG
+- Added: Support for up to 10 photos per post using Bluesky's new `app.bsky.embed.gallery` embed.
+- Changed: Uploader grid layout to accommodate 10 slots responsively.
+
+## Open questions
+
+1. Should we ship behind the `BLUESKY_GALLERY_ENABLED` flag (default on) so we can quickly revert to 4 if the lexicon rollout slips, or just gate by feature detection at post time (try gallery, fall back to images on lexicon-rejection error)?
+2. On mobile, do you prefer a 3-column grid (10 = 3-3-3-1, slightly ragged last row) or 2-column (10 = 5 rows, taller scroll)?

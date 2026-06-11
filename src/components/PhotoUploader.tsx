@@ -296,7 +296,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
               onDrop={onDropZone}
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
-              className={`grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-2xl transition-all ${
+              className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 rounded-2xl transition-all ${
                 isDraggingOver
                   ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
                   : ""

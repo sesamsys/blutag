@@ -8,6 +8,7 @@ import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import LanguagePicker from "@/components/LanguagePicker";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import { compressImageForBluesky } from "@/lib/image-compress";
+import { buildPostEmbed } from "@/lib/bluesky-embed";
 import { RichText, type BlobRef } from "@atproto/api";
 import { toast } from "sonner";
 import { BLUESKY_POST_MAX_LENGTH, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
@@ -120,11 +121,9 @@ export default function PostComposer({ photos }: PostComposerProps) {
         record.facets = richText.facets;
       }
 
-      if (embeddedImages.length > 0) {
-        record.embed = {
-          $type: "app.bsky.embed.images",
-          images: embeddedImages,
-        };
+      const embed = buildPostEmbed(embeddedImages);
+      if (embed) {
+        record.embed = embed;
       }
 
       // Post with retry
