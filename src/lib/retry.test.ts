@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { retryWithBackoff, withTimeout, retryWithTimeout } from "./retry";
 
 describe("retry utilities", () => {
@@ -84,6 +84,15 @@ describe("retry utilities", () => {
   });
 
   describe("withTimeout", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(async () => {
+      await vi.runAllTimersAsync();
+      vi.useRealTimers();
+    });
+
     it("should resolve if function completes before timeout", async () => {
       const fn = vi.fn().mockResolvedValue("success");
       const result = await withTimeout(fn, 1000);
@@ -92,20 +101,28 @@ describe("retry utilities", () => {
     });
 
     it("should reject if function exceeds timeout", async () => {
-      const fn = vi.fn().mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve("too slow"), 100))
-      );
+      // A promise that never settles — attaching .catch(noop) prevents the
+      // "unhandled rejection" warning when Promise.race picks the timeout.
+      const noop = () => {};
+      const slow = new Promise(() => {});
+      (slow as Promise<unknown>).catch(noop);
+      const fn = vi.fn().mockReturnValue(slow);
 
-      await expect(withTimeout(fn, 25)).rejects.toThrow("Operation timed out");
+      const promise = withTimeout(fn, 100);
+      await vi.advanceTimersByTimeAsync(200);
+      await expect(promise).rejects.toThrow("Operation timed out");
     });
 
     it("should use custom timeout error", async () => {
-      const fn = vi.fn().mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve("too slow"), 100))
-      );
+      const noop = () => {};
+      const slow = new Promise(() => {});
+      (slow as Promise<unknown>).catch(noop);
+      const fn = vi.fn().mockReturnValue(slow);
       const customError = new Error("Custom timeout");
 
-      await expect(withTimeout(fn, 25, customError)).rejects.toThrow("Custom timeout");
+      const promise = withTimeout(fn, 100, customError);
+      await vi.advanceTimersByTimeAsync(200);
+      await expect(promise).rejects.toThrow("Custom timeout");
     });
   });
 
@@ -125,13 +142,20 @@ describe("retry utilities", () => {
     });
 
     it("should timeout if function takes too long", async () => {
-      const fn = vi.fn().mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve("too slow"), 100))
-      );
+      vi.useFakeTimers();
+      try {
+        const noop = () => {};
+        const slow = new Promise(() => {});
+        (slow as Promise<unknown>).catch(noop);
+        const fn = vi.fn().mockReturnValue(slow);
 
-      await expect(retryWithTimeout(fn, 25, { maxAttempts: 1 })).rejects.toThrow(
-        "Operation timed out"
-      );
+        const promise = retryWithTimeout(fn, 100, { maxAttempts: 1 });
+        await vi.advanceTimersByTimeAsync(200);
+        await expect(promise).rejects.toThrow("Operation timed out");
+        await vi.runAllTimersAsync();
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 });

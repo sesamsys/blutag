@@ -78,8 +78,13 @@ export async function withTimeout<T>(
   timeoutMs: number,
   timeoutError: Error = new Error("Operation timed out")
 ): Promise<T> {
+  const fnPromise = fn();
+  // Attach a no-op catch so that if the timeout wins the race, the fn()
+  // promise's eventual rejection is not surfaced as an unhandled rejection
+  // by the runtime.
+  fnPromise.catch(() => {});
   return Promise.race([
-    fn(),
+    fnPromise,
     sleep(timeoutMs).then(() => {
       throw timeoutError;
     }),

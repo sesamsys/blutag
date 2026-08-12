@@ -66,6 +66,17 @@ describe("error-messages", () => {
       expect(getErrorMessage(error)).toBe("Some random error");
     });
 
+    it("should return UNKNOWN_ERROR for messages >= 200 characters", () => {
+      const longMessage = "x".repeat(200);
+      const error = new Error(longMessage);
+      expect(getErrorMessage(error)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
+    });
+
+    it("should return UNKNOWN_ERROR when message contains 'undefined'", () => {
+      const error = new Error("Cannot read properties of undefined");
+      expect(getErrorMessage(error)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
+    });
+
     it("should handle non-Error objects", () => {
       expect(getErrorMessage("string error")).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
       expect(getErrorMessage(null)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
