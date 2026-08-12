@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- Integration test (`src/components/PostComposer.aspectRatio.test.tsx`) posting a 4000×2250 landscape photo through the real compressor, asserting the uploaded blob's declared `aspectRatio` preserves 16:9 and that the reserved render box is not square (no top/bottom padding)
+
 ### Fixed
 - Landscape and portrait photos were posted without an `aspectRatio`, so Bluesky clients letterboxed them into a square frame with top/bottom (or side) padding. `compressImageForBluesky` now returns the final rendered dimensions and `PostComposer` attaches `aspectRatio` to every image in both `app.bsky.embed.images` and `app.bsky.embed.gallery` embeds.
 
