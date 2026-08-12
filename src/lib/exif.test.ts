@@ -14,7 +14,7 @@ const mockLoad = vi.mocked(ExifReader.load);
 
 /** Build a minimal ExifReader tags object from the provided fields. */
 function makeTags(fields: Record<string, { description?: string; value?: unknown }>) {
-  return fields as ReturnType<typeof ExifReader.load>;
+  return fields as unknown as ReturnType<typeof ExifReader.load>;
 }
 
 /** Minimal File stub — extractExif only calls file.arrayBuffer(). */

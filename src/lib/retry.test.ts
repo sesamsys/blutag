@@ -109,8 +109,11 @@ describe("retry utilities", () => {
       const fn = vi.fn().mockReturnValue(slow);
 
       const promise = withTimeout(fn, 100);
+      // Attach the rejection handler *before* advancing timers, otherwise the
+      // rejection lands with no handler attached and surfaces as unhandled.
+      const assertion = expect(promise).rejects.toThrow("Operation timed out");
       await vi.advanceTimersByTimeAsync(200);
-      await expect(promise).rejects.toThrow("Operation timed out");
+      await assertion;
     });
 
     it("should use custom timeout error", async () => {
@@ -121,8 +124,9 @@ describe("retry utilities", () => {
       const customError = new Error("Custom timeout");
 
       const promise = withTimeout(fn, 100, customError);
+      const assertion = expect(promise).rejects.toThrow("Custom timeout");
       await vi.advanceTimersByTimeAsync(200);
-      await expect(promise).rejects.toThrow("Custom timeout");
+      await assertion;
     });
   });
 
@@ -150,8 +154,9 @@ describe("retry utilities", () => {
         const fn = vi.fn().mockReturnValue(slow);
 
         const promise = retryWithTimeout(fn, 100, { maxAttempts: 1 });
+        const assertion = expect(promise).rejects.toThrow("Operation timed out");
         await vi.advanceTimersByTimeAsync(200);
-        await expect(promise).rejects.toThrow("Operation timed out");
+        await assertion;
         await vi.runAllTimersAsync();
       } finally {
         vi.useRealTimers();
