@@ -73,17 +73,18 @@ export async function compressImageForBluesky(file: File): Promise<CompressedIma
     );
 
     if (blob && blob.size <= BLUESKY_IMAGE_MAX_BYTES) {
-      return blob;
+      return { blob, width, height };
     }
 
     quality -= BLUESKY_IMAGE_JPEG_QUALITY_STEP;
   }
 
   // Return whatever we got at minimum quality
-  if (blob) return blob;
+  if (blob) return { blob, width, height };
 
   // Fallback — shouldn't happen
-  return await new Promise<Blob>((resolve) =>
+  const fallback = await new Promise<Blob>((resolve) =>
     canvas.toBlob((b) => resolve(b!), "image/jpeg", BLUESKY_IMAGE_JPEG_QUALITY_MIN)
   );
+  return { blob: fallback, width, height };
 }
