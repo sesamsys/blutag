@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Landscape and portrait photos were posted without an `aspectRatio`, so Bluesky clients letterboxed them into a square frame with top/bottom (or side) padding. `compressImageForBluesky` now returns the final rendered dimensions and `PostComposer` attaches `aspectRatio` to every image in both `app.bsky.embed.images` and `app.bsky.embed.gallery` embeds.
+
 ## [0.4.0] - 2026-06-11
 
 ### Added
