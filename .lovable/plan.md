@@ -1,77 +1,22 @@
-## Goal
+# Fix: landscape photos posted as square
 
-Make the upload grid visually mirror how Bluesky will actually render the post:
-- **1–4 photos** → "images embed" mode: top row of 4 large slots + second row of 6 smaller slots (desktop). Mobile: rows of 2-2-3-3.
-- **5–10 photos** → "gallery" mode: uniform square grid (current behavior).
+## What's happening
 
-The switch happens the moment a 5th photo is added/removed.
+Blutag never tells Bluesky the shape of the uploaded image. The embed supports an `aspectRatio` field, and `src/lib/bluesky-embed.ts` already forwards it when present — but nothing ever populates it. `PostComposer` builds each embedded image with only `alt` and `image`, because `compressImageForBluesky` returns a bare `Blob` and discards the width/height it computed while resizing.
 
-## Layout specs
+Without `aspectRatio`, the Bluesky client can't reserve the correct box before the image loads and falls back to a square frame, which letterboxes landscape photos with top/bottom padding.
 
-### Desktop / tablet (≥ sm)
-**Embed mode (≤4 photos):**
-```text
-[  L  ][  L  ][  L  ][  L  ]        ← row 1: 4 large square slots (cols-span-3 each in a 12-col grid)
-[ s ][ s ][ s ][ s ][ s ][ s ]      ← row 2: 6 smaller square slots (cols-span-2 each)
-```
-Implementation: a single `grid-cols-12 gap-3`; large slots `col-span-3`, small slots `col-span-2`.
+## The fix
 
-**Gallery mode (5–10 photos):** current `grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3` uniform layout — unchanged.
+1. Have the compression helper also report the final pixel dimensions it rendered to canvas, instead of throwing them away.
+2. In `PostComposer`, attach `aspectRatio: { width, height }` to every uploaded image before building the embed.
+3. Applies to both embed types — `app.bsky.embed.images` and `app.bsky.embed.gallery` both accept `aspectRatio` per image, and `buildPostEmbed` already passes it through for gallery items; the images branch needs the field kept too.
 
-### Mobile (< sm) empty / embed mode
-```text
-[ L ][ L ]
-[ L ][ L ]
-[ s ][ s ][ s ]
-[ s ][ s ][ s ]
-```
-Implementation: `grid-cols-6`; large slots `col-span-3`, small slots `col-span-2`. Yields 2+2+3+3 rows.
+## Technical details
 
-**Gallery mode on mobile:** unchanged `grid-cols-3`.
-
-### Mode trigger
-```ts
-const mode = photos.length > BLUESKY_IMAGES_EMBED_MAX ? "gallery" : "embed";
-```
-Re-uses existing `BLUESKY_IMAGES_EMBED_MAX = 4` constant — no new magic numbers.
-
-The split between "large" and "small" slots only matters in embed mode. In gallery mode the existing uniform `slots` array (length 10) is used as today.
-
-## Caption / hint
-
-Replace the current single-line helper text under the grid with a two-part caption that updates with photo count:
-
-- Embed: `Images post · up to 4 photos shown larger`
-- Gallery: `Gallery post · 5–10 photos, equal size`
-- Always followed by the existing `· {MAX_FILE_SIZE_MB}MB max each · ⌘V / Ctrl+V or tap Paste` line.
-
-Wrapped in `<p aria-live="polite">` so screen readers pick up the mode change.
-
-## Files to change
-
-1. **`src/components/PhotoUploader.tsx`** — only file with structural changes.
-   - Compute `mode` from `photos.length`.
-   - Split `slots` into `largeSlots` (first 4) and `smallSlots` (next 6) for embed mode.
-   - Render two different grid containers based on `mode`. Both wrapped inside the same `DndContext` + `SortableContext` (same `sortableIds`) so drag-reorder keeps working across both modes and across the transition.
-   - Empty-slot buttons keep their existing styling (rounded-2xl, dashed border, ImagePlus icon).
-   - Update the helper text into the dual-caption above.
-   - Keep the "Drag photos here" Caveat-font flourish for the empty state (count === 0).
-
-2. **`CHANGELOG.md`** — `[Unreleased] / Changed` entry describing the dual-mode grid.
-
-3. **`mem://features/photo-upload`** — append the new dual-mode behavior so future sessions know about it. Update index reference line accordingly.
-
-No changes to: `SortablePhotoItem`, drag logic, post-time embed selection (`bluesky-embed.ts`), constants file, or backend.
-
-## Technical notes
-
-- Embed-mode aspect ratio: keep `aspect-square` on every slot so dnd-kit's `rectSortingStrategy` continues to work cleanly and large/small slots remain visually proportional.
-- Transition: when the user drops the 5th photo, the layout swap is instantaneous (CSS grid recomposition). dnd-kit's sortable items keep their `id`s, so React's reconciler will preserve the photo DOM nodes and their object-URL previews — no flicker, no re-decoding.
-- A11y: `aria-label` on the grid region updated to mention the active mode ("Images embed layout" vs "Gallery layout").
-- No new dependencies. No changes to constants, validation, compression, or posting pipeline.
-
-## Out of scope
-
-- Changing how posts are actually published (gallery vs images lexicon selection already lives in `bluesky-embed.ts` and is unaffected).
-- Animating between the two layouts (FLIP / layout transitions) — can be added later if desired.
-- Changing `MAX_PHOTOS` or any limit.
+- `src/lib/image-compress.ts`: change `compressImageForBluesky` to return `{ blob, width, height }` (or add a sibling function returning dimensions) using the already-computed resized `width`/`height`.
+- `src/components/PostComposer.tsx`: use the returned dimensions when pushing to `embeddedImages`.
+- `src/pages/Index.tsx` also calls `compressImageForBluesky` before base64 for alt-text analysis — update that call site for the new return shape (it only needs `.blob`).
+- `src/lib/bluesky-embed.ts`: the `app.bsky.embed.images` branch currently spreads images as-is, so `aspectRatio` already survives; verify with a test.
+- Tests: extend `src/lib/bluesky-embed.test.ts` and `src/components/PostComposer.integration.test.tsx` to assert `aspectRatio` is present on each embedded image for both 4-photo (images) and 5-photo (gallery) cases.
+- `CHANGELOG.md`: add a Fixed entry under `[Unreleased]`.
