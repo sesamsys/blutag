@@ -131,7 +131,7 @@ const Index = () => {
         // gives us ≤2MB JPEGs, more than enough quality for alt-text AI.
         const compressed = await compressImageForBluesky(photo.file);
         const [base64, exifData] = await Promise.all([
-          blobToBase64(compressed),
+          blobToBase64(compressed.blob),
           extractExif(photo.file).catch((err) => {
             logError(err, { context: "exif_extraction", photoId: photo.id });
             return {}; // Continue without EXIF data

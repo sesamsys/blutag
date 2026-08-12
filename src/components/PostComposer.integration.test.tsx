@@ -27,7 +27,11 @@ vi.mock("@/contexts/LanguageContext", () => ({
 }));
 
 vi.mock("@/lib/image-compress", () => ({
-  compressImageForBluesky: vi.fn(async (file: File) => file),
+  compressImageForBluesky: vi.fn(async (file: File) => ({
+    blob: file,
+    width: 2560,
+    height: 1440,
+  })),
 }));
 
 vi.mock("@atproto/api", () => ({
@@ -63,12 +67,20 @@ function makePhotos(n: number): PhotoFile[] {
   }));
 }
 
+type EmbedShape = {
+  $type: string;
+  images?: Array<{ aspectRatio?: { width: number; height: number } }>;
+  items?: Array<{ aspectRatio?: { width: number; height: number } }>;
+};
+
+const EXPECTED_ASPECT_RATIO = { width: 2560, height: 1440 };
+
 async function postAndGetEmbed(photoCount: number) {
   render(<PostComposer photos={makePhotos(photoCount)} />);
   fireEvent.click(screen.getByRole("button", { name: /post to bluesky/i }));
   await waitFor(() => expect(createRecord).toHaveBeenCalled());
   const call = createRecord.mock.calls[0] as unknown as [
-    { record: { embed?: { $type: string; images?: unknown[]; items?: unknown[] } } }
+    { record: { embed?: EmbedShape } }
   ];
   return call[0].record.embed;
 }
@@ -100,5 +112,19 @@ describe("PostComposer → Bluesky embed selection", () => {
     expect(embed?.$type).toBe("app.bsky.embed.gallery");
     expect(embed?.items).toHaveLength(10);
     expect(uploadBlob).toHaveBeenCalledTimes(10);
+  });
+
+  it("sets aspectRatio on every image in an images embed", async () => {
+    const embed = await postAndGetEmbed(4);
+    for (const img of embed?.images ?? []) {
+      expect(img.aspectRatio).toEqual(EXPECTED_ASPECT_RATIO);
+    }
+  });
+
+  it("sets aspectRatio on every item in a gallery embed", async () => {
+    const embed = await postAndGetEmbed(5);
+    for (const item of embed?.items ?? []) {
+      expect(item.aspectRatio).toEqual(EXPECTED_ASPECT_RATIO);
+    }
   });
 });

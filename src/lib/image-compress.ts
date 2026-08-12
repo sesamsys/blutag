@@ -18,13 +18,26 @@ function loadImage(file: File): Promise<HTMLImageElement> {
   });
 }
 
+/** Result of compressing an image for Bluesky upload. */
+export interface CompressedImage {
+  blob: Blob;
+  /** Final rendered width in px (post-resize) */
+  width: number;
+  /** Final rendered height in px (post-resize) */
+  height: number;
+}
+
 /**
  * Compresses an image file to JPEG ≤ 2 MB (Bluesky's lexicon limit since
  * Apr 2026), resizing the longest edge to at most
  * BLUESKY_IMAGE_MAX_DIMENSION px. Iteratively reduces quality if the
  * first pass is still too large.
+ *
+ * Returns the final pixel dimensions alongside the blob so callers can set
+ * the embed's `aspectRatio` — without it, Bluesky clients letterbox
+ * non-square images into a square frame.
  */
-export async function compressImageForBluesky(file: File): Promise<Blob> {
+export async function compressImageForBluesky(file: File): Promise<CompressedImage> {
   const img = await loadImage(file);
 
   // Calculate target dimensions
@@ -60,17 +73,18 @@ export async function compressImageForBluesky(file: File): Promise<Blob> {
     );
 
     if (blob && blob.size <= BLUESKY_IMAGE_MAX_BYTES) {
-      return blob;
+      return { blob, width, height };
     }
 
     quality -= BLUESKY_IMAGE_JPEG_QUALITY_STEP;
   }
 
   // Return whatever we got at minimum quality
-  if (blob) return blob;
+  if (blob) return { blob, width, height };
 
   // Fallback — shouldn't happen
-  return await new Promise<Blob>((resolve) =>
+  const fallback = await new Promise<Blob>((resolve) =>
     canvas.toBlob((b) => resolve(b!), "image/jpeg", BLUESKY_IMAGE_JPEG_QUALITY_MIN)
   );
+  return { blob: fallback, width, height };
 }
