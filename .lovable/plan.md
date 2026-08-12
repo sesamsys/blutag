@@ -1,6 +1,11 @@
 # Adopt Code-Review Steering Rules
 
-Capture the code-review rules you pasted as durable project standards so every future change follows them automatically.
+Capture the code-review rules you pasted as durable project standards, and clear the two build errors currently blocking the project.
+
+## Fix build errors first
+
+1. `src/components/ui/sidebar.tsx` imports `@/hooks/use-mobile`, which doesn't exist. The sidebar component is unused anywhere in `src/` — delete the file (this is exactly the "remove template scaffold" rule).
+2. `src/lib/exif.test.ts:17` casts a plain object straight to `ReturnType<typeof ExifReader.load>`. Change the cast to go through `unknown` so the test helper type-checks under strict mode.
 
 ## What gets added
 
@@ -9,7 +14,7 @@ Capture the code-review rules you pasted as durable project standards so every f
 3. **Project memory** entries so the rules are applied without needing to be re-pasted:
    - A `preference` memory holding the full rule set.
    - Two one-line Core rules in the memory index: no `as any` / no non-null assertions across `await`; Vite `import.meta.env.DEV` over `process.env.NODE_ENV`.
-4. **CHANGELOG.md** entry under `Changed` noting the new standards.
+4. **CHANGELOG.md** entry under `Changed` (standards) and `Fixed` (build errors).
 
 ## Optional follow-up (say the word and I'll include it)
 
