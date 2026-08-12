@@ -27,7 +27,11 @@ vi.mock("@/contexts/LanguageContext", () => ({
 }));
 
 vi.mock("@/lib/image-compress", () => ({
-  compressImageForBluesky: vi.fn(async (file: File) => file),
+  compressImageForBluesky: vi.fn(async (file: File) => ({
+    blob: file,
+    width: 2560,
+    height: 1440,
+  })),
 }));
 
 vi.mock("@atproto/api", () => ({
