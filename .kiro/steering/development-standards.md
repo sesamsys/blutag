@@ -1,5 +1,9 @@
 # Development Standards
 
+> See also: [`code-review-rules.md`](./code-review-rules.md) — mandatory rules derived from past code review findings (cleanup, env validation, TypeScript casts, React effects/refs, client IP, branch and timer testing).
+
+
+
 ## Code Style & Conventions
 
 ### TypeScript
