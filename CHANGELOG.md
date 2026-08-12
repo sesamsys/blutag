@@ -8,9 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - Integration test (`src/components/PostComposer.aspectRatio.test.tsx`) posting a 4000×2250 landscape photo through the real compressor, asserting the uploaded blob's declared `aspectRatio` preserves 16:9 and that the reserved render box is not square (no top/bottom padding)
+- `.kiro/steering/code-review-rules.md` — project-wide rules from code review findings (scaffold cleanup, env validation, TypeScript casts, React effect/ref rules, `cf-connecting-ip` for client IP, per-branch and fake-timer testing), cross-referenced from `development-standards.md`
 
 ### Fixed
 - Landscape and portrait photos were posted without an `aspectRatio`, so Bluesky clients letterboxed them into a square frame with top/bottom (or side) padding. `compressImageForBluesky` now returns the final rendered dimensions and `PostComposer` attaches `aspectRatio` to every image in both `app.bsky.embed.images` and `app.bsky.embed.gallery` embeds.
+- Build errors: removed the unused shadcn `sidebar` scaffold component (imported a missing `use-mobile` hook) and fixed an unsound cast in `src/lib/exif.test.ts`
+
 
 ## [0.4.0] - 2026-06-11
 
