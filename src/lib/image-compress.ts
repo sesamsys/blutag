@@ -18,13 +18,26 @@ function loadImage(file: File): Promise<HTMLImageElement> {
   });
 }
 
+/** Result of compressing an image for Bluesky upload. */
+export interface CompressedImage {
+  blob: Blob;
+  /** Final rendered width in px (post-resize) */
+  width: number;
+  /** Final rendered height in px (post-resize) */
+  height: number;
+}
+
 /**
  * Compresses an image file to JPEG ≤ 2 MB (Bluesky's lexicon limit since
  * Apr 2026), resizing the longest edge to at most
  * BLUESKY_IMAGE_MAX_DIMENSION px. Iteratively reduces quality if the
  * first pass is still too large.
+ *
+ * Returns the final pixel dimensions alongside the blob so callers can set
+ * the embed's `aspectRatio` — without it, Bluesky clients letterbox
+ * non-square images into a square frame.
  */
-export async function compressImageForBluesky(file: File): Promise<Blob> {
+export async function compressImageForBluesky(file: File): Promise<CompressedImage> {
   const img = await loadImage(file);
 
   // Calculate target dimensions
