@@ -85,7 +85,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
 
           // Upload blob with retry
           const response = await retryWithBackoff(
-            () => agent.uploadBlob(compressed, { encoding: "image/jpeg" }),
+            () => agent.uploadBlob(compressed.blob, { encoding: "image/jpeg" }),
             {
               maxAttempts: RETRY_MAX_ATTEMPTS,
               onRetry: (_error, attempt) => {
@@ -97,6 +97,9 @@ export default function PostComposer({ photos }: PostComposerProps) {
           embeddedImages.push({
             alt: photo.altText || "",
             image: response.data.blob,
+            // Without aspectRatio, Bluesky clients letterbox non-square
+            // images into a square frame.
+            aspectRatio: { width: compressed.width, height: compressed.height },
           });
         } catch (uploadError) {
           logError(uploadError, { context: "image_upload", photoId: photo.id });
