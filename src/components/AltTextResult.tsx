@@ -58,7 +58,7 @@ export default function AltTextResult({ photo, index, onUpdateAltText }: AltText
               <button
                 onClick={handleCopy}
                 disabled={!photo.altText}
-                aria-live="polite"
+                aria-label={copied ? "Copied to clipboard" : "Copy alt text"}
                 className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}

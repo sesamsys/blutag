@@ -19,7 +19,11 @@ export async function runWithConcurrency<T, R>(
   // Every runner atomically claims the next unclaimed index, so no item is
   // processed twice and no runner sits idle while work remains.
   let cursor = 0;
-  let firstError: unknown = undefined;
+  // Symbol sentinel distinguishes "no error yet" from a worker that threw
+  // `undefined` (unusual but valid JS), which would be silently swallowed
+  // if we used `undefined` itself as the sentinel.
+  const NO_ERROR = Symbol("no_error");
+  let firstError: unknown = NO_ERROR;
 
   const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
     while (true) {
@@ -28,12 +32,12 @@ export async function runWithConcurrency<T, R>(
       try {
         results[i] = await worker(items[i], i);
       } catch (err) {
-        if (firstError === undefined) firstError = err;
+        if (firstError === NO_ERROR) firstError = err;
       }
     }
   });
 
   await Promise.all(runners);
-  if (firstError !== undefined) throw firstError;
+  if (firstError !== NO_ERROR) throw firstError;
   return results;
 }

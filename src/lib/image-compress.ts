@@ -13,7 +13,10 @@ function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = reject;
+    img.onerror = (e) => {
+      URL.revokeObjectURL(img.src);
+      reject(e);
+    };
     img.src = URL.createObjectURL(file);
   });
 }

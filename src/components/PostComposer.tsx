@@ -11,7 +11,7 @@ import { compressImageForBluesky } from "@/lib/image-compress";
 import { buildPostEmbed } from "@/lib/bluesky-embed";
 import { RichText, type BlobRef } from "@atproto/api";
 import { toast } from "sonner";
-import { BLUESKY_POST_MAX_LENGTH, MAX_PHOTOS, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
+import { BLUESKY_POST_MAX_LENGTH, MAX_ALT_TEXT_LENGTH, MAX_PHOTOS, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
 import { ERROR_MESSAGES, getErrorMessage, logError, AppError, ErrorType } from "@/lib/error-messages";
 import { retryWithBackoff } from "@/lib/retry";
@@ -62,14 +62,22 @@ export default function PostComposer({ photos }: PostComposerProps) {
     }
     
     // Validate alt text lengths
-    const invalidAltText = photosWithAltText.find(p => 
-      !p.altText || p.altText.length === 0 || p.altText.length > 2000
+    const invalidAltText = photosWithAltText.find(p =>
+      !p.altText || p.altText.length === 0 || p.altText.length > MAX_ALT_TEXT_LENGTH
     );
     if (invalidAltText) {
-      toast.error("All photos must have alt text (max 2000 characters)");
+      toast.error(`All photos must have alt text (max ${MAX_ALT_TEXT_LENGTH} characters)`);
       return;
     }
-    
+
+    // Capture agent.did before any async work so the reference stays valid
+    // and we don't need a non-null assertion inside async callbacks.
+    const did = agent.did;
+    if (!did) {
+      toast.error("Session error — please sign in again");
+      return;
+    }
+
     setPosting(true);
     try {
       // Compress and upload all images
@@ -140,7 +148,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
       // Post with retry
       const result = await retryWithBackoff(
         () => agent.com.atproto.repo.createRecord({
-          repo: agent.did!,
+          repo: did,
           collection: "app.bsky.feed.post",
           record,
         }),

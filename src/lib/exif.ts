@@ -16,8 +16,10 @@ export async function extractExif(file: File): Promise<ExifInfo> {
     if (tags["GPSLatitude"] && tags["GPSLongitude"]) {
       latitude = parseFloat(tags["GPSLatitude"].description);
       longitude = parseFloat(tags["GPSLongitude"].description);
-      if ((tags["GPSLatitudeRef"]?.value as any)?.[0] === "S") latitude = -latitude;
-      if ((tags["GPSLongitudeRef"]?.value as any)?.[0] === "W") longitude = -longitude;
+      const latRef = tags["GPSLatitudeRef"]?.value;
+      const lonRef = tags["GPSLongitudeRef"]?.value;
+      if (Array.isArray(latRef) && latRef[0] === "S") latitude = -latitude;
+      if (Array.isArray(lonRef) && lonRef[0] === "W") longitude = -longitude;
     }
 
     const make = tags["Make"]?.description;

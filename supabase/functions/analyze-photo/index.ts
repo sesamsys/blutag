@@ -14,6 +14,11 @@ const MAX_PAYLOAD_BYTES = 30 * 1024 * 1024;
 
 const ipBuckets = new Map<string, number[]>();
 
+// NOTE: This Map is scoped to the current Deno isolate. Supabase Edge Functions
+// may spin up multiple concurrent isolates, each with their own empty bucket.
+// This rate limiter is a best-effort defence within a single isolate; the
+// client-side limiter in src/lib/rate-limiter.ts is the primary protection.
+
 function isRateLimited(ip: string): { limited: boolean; retryAfterSec: number } {
   const now = Date.now();
   const cutoff = now - RATE_LIMIT_WINDOW_MS;
@@ -71,8 +76,10 @@ serve(async (req) => {
 
   try {
     // --- Server-side rate limiting ---
-    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-                     req.headers.get("cf-connecting-ip") ||
+    // Prefer cf-connecting-ip (set by the edge network, cannot be spoofed)
+    // over x-forwarded-for (user-controlled, trivially rotatable).
+    const clientIp = req.headers.get("cf-connecting-ip") ||
+                     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
                      "unknown";
     const { limited, retryAfterSec } = isRateLimited(clientIp);
     if (limited) {
