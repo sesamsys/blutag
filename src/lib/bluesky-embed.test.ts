@@ -7,6 +7,7 @@ const makeImages = (n: number): EmbeddedImage[] =>
   Array.from({ length: n }, (_, i) => ({
     alt: `alt ${i}`,
     image: fakeBlob,
+    aspectRatio: { width: 2560, height: 1440 },
   }));
 
 describe("buildPostEmbed", () => {
