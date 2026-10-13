@@ -10,8 +10,9 @@ import "fake-indexeddb/auto";
 import { IDBFactory } from "fake-indexeddb";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-// jsdom does not implement URL.createObjectURL — stub it globally.
-vi.stubGlobal("URL", {
+// jsdom does not implement URL.createObjectURL — stub the two static methods
+// only. Replacing the whole URL global breaks Vitest's module loader.
+Object.assign(URL, {
   createObjectURL: vi.fn(() => "blob:preview-stub"),
   revokeObjectURL: vi.fn(),
 });
