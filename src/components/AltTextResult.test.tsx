@@ -31,7 +31,9 @@ afterEach(() => {
 
 describe("AltTextResult", () => {
   it("shows a loading state while analyzing", () => {
-    render(<AltTextResult photo={makePhoto({ analyzing: true })} index={0} onUpdateAltText={vi.fn()} />);
+    render(
+      <AltTextResult photo={makePhoto({ analyzing: true })} index={0} onUpdateAltText={vi.fn()} />,
+    );
     expect(screen.getByRole("status", { name: "Analyzing photo" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Alt text description")).not.toBeInTheDocument();
   });
@@ -57,7 +59,13 @@ describe("AltTextResult", () => {
   });
 
   it("disables copy when there is no alt text", () => {
-    render(<AltTextResult photo={makePhoto({ altText: undefined })} index={0} onUpdateAltText={vi.fn()} />);
+    render(
+      <AltTextResult
+        photo={makePhoto({ altText: undefined })}
+        index={0}
+        onUpdateAltText={vi.fn()}
+      />,
+    );
     expect(screen.getByRole("button", { name: "Copy alt text" })).toBeDisabled();
   });
 
