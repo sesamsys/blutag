@@ -28,18 +28,16 @@ export default function AboutDialog() {
             <ul className="list-disc pl-4 space-y-1">
               <li>
                 Photos are sent to{" "}
-                <span className="font-medium text-foreground">
-                  {AI_MODEL_DISPLAY_NAME}
-                </span>{" "}
-                (an AI model) to generate descriptive alt text.
+                <span className="font-medium text-foreground">{AI_MODEL_DISPLAY_NAME}</span> (an AI
+                model) to generate descriptive alt text.
               </li>
               <li>
-                EXIF metadata (date, location) may be used to improve
-                descriptions, but raw values are never included in the output.
+                EXIF metadata (date, location) may be used to improve descriptions, but raw values
+                are never included in the output.
               </li>
               <li>
-                Photos are processed in-memory and not stored permanently — they
-                are deleted when your session ends.
+                Photos are processed in-memory and not stored permanently — they are deleted when
+                your session ends.
               </li>
             </ul>
           </section>
@@ -49,12 +47,10 @@ export default function AboutDialog() {
             <ul className="list-disc pl-4 space-y-1">
               <li>Photos are not used to train AI models.</li>
               <li>No account is required to generate alt text.</li>
+              <li>No personal data is collected or shared with third parties.</li>
               <li>
-                No personal data is collected or shared with third parties.
-              </li>
-              <li>
-                Bluesky login (optional, for posting) uses the AT Protocol OAuth
-                flow — Blutag never sees your password.
+                Bluesky login (optional, for posting) uses the AT Protocol OAuth flow — Blutag never
+                sees your password.
               </li>
             </ul>
           </section>

@@ -19,8 +19,7 @@ Object.assign(URL, {
 
 // Each test gets a fresh IDB so state never leaks between cases.
 beforeEach(() => {
-  (globalThis as unknown as { indexedDB: IDBFactory }).indexedDB =
-    new IDBFactory();
+  (globalThis as unknown as { indexedDB: IDBFactory }).indexedDB = new IDBFactory();
   // Reset the module's singleton DB/promise so it opens a fresh database.
   vi.resetModules();
 });
@@ -29,11 +28,7 @@ beforeEach(() => {
 async function getPersistence() {
   return import("./session-persistence");
 }
-function makeFile(
-  content: string,
-  name = "photo.jpg",
-  type = "image/jpeg",
-): File {
+function makeFile(content: string, name = "photo.jpg", type = "image/jpeg"): File {
   return new File([content], name, { type });
 }
 
@@ -100,11 +95,7 @@ describe("session-persistence", () => {
 
       const restored = await loadPhotosSession();
       expect(restored!.map((p) => p.id)).toEqual(["a", "b", "c"]);
-      expect(restored!.map((p) => p.altText)).toEqual([
-        "First",
-        "Second",
-        "Third",
-      ]);
+      expect(restored!.map((p) => p.altText)).toEqual(["First", "Second", "Third"]);
     });
 
     it("reconstructs File content correctly", async () => {
@@ -151,8 +142,7 @@ describe("session-persistence", () => {
 
   describe("clearPhotosSession", () => {
     it("returns null after clearing", async () => {
-      const { savePhotosSession, loadPhotosSession, clearPhotosSession } =
-        await getPersistence();
+      const { savePhotosSession, loadPhotosSession, clearPhotosSession } = await getPersistence();
 
       await savePhotosSession([makePhotoFile()]);
       await clearPhotosSession();
@@ -202,10 +192,7 @@ describe("session-persistence", () => {
       const photosB = [makePhotoFile({ id: "b1", altText: "B" })];
 
       // Fire save + load concurrently; the queue must serialize them.
-      await Promise.all([
-        savePhotosSession(photosA),
-        savePhotosSession(photosB),
-      ]);
+      await Promise.all([savePhotosSession(photosA), savePhotosSession(photosB)]);
 
       // Whichever save ran last wins — load must return a consistent result
       const restored = await loadPhotosSession();

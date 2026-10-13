@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { compressImageForBluesky } from "./image-compress";
-import {
-  BLUESKY_IMAGE_MAX_BYTES,
-  BLUESKY_IMAGE_MAX_DIMENSION,
-} from "./constants";
+import { BLUESKY_IMAGE_MAX_BYTES, BLUESKY_IMAGE_MAX_DIMENSION } from "./constants";
 
 // ---------------------------------------------------------------------------
 // Canvas / Image stubs
@@ -34,11 +31,7 @@ function setupCanvasMock(blobSizeForQuality: (quality: number) => number) {
       width: 0,
       height: 0,
       getContext: () => ({ drawImage: vi.fn() }),
-      toBlob: (
-        cb: (b: Blob | null) => void,
-        _type: string,
-        quality: number,
-      ) => {
+      toBlob: (cb: (b: Blob | null) => void, _type: string, quality: number) => {
         toBlobCalls.push(quality);
         cb(makeBlob(blobSizeForQuality(quality)));
       },
@@ -52,11 +45,7 @@ function setupCanvasMock(blobSizeForQuality: (quality: number) => number) {
  * synchronously when `src` is assigned, so the promise in loadImage()
  * settles within the same microtask queue flush.
  */
-function setupImageMock(
-  naturalWidth: number,
-  naturalHeight: number,
-  fail = false,
-) {
+function setupImageMock(naturalWidth: number, naturalHeight: number, fail = false) {
   vi.stubGlobal("URL", {
     createObjectURL: vi.fn(() => "blob:mock"),
     revokeObjectURL: vi.fn(),
@@ -144,9 +133,7 @@ describe("compressImageForBluesky", () => {
     const result = await compressImageForBluesky(file);
 
     expect(result.width).toBe(BLUESKY_IMAGE_MAX_DIMENSION);
-    expect(result.height).toBe(
-      Math.round((bigH / bigW) * BLUESKY_IMAGE_MAX_DIMENSION),
-    );
+    expect(result.height).toBe(Math.round((bigH / bigW) * BLUESKY_IMAGE_MAX_DIMENSION));
   });
 
   it("scales down a portrait image that exceeds max dimension", async () => {
@@ -159,9 +146,7 @@ describe("compressImageForBluesky", () => {
     const result = await compressImageForBluesky(file);
 
     expect(result.height).toBe(BLUESKY_IMAGE_MAX_DIMENSION);
-    expect(result.width).toBe(
-      Math.round((bigW / bigH) * BLUESKY_IMAGE_MAX_DIMENSION),
-    );
+    expect(result.width).toBe(Math.round((bigW / bigH) * BLUESKY_IMAGE_MAX_DIMENSION));
   });
 
   it("reduces quality iteratively until blob fits within size limit", async () => {

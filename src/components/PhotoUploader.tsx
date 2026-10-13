@@ -108,15 +108,7 @@ export default function PhotoUploader({
           return;
         }
         const ext = f.name.split(".").pop()?.toLowerCase();
-        const validExtensions = [
-          "jpg",
-          "jpeg",
-          "png",
-          "gif",
-          "webp",
-          "heic",
-          "heif",
-        ];
+        const validExtensions = ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif"];
         if (!ext || !validExtensions.includes(ext)) {
           errors.push(`${f.name}: Unsupported file type`);
           return;
@@ -159,25 +151,16 @@ export default function PhotoUploader({
       const files: File[] = [];
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        if (!item || item.kind !== "file" || !item.type.startsWith("image/"))
-          continue;
+        if (!item || item.kind !== "file" || !item.type.startsWith("image/")) continue;
         const file = item.getAsFile();
         if (!file) continue;
         // Clipboard images (e.g. screenshots) often lack a proper filename
-        if (
-          !file.name ||
-          file.name === "image.png" ||
-          !file.name.includes(".")
-        ) {
+        if (!file.name || file.name === "image.png" || !file.name.includes(".")) {
           const ext = file.type.split("/")[1] || "png";
-          const renamed = new File(
-            [file],
-            `pasted-image-${Date.now()}.${ext}`,
-            {
-              type: file.type,
-              lastModified: file.lastModified,
-            },
-          );
+          const renamed = new File([file], `pasted-image-${Date.now()}.${ext}`, {
+            type: file.type,
+            lastModified: file.lastModified,
+          });
           files.push(renamed);
         } else {
           files.push(file);
@@ -245,10 +228,7 @@ export default function PhotoUploader({
       toast.warning(`You've reached the ${MAX_PHOTOS} photo limit.`);
       return;
     }
-    if (
-      !navigator.clipboard ||
-      typeof navigator.clipboard.read !== "function"
-    ) {
+    if (!navigator.clipboard || typeof navigator.clipboard.read !== "function") {
       toast.error(
         "Your browser doesn't support pasting images. Try copying the image again or use the file picker.",
       );
@@ -269,9 +249,7 @@ export default function PhotoUploader({
         );
       }
       if (files.length === 0) {
-        toast.error(
-          "No image found on the clipboard. Copy an image first, then tap Paste.",
-        );
+        toast.error("No image found on the clipboard. Copy an image first, then tap Paste.");
         return;
       }
       const dt = new DataTransfer();
@@ -280,24 +258,15 @@ export default function PhotoUploader({
     } catch (err) {
       // User denied permission, or clipboard unreadable
       const msg = err instanceof Error ? err.message : String(err);
-      if (
-        msg.toLowerCase().includes("denied") ||
-        msg.toLowerCase().includes("permission")
-      ) {
-        toast.error(
-          "Clipboard permission denied. Please allow clipboard access and try again.",
-        );
+      if (msg.toLowerCase().includes("denied") || msg.toLowerCase().includes("permission")) {
+        toast.error("Clipboard permission denied. Please allow clipboard access and try again.");
       } else {
-        toast.error(
-          "Couldn't read the clipboard. Try copying the image again.",
-        );
+        toast.error("Couldn't read the clipboard. Try copying the image again.");
       }
     }
   }, [remaining, handleFiles]);
 
-  const activePhoto = activeDragId
-    ? photos.find((p) => p.id === activeDragId)
-    : null;
+  const activePhoto = activeDragId ? photos.find((p) => p.id === activeDragId) : null;
   const isEmpty = photos.length === 0;
   const sortableIds = photos.map((p) => p.id);
 
@@ -305,9 +274,7 @@ export default function PhotoUploader({
   // flag so the visual layout stays consistent with posting behaviour.
   const { mode, slots, largeSlots, smallSlots } = useMemo(() => {
     const m: "embed" | "gallery" =
-      BLUESKY_GALLERY_ENABLED && photos.length > BLUESKY_IMAGES_EMBED_MAX
-        ? "gallery"
-        : "embed";
+      BLUESKY_GALLERY_ENABLED && photos.length > BLUESKY_IMAGES_EMBED_MAX ? "gallery" : "embed";
     const s = Array.from({ length: MAX_PHOTOS }, (_, i) => photos[i] ?? null);
     return {
       mode: m,
@@ -335,9 +302,7 @@ export default function PhotoUploader({
         className="aspect-square w-full rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <ImagePlus className="w-6 h-6 text-muted-foreground" />
-        <span className="text-xs text-muted-foreground font-medium">
-          Add photo
-        </span>
+        <span className="text-xs text-muted-foreground font-medium">Add photo</span>
       </button>
     );
 
@@ -391,26 +356,18 @@ export default function PhotoUploader({
                   ? "grid-cols-6 sm:grid-cols-12"
                   : "grid-cols-3 sm:grid-cols-4 md:grid-cols-5"
               } ${
-                isDraggingOver
-                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                  : ""
+                isDraggingOver ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
               }`}
             >
               {mode === "embed" ? (
                 <>
                   {largeSlots.map((photo, i) => (
-                    <div
-                      key={photo ? photo.id : `empty-large-${i}`}
-                      className="col-span-3"
-                    >
+                    <div key={photo ? photo.id : `empty-large-${i}`} className="col-span-3">
                       {renderSlot(photo, i)}
                     </div>
                   ))}
                   {smallSlots.map((photo, i) => (
-                    <div
-                      key={photo ? photo.id : `empty-small-${i}`}
-                      className="col-span-2"
-                    >
+                    <div key={photo ? photo.id : `empty-small-${i}`} className="col-span-2">
                       {renderSlot(photo, i + BLUESKY_IMAGES_EMBED_MAX)}
                     </div>
                   ))}
@@ -442,15 +399,10 @@ export default function PhotoUploader({
 
       {/* Live region for screen readers */}
       <span className="sr-only" aria-live="polite">
-        {photos.length > 0
-          ? `${photos.length} of ${MAX_PHOTOS} photos added`
-          : "No photos added"}
+        {photos.length > 0 ? `${photos.length} of ${MAX_PHOTOS} photos added` : "No photos added"}
       </span>
 
-      <p
-        className="text-xs text-muted-foreground mt-2 text-center"
-        aria-live="polite"
-      >
+      <p className="text-xs text-muted-foreground mt-2 text-center" aria-live="polite">
         {mode === "embed"
           ? `Images post · up to ${BLUESKY_IMAGES_EMBED_MAX} photos shown larger`
           : `Gallery post · ${BLUESKY_IMAGES_EMBED_MAX + 1}–${MAX_PHOTOS} photos, equal size`}

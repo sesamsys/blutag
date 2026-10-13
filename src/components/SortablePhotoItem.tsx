@@ -36,14 +36,9 @@ const SortablePhotoItem = memo(function SortablePhotoItem({
   onRemove,
   showNumber,
 }: SortablePhotoItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),

@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import PostComposer from "./PostComposer";
-import {
-  BLUESKY_IMAGE_MAX_DIMENSION,
-  BLUESKY_IMAGE_MAX_BYTES,
-} from "@/lib/constants";
+import { BLUESKY_IMAGE_MAX_DIMENSION, BLUESKY_IMAGE_MAX_BYTES } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
 
 /**
@@ -21,9 +18,7 @@ const SOURCE_HEIGHT = 2250;
 
 /** Expected post-resize dimensions: longest edge clamped to the max dimension. */
 const EXPECTED_WIDTH = BLUESKY_IMAGE_MAX_DIMENSION;
-const EXPECTED_HEIGHT = Math.round(
-  (SOURCE_HEIGHT / SOURCE_WIDTH) * BLUESKY_IMAGE_MAX_DIMENSION,
-);
+const EXPECTED_HEIGHT = Math.round((SOURCE_HEIGHT / SOURCE_WIDTH) * BLUESKY_IMAGE_MAX_DIMENSION);
 
 // ── Mocks ─────────────────────────────────────────────────────────────
 
@@ -118,13 +113,9 @@ function installBrowserStubs() {
 function makeLandscapePhoto(): PhotoFile {
   return {
     id: "photo-landscape",
-    file: new File(
-      [new Uint8Array([0xff, 0xd8, 0xff, 0xd9])],
-      "landscape.jpg",
-      {
-        type: "image/jpeg",
-      },
-    ),
+    file: new File([new Uint8Array([0xff, 0xd8, 0xff, 0xd9])], "landscape.jpg", {
+      type: "image/jpeg",
+    }),
     preview: "blob:fake/0",
     altText: "A car dashboard photographed from the driver's seat.",
     analyzing: false,
@@ -158,10 +149,7 @@ async function postLandscapePhoto(): Promise<UploadedImage> {
  * client would use for a fixed-width container. 100% means a square box —
  * i.e. a letterboxed landscape photo with top/bottom padding.
  */
-function reservedBoxPaddingPercent(aspectRatio?: {
-  width: number;
-  height: number;
-}): number {
+function reservedBoxPaddingPercent(aspectRatio?: { width: number; height: number }): number {
   if (!aspectRatio) return 100; // no ratio declared → square fallback
   return (aspectRatio.height / aspectRatio.width) * 100;
 }

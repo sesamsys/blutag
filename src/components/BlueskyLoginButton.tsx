@@ -17,10 +17,7 @@ import { toast } from "sonner";
 function isValidHandle(value: string): boolean {
   const trimmed = value.trim();
   return (
-    trimmed.length >= 3 &&
-    trimmed.includes(".") &&
-    !trimmed.includes("@") &&
-    !trimmed.includes(" ")
+    trimmed.length >= 3 && trimmed.includes(".") && !trimmed.includes("@") && !trimmed.includes(" ")
   );
 }
 
@@ -41,10 +38,7 @@ export default function BlueskyLoginButton() {
     try {
       await signIn(trimmed);
     } catch (err) {
-      const msg =
-        err instanceof Error
-          ? err.message
-          : "Sign-in failed. Please try again.";
+      const msg = err instanceof Error ? err.message : "Sign-in failed. Please try again.";
       toast.error(msg);
       setSigningIn(false);
     }
@@ -80,12 +74,7 @@ export default function BlueskyLoginButton() {
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setOpen(true)}
-        className="gap-1.5"
-      >
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)} className="gap-1.5">
         <LogIn className="w-4 h-4" />
         <span className="hidden sm:inline">Sign in with Bluesky</span>
         <span className="sm:hidden">Sign in</span>
@@ -96,8 +85,8 @@ export default function BlueskyLoginButton() {
           <DialogHeader>
             <DialogTitle>Sign in with Bluesky</DialogTitle>
             <DialogDescription>
-              Enter your Bluesky handle to sign in securely via OAuth. You'll be
-              redirected to Bluesky to approve access.
+              Enter your Bluesky handle to sign in securely via OAuth. You'll be redirected to
+              Bluesky to approve access.
             </DialogDescription>
           </DialogHeader>
 
@@ -121,11 +110,7 @@ export default function BlueskyLoginButton() {
                 </p>
               )}
             </div>
-            <Button
-              type="submit"
-              disabled={signingIn || !valid}
-              className="w-full gap-2"
-            >
+            <Button type="submit" disabled={signingIn || !valid} className="w-full gap-2">
               {signingIn ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />

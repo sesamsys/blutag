@@ -1,10 +1,6 @@
 import { useMemo, useState } from "react";
 import { Globe, Check } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -14,12 +10,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  ALL_LANGUAGES,
-  CURATED_LANGUAGES,
-  getLanguage,
-  type Language,
-} from "@/lib/languages";
+import { ALL_LANGUAGES, CURATED_LANGUAGES, getLanguage, type Language } from "@/lib/languages";
 import { cn } from "@/lib/utils";
 
 interface LanguagePickerProps {
@@ -27,10 +18,7 @@ interface LanguagePickerProps {
   className?: string;
 }
 
-export default function LanguagePicker({
-  variant = "pill",
-  className,
-}: LanguagePickerProps) {
+export default function LanguagePicker({ variant = "pill", className }: LanguagePickerProps) {
   const { language, setLanguage, recent } = useLanguage();
   const [open, setOpen] = useState(false);
   const current = getLanguage(language);
@@ -41,10 +29,7 @@ export default function LanguagePicker({
   );
 
   const curatedFiltered = useMemo(
-    () =>
-      CURATED_LANGUAGES.filter(
-        (l) => !recentLanguages.some((r) => r.code === l.code),
-      ),
+    () => CURATED_LANGUAGES.filter((l) => !recentLanguages.some((r) => r.code === l.code)),
     [recentLanguages],
   );
 
@@ -148,9 +133,7 @@ function LangRow({
       <span className="flex flex-col">
         <span className="text-sm">{lang.nameEn}</span>
         {lang.nativeName !== lang.nameEn && (
-          <span className="text-xs text-muted-foreground">
-            {lang.nativeName}
-          </span>
+          <span className="text-xs text-muted-foreground">{lang.nativeName}</span>
         )}
       </span>
       {selected && <Check className="w-4 h-4 text-primary shrink-0" />}

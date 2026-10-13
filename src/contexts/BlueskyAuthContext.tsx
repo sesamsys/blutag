@@ -1,16 +1,6 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { useRouter } from "@tanstack/react-router";
-import type {
-  BrowserOAuthClient,
-  OAuthSession,
-} from "@atproto/oauth-client-browser";
+import type { BrowserOAuthClient, OAuthSession } from "@atproto/oauth-client-browser";
 import { Agent } from "@atproto/api";
 import { toast } from "sonner";
 import {
@@ -56,12 +46,11 @@ function getClient(): Promise<BrowserOAuthClient> {
   if (!clientPromise) {
     // Imported lazily: the OAuth client is browser-only (IndexedDB, WebCrypto)
     // and must never be evaluated during server rendering.
-    clientPromise = import("@atproto/oauth-client-browser").then(
-      ({ BrowserOAuthClient: Client }) =>
-        Client.load({
-          clientId: CLIENT_ID,
-          handleResolver: "https://bsky.social",
-        }),
+    clientPromise = import("@atproto/oauth-client-browser").then(({ BrowserOAuthClient: Client }) =>
+      Client.load({
+        clientId: CLIENT_ID,
+        handleResolver: "https://bsky.social",
+      }),
     );
   }
   return clientPromise;
@@ -94,11 +83,7 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       logError(error, { context: "establish_session" });
-      throw new AppError(
-        ERROR_MESSAGES.AUTH_FAILED,
-        ErrorType.AUTHENTICATION,
-        error,
-      );
+      throw new AppError(ERROR_MESSAGES.AUTH_FAILED, ErrorType.AUTHENTICATION, error);
     }
   }, []);
 
@@ -195,7 +180,6 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
 
 export function useBlueskyAuth() {
   const ctx = useContext(BlueskyAuthContext);
-  if (!ctx)
-    throw new Error("useBlueskyAuth must be used within BlueskyAuthProvider");
+  if (!ctx) throw new Error("useBlueskyAuth must be used within BlueskyAuthProvider");
   return ctx;
 }

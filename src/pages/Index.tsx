@@ -50,8 +50,7 @@ function blobToBase64(blob: Blob): Promise<string> {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result;
-      const base64 =
-        typeof result === "string" ? result.split(",")[1] : undefined;
+      const base64 = typeof result === "string" ? result.split(",")[1] : undefined;
       if (base64 === undefined) {
         reject(new Error("Could not read image data"));
         return;
@@ -121,23 +120,15 @@ const Index = () => {
     });
   }, []);
 
-  const handleReorderPhotos = useCallback(
-    (oldIndex: number, newIndex: number) => {
-      setPhotos((prev) => arrayMove(prev, oldIndex, newIndex));
-    },
-    [],
-  );
-
-  const handleUpdateAltText = useCallback((id: string, text: string) => {
-    setPhotos((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, altText: text } : p)),
-    );
+  const handleReorderPhotos = useCallback((oldIndex: number, newIndex: number) => {
+    setPhotos((prev) => arrayMove(prev, oldIndex, newIndex));
   }, []);
 
-  const runAnalysis = async (
-    targetPhotos: PhotoFile[],
-    targetLanguage: string,
-  ) => {
+  const handleUpdateAltText = useCallback((id: string, text: string) => {
+    setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, altText: text } : p)));
+  }, []);
+
+  const runAnalysis = async (targetPhotos: PhotoFile[], targetLanguage: string) => {
     if (targetPhotos.length === 0 || isAnalyzing) return;
 
     // Client-side rate limiting
@@ -153,9 +144,7 @@ const Index = () => {
     setIsAnalyzing(true);
     setHasResults(true);
     setResultsLanguage(targetLanguage);
-    setPhotos((prev) =>
-      prev.map((p) => (targetIds.has(p.id) ? { ...p, analyzing: true } : p)),
-    );
+    setPhotos((prev) => prev.map((p) => (targetIds.has(p.id) ? { ...p, analyzing: true } : p)));
 
     const analyzeOne = async (photo: PhotoFile) => {
       try {
@@ -175,25 +164,18 @@ const Index = () => {
         // Retry with timeout (30 seconds per request, up to 3 attempts)
         const result = await retryWithTimeout(
           async () => {
-            const { data, error } = await supabase.functions.invoke(
-              "analyze-photo",
-              {
-                body: {
-                  imageBase64: base64,
-                  exifData,
-                  language: targetLanguage,
-                },
+            const { data, error } = await supabase.functions.invoke("analyze-photo", {
+              body: {
+                imageBase64: base64,
+                exifData,
+                language: targetLanguage,
               },
-            );
+            });
 
             if (error) {
               // Check for specific error types
               if (error.message?.includes("429")) {
-                throw new AppError(
-                  ERROR_MESSAGES.ALT_TEXT_RATE_LIMIT,
-                  ErrorType.RATE_LIMIT,
-                  error,
-                );
+                throw new AppError(ERROR_MESSAGES.ALT_TEXT_RATE_LIMIT, ErrorType.RATE_LIMIT, error);
               }
               if (error.message?.includes("402")) {
                 throw new AppError(
@@ -212,18 +194,14 @@ const Index = () => {
           {
             maxAttempts: RETRY_MAX_ATTEMPTS,
             onRetry: (_error, attempt) => {
-              toast.info(
-                `Retrying analysis (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`,
-              );
+              toast.info(`Retrying analysis (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`);
             },
           },
         );
 
         setPhotos((prev) =>
           prev.map((p) =>
-            p.id === photo.id
-              ? { ...p, altText: result.altText, exifData, analyzing: false }
-              : p,
+            p.id === photo.id ? { ...p, altText: result.altText, exifData, analyzing: false } : p,
           ),
         );
       } catch (err) {
@@ -232,9 +210,7 @@ const Index = () => {
         const errorMessage = getErrorMessage(err);
         toast.error(errorMessage);
 
-        setPhotos((prev) =>
-          prev.map((p) => (p.id === photo.id ? { ...p, analyzing: false } : p)),
-        );
+        setPhotos((prev) => prev.map((p) => (p.id === photo.id ? { ...p, analyzing: false } : p)));
       }
     };
 
@@ -294,13 +270,7 @@ const Index = () => {
                 className="w-4 h-4 text-primary-foreground"
               >
                 <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
-                <circle
-                  cx="7"
-                  cy="7"
-                  r="1.5"
-                  fill="currentColor"
-                  stroke="none"
-                />
+                <circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none" />
               </svg>
             </div>
             <h1 className="text-lg font-bold tracking-tight">Blutag</h1>
@@ -316,12 +286,11 @@ const Index = () => {
             {/* Hero */}
             <div className="text-center space-y-2">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                AI-powered alt text for{" "}
-                <span className="text-primary">Bluesky</span>
+                AI-powered alt text for <span className="text-primary">Bluesky</span>
               </h2>
               <p className="text-muted-foreground text-base max-w-md mx-auto">
-                Upload your photos and get meaningful, descriptive alt text to
-                make your posts accessible to everyone.
+                Upload your photos and get meaningful, descriptive alt text to make your posts
+                accessible to everyone.
               </p>
             </div>
 
@@ -371,24 +340,18 @@ const Index = () => {
                 <span>Output language:</span>
                 <LanguagePicker variant="compact" />
               </div>
-              {resultsLanguage &&
-                resultsLanguage !== language &&
-                !isAnalyzing && (
-                  <button
-                    onClick={handleRegenerate}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    Regenerate in {getLanguage(language).nameEn}
-                  </button>
-                )}
-              {isAnalyzing &&
-                resultsLanguage &&
-                resultsLanguage !== language && (
-                  <span className="text-xs text-muted-foreground">
-                    Regenerating…
-                  </span>
-                )}
+              {resultsLanguage && resultsLanguage !== language && !isAnalyzing && (
+                <button
+                  onClick={handleRegenerate}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Regenerate in {getLanguage(language).nameEn}
+                </button>
+              )}
+              {isAnalyzing && resultsLanguage && resultsLanguage !== language && (
+                <span className="text-xs text-muted-foreground">Regenerating…</span>
+              )}
             </div>
 
             <div className="flex flex-col gap-4">

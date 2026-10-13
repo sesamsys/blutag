@@ -13,9 +13,7 @@ import ExifReader from "exifreader";
 const mockLoad = vi.mocked(ExifReader.load);
 
 /** Build a minimal ExifReader tags object from the provided fields. */
-function makeTags(
-  fields: Record<string, { description?: string; value?: unknown }>,
-) {
+function makeTags(fields: Record<string, { description?: string; value?: unknown }>) {
   return fields as unknown as ReturnType<typeof ExifReader.load>;
 }
 
@@ -47,9 +45,7 @@ describe("extractExif", () => {
   });
 
   it("falls back to DateTime when DateTimeOriginal is absent", async () => {
-    mockLoad.mockReturnValue(
-      makeTags({ DateTime: { description: "2024:01:01 00:00:00" } }),
-    );
+    mockLoad.mockReturnValue(makeTags({ DateTime: { description: "2024:01:01 00:00:00" } }));
     const result = await extractExif(makeFile());
     expect(result.dateTime).toBe("2024:01:01 00:00:00");
   });

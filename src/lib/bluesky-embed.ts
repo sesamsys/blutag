@@ -1,8 +1,5 @@
 import type { BlobRef } from "@atproto/api";
-import {
-  BLUESKY_GALLERY_ENABLED,
-  BLUESKY_IMAGES_EMBED_MAX,
-} from "@/lib/constants";
+import { BLUESKY_GALLERY_ENABLED, BLUESKY_IMAGES_EMBED_MAX } from "@/lib/constants";
 
 export interface EmbeddedImage {
   alt: string;

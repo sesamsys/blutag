@@ -6,8 +6,7 @@ export async function extractExif(file: File): Promise<ExifInfo> {
     const buffer = await file.arrayBuffer();
     const tags = ExifReader.load(buffer);
 
-    const dateTime =
-      tags["DateTimeOriginal"]?.description ?? tags["DateTime"]?.description;
+    const dateTime = tags["DateTimeOriginal"]?.description ?? tags["DateTime"]?.description;
 
     let latitude: number | undefined;
     let longitude: number | undefined;

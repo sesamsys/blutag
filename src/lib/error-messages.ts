@@ -4,18 +4,14 @@
 
 export const ERROR_MESSAGES = {
   // Network errors
-  NETWORK_ERROR:
-    "Unable to connect. Please check your internet connection and try again.",
+  NETWORK_ERROR: "Unable to connect. Please check your internet connection and try again.",
   TIMEOUT_ERROR: "The request took too long. Please try again.",
 
   // Photo upload errors
-  PHOTO_TOO_LARGE: (maxMB: number) =>
-    `Photo is too large. Maximum size is ${maxMB}MB.`,
-  PHOTO_INVALID_TYPE:
-    "Invalid file type. Please upload an image file (JPEG, PNG, etc.).",
+  PHOTO_TOO_LARGE: (maxMB: number) => `Photo is too large. Maximum size is ${maxMB}MB.`,
+  PHOTO_INVALID_TYPE: "Invalid file type. Please upload an image file (JPEG, PNG, etc.).",
   PHOTO_UPLOAD_FAILED: "Failed to upload photo. Please try again.",
-  PHOTO_COMPRESSION_FAILED:
-    "Failed to compress image. The file may be corrupted.",
+  PHOTO_COMPRESSION_FAILED: "Failed to compress image. The file may be corrupted.",
 
   // Alt text generation errors
   ALT_TEXT_GENERATION_FAILED: "Failed to generate alt text. Please try again.",
@@ -31,13 +27,11 @@ export const ERROR_MESSAGES = {
   AUTH_CLIENT_METADATA_ERROR:
     "Unable to verify app identity. Please ensure you're using a stable domain.",
   AUTH_SESSION_EXPIRED: "Your session has expired. Please sign in again.",
-  AUTH_TOKEN_REFRESH_FAILED:
-    "Failed to refresh authentication. Please sign in again.",
+  AUTH_TOKEN_REFRESH_FAILED: "Failed to refresh authentication. Please sign in again.",
 
   // Bluesky posting errors
   POST_FAILED: "Failed to post to Bluesky. Please try again.",
-  POST_IMAGE_UPLOAD_FAILED:
-    "Failed to upload images to Bluesky. Please try again.",
+  POST_IMAGE_UPLOAD_FAILED: "Failed to upload images to Bluesky. Please try again.",
   POST_TOO_LONG: (maxLength: number) =>
     `Post text is too long. Maximum length is ${maxLength} characters.`,
   POST_NO_IMAGES: "Please add at least one photo before posting.",
@@ -173,18 +167,13 @@ export function isRetryableError(error: unknown): boolean {
   const type = getErrorType(error);
 
   // Network, service, and rate limit errors are retryable
-  return [ErrorType.NETWORK, ErrorType.SERVICE, ErrorType.RATE_LIMIT].includes(
-    type,
-  );
+  return [ErrorType.NETWORK, ErrorType.SERVICE, ErrorType.RATE_LIMIT].includes(type);
 }
 
 /**
  * Log error to console with context (in development) or to error tracking service (in production)
  */
-export function logError(
-  error: unknown,
-  context?: Record<string, unknown>,
-): void {
+export function logError(error: unknown, context?: Record<string, unknown>): void {
   console.error("Error:", error, context);
 
   // TODO: In production, send to error tracking service (Sentry, LogRocket, etc.)

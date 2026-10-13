@@ -1,15 +1,11 @@
 type LovableErrorOptions = {
-  mechanism?:
-    "manual" | "onerror" | "unhandledrejection" | "react_error_boundary";
+  mechanism?: "manual" | "onerror" | "unhandledrejection" | "react_error_boundary";
   handled?: boolean;
   severity?: "error" | "warning" | "info";
 };
 
 type LovableEvents = {
-  track?: (
-    event: string,
-    properties?: Record<string, unknown>,
-  ) => string | null;
+  track?: (event: string, properties?: Record<string, unknown>) => string | null;
   captureException?: (
     error: unknown,
     context?: Record<string, unknown>,
@@ -28,10 +24,7 @@ declare global {
   }
 }
 
-export function reportLovableError(
-  error: unknown,
-  context: Record<string, unknown> = {},
-) {
+export function reportLovableError(error: unknown, context: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
   window.__lovableEvents?.captureException?.(
     error,
@@ -70,9 +63,7 @@ function describeThrown(error: unknown): string {
   const { message } = (error ?? {}) as { message?: unknown };
   if (typeof message === "string" && message.length > 0) return message;
   try {
-    return (
-      JSON.stringify(error)?.slice(0, MAX_SERIALIZED_LENGTH) ?? String(error)
-    );
+    return JSON.stringify(error)?.slice(0, MAX_SERIALIZED_LENGTH) ?? String(error);
   } catch {
     return String(error);
   }

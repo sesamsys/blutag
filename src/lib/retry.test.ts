@@ -43,10 +43,7 @@ describe("retry utilities", () => {
     });
 
     it("should call onRetry callback", async () => {
-      const fn = vi
-        .fn()
-        .mockRejectedValueOnce(new Error("fail"))
-        .mockResolvedValue("success");
+      const fn = vi.fn().mockRejectedValueOnce(new Error("fail")).mockResolvedValue("success");
       const onRetry = vi.fn();
 
       await retryWithBackoff(fn, {
@@ -63,9 +60,9 @@ describe("retry utilities", () => {
     it("should not retry non-retryable errors", async () => {
       const fn = vi.fn().mockRejectedValue(new Error("quota exceeded 402"));
 
-      await expect(
-        retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 5 }),
-      ).rejects.toThrow("quota exceeded");
+      await expect(retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 5 })).rejects.toThrow(
+        "quota exceeded",
+      );
 
       expect(fn).toHaveBeenCalledTimes(1);
     });
@@ -158,9 +155,7 @@ describe("retry utilities", () => {
         const fn = vi.fn().mockReturnValue(slow);
 
         const promise = retryWithTimeout(fn, 100, { maxAttempts: 1 });
-        const assertion = expect(promise).rejects.toThrow(
-          "Operation timed out",
-        );
+        const assertion = expect(promise).rejects.toThrow("Operation timed out");
         await vi.advanceTimersByTimeAsync(200);
         await assertion;
         await vi.runAllTimersAsync();

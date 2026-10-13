@@ -52,8 +52,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
         </div>
         <p className="font-semibold">Post to Bluesky with alt text</p>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Sign in to post your photos with the generated alt text directly to
-          Bluesky.
+          Sign in to post your photos with the generated alt text directly to Bluesky.
         </p>
         <BlueskyLoginButton />
       </div>
@@ -63,9 +62,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
   const handlePost = async () => {
     if (posting) return;
     if (text.length > BLUESKY_POST_MAX_LENGTH) {
-      toast.error(
-        `Post text exceeds ${BLUESKY_POST_MAX_LENGTH} character limit`,
-      );
+      toast.error(`Post text exceeds ${BLUESKY_POST_MAX_LENGTH} character limit`);
       return;
     }
 
@@ -77,15 +74,10 @@ export default function PostComposer({ photos }: PostComposerProps) {
 
     // Validate alt text lengths
     const invalidAltText = photosWithAltText.find(
-      (p) =>
-        !p.altText ||
-        p.altText.length === 0 ||
-        p.altText.length > MAX_ALT_TEXT_LENGTH,
+      (p) => !p.altText || p.altText.length === 0 || p.altText.length > MAX_ALT_TEXT_LENGTH,
     );
     if (invalidAltText) {
-      toast.error(
-        `All photos must have alt text (max ${MAX_ALT_TEXT_LENGTH} characters)`,
-      );
+      toast.error(`All photos must have alt text (max ${MAX_ALT_TEXT_LENGTH} characters)`);
       return;
     }
 
@@ -177,9 +169,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
         {
           maxAttempts: RETRY_MAX_ATTEMPTS,
           onRetry: (_error, attempt) => {
-            toast.info(
-              `Retrying post (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`,
-            );
+            toast.info(`Retrying post (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`);
           },
         },
       );
@@ -230,9 +220,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
       <div className="space-y-1.5">
         <Textarea
           value={text}
-          onChange={(e) =>
-            setText(e.target.value.slice(0, BLUESKY_POST_MAX_LENGTH))
-          }
+          onChange={(e) => setText(e.target.value.slice(0, BLUESKY_POST_MAX_LENGTH))}
           maxLength={BLUESKY_POST_MAX_LENGTH}
           placeholder="What's on your mind?"
           rows={3}
@@ -240,9 +228,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
         />
         <div className="flex items-center justify-between gap-2">
           <span
-            className={`text-xs ${
-              remaining < 20 ? "text-destructive" : "text-muted-foreground"
-            }`}
+            className={`text-xs ${remaining < 20 ? "text-destructive" : "text-muted-foreground"}`}
           >
             {remaining} characters remaining
           </span>
