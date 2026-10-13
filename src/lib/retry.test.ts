@@ -12,7 +12,8 @@ describe("retry utilities", () => {
     });
 
     it("should retry on failure and eventually succeed", async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error("fail 1"))
         .mockRejectedValueOnce(new Error("fail 2"))
         .mockResolvedValue("success");
@@ -35,16 +36,14 @@ describe("retry utilities", () => {
           maxAttempts: 2,
           initialDelayMs: 5,
           shouldRetry: () => true,
-        })
+        }),
       ).rejects.toThrow("always fails");
 
       expect(fn).toHaveBeenCalledTimes(2);
     });
 
     it("should call onRetry callback", async () => {
-      const fn = vi.fn()
-        .mockRejectedValueOnce(new Error("fail"))
-        .mockResolvedValue("success");
+      const fn = vi.fn().mockRejectedValueOnce(new Error("fail")).mockResolvedValue("success");
       const onRetry = vi.fn();
 
       await retryWithBackoff(fn, {
@@ -61,15 +60,16 @@ describe("retry utilities", () => {
     it("should not retry non-retryable errors", async () => {
       const fn = vi.fn().mockRejectedValue(new Error("quota exceeded 402"));
 
-      await expect(
-        retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 5 })
-      ).rejects.toThrow("quota exceeded");
+      await expect(retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 5 })).rejects.toThrow(
+        "quota exceeded",
+      );
 
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
     it("should retry network errors by default", async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error("network failed"))
         .mockResolvedValue("success");
 
@@ -132,7 +132,8 @@ describe("retry utilities", () => {
 
   describe("retryWithTimeout", () => {
     it("should combine retry and timeout", async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error("network failed"))
         .mockResolvedValue("success");
 

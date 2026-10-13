@@ -2,15 +2,15 @@ export interface PhotoFile {
   id: string;
   file: File;
   preview: string;
-  altText?: string;
-  exifData?: ExifInfo;
-  analyzing?: boolean;
+  altText?: string | undefined;
+  exifData?: ExifInfo | undefined;
+  analyzing?: boolean | undefined;
 }
 
 export interface ExifInfo {
-  dateTime?: string;
-  latitude?: number;
-  longitude?: number;
-  make?: string;
-  model?: string;
+  dateTime?: string | undefined;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
+  make?: string | undefined;
+  model?: string | undefined;
 }

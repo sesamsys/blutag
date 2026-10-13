@@ -11,5 +11,5 @@ export const metaData: MetaData = {
   github: "https://github.com/sesamsys",
   linkedin: "https://linkedin.com/in/pszilagyi",
   lovable: "https://lovable.dev",
-  kiro: "https://kiro.dev"
+  kiro: "https://kiro.dev",
 };

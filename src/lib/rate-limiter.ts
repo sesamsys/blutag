@@ -40,7 +40,7 @@ export interface RateLimiter {
 export function createRateLimiter(
   options: RateLimiterOptions,
   /** Overridable clock for testing */
-  now: () => number = Date.now
+  now: () => number = Date.now,
 ): RateLimiter {
   const { maxCalls, windowMs } = options;
   let timestamps: number[] = [];
@@ -66,6 +66,7 @@ export function createRateLimiter(
     if (timestamps.length < maxCalls) return 0;
     // Oldest timestamp in window determines when the next slot opens
     const oldest = timestamps[0];
+    if (oldest === undefined) return 0;
     return Math.max(0, oldest + windowMs - now());
   }
 

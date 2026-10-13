@@ -26,7 +26,10 @@ describe("buildPostEmbed", () => {
     expect(embed?.$type).toBe("app.bsky.embed.images");
     if (embed?.$type === "app.bsky.embed.images") {
       expect(embed.images).toHaveLength(n);
-      expect(embed.images[0].aspectRatio).toEqual({ width: 2560, height: 1440 });
+      expect(embed.images[0]?.aspectRatio).toEqual({
+        width: 2560,
+        height: 1440,
+      });
     }
     expect(truncatedCount).toBe(0);
   });
@@ -38,7 +41,10 @@ describe("buildPostEmbed", () => {
       expect(embed.items).toHaveLength(n);
       expect(embed.items[0]).toHaveProperty("alt");
       expect(embed.items[0]).toHaveProperty("image");
-      expect(embed.items[0].aspectRatio).toEqual({ width: 2560, height: 1440 });
+      expect(embed.items[0]?.aspectRatio).toEqual({
+        width: 2560,
+        height: 1440,
+      });
     }
     expect(truncatedCount).toBe(0);
   });
@@ -54,7 +60,7 @@ describe("buildPostEmbed", () => {
       }
       expect(truncatedCount).toBe(3);
       expect(warnSpy).toHaveBeenCalledOnce();
-      expect(warnSpy.mock.calls[0][0]).toMatch(/3 photo\(s\)/);
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/3 photo\(s\)/);
     });
 
     it("does not warn or truncate when gallery is disabled but ≤4 images", () => {
@@ -69,13 +75,10 @@ describe("buildPostEmbed", () => {
       expect(warnSpy).not.toHaveBeenCalled();
     });
 
-    it.each([5, 10])(
-      "truncatedCount equals (n - 4) for %i images when gallery disabled",
-      (n) => {
-        vi.spyOn(console, "warn").mockImplementation(() => {});
-        const { truncatedCount } = buildPostEmbed(makeImages(n), false);
-        expect(truncatedCount).toBe(n - 4);
-      },
-    );
+    it.each([5, 10])("truncatedCount equals (n - 4) for %i images when gallery disabled", (n) => {
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { truncatedCount } = buildPostEmbed(makeImages(n), false);
+      expect(truncatedCount).toBe(n - 4);
+    });
   });
 });

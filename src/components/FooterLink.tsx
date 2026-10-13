@@ -6,11 +6,7 @@ type FooterLinkProps = {
   ariaLabel?: string;
 };
 
-export default function FooterLink({
-  href,
-  children,
-  ariaLabel,
-}: FooterLinkProps) {
+export default function FooterLink({ href, children, ariaLabel }: FooterLinkProps) {
   return (
     <a
       href={href}

@@ -19,7 +19,9 @@ function makeTags(fields: Record<string, { description?: string; value?: unknown
 
 /** Minimal File stub — extractExif only calls file.arrayBuffer(). */
 function makeFile(): File {
-  const file = { arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)) } as unknown as File;
+  const file = {
+    arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
+  } as unknown as File;
   return file;
 }
 
@@ -36,16 +38,14 @@ describe("extractExif", () => {
 
   it("extracts DateTimeOriginal", async () => {
     mockLoad.mockReturnValue(
-      makeTags({ DateTimeOriginal: { description: "2024:06:15 12:00:00" } })
+      makeTags({ DateTimeOriginal: { description: "2024:06:15 12:00:00" } }),
     );
     const result = await extractExif(makeFile());
     expect(result.dateTime).toBe("2024:06:15 12:00:00");
   });
 
   it("falls back to DateTime when DateTimeOriginal is absent", async () => {
-    mockLoad.mockReturnValue(
-      makeTags({ DateTime: { description: "2024:01:01 00:00:00" } })
-    );
+    mockLoad.mockReturnValue(makeTags({ DateTime: { description: "2024:01:01 00:00:00" } }));
     const result = await extractExif(makeFile());
     expect(result.dateTime).toBe("2024:01:01 00:00:00");
   });
@@ -57,7 +57,7 @@ describe("extractExif", () => {
         GPSLongitude: { description: "2.3522" },
         GPSLatitudeRef: { value: ["N"] },
         GPSLongitudeRef: { value: ["E"] },
-      })
+      }),
     );
     const result = await extractExif(makeFile());
     expect(result.latitude).toBeCloseTo(48.8566);
@@ -71,7 +71,7 @@ describe("extractExif", () => {
         GPSLongitude: { description: "151.2093" },
         GPSLatitudeRef: { value: ["S"] },
         GPSLongitudeRef: { value: ["E"] },
-      })
+      }),
     );
     const result = await extractExif(makeFile());
     expect(result.latitude).toBeCloseTo(-33.8688);
@@ -85,7 +85,7 @@ describe("extractExif", () => {
         GPSLongitude: { description: "74.006" },
         GPSLatitudeRef: { value: ["N"] },
         GPSLongitudeRef: { value: ["W"] },
-      })
+      }),
     );
     const result = await extractExif(makeFile());
     expect(result.latitude).toBeCloseTo(40.7128);
@@ -99,7 +99,7 @@ describe("extractExif", () => {
         GPSLongitude: { description: "58.3816" },
         GPSLatitudeRef: { value: ["S"] },
         GPSLongitudeRef: { value: ["W"] },
-      })
+      }),
     );
     const result = await extractExif(makeFile());
     expect(result.latitude).toBeCloseTo(-34.6037);
@@ -114,16 +114,16 @@ describe("extractExif", () => {
         GPSLongitude: { description: "0.1278" },
         GPSLatitudeRef: { value: "S" as unknown as string[] }, // string, not array
         GPSLongitudeRef: { value: "W" as unknown as string[] },
-      })
+      }),
     );
     const result = await extractExif(makeFile());
-    expect(result.latitude).toBeCloseTo(51.5074);  // should remain positive
-    expect(result.longitude).toBeCloseTo(0.1278);   // should remain positive
+    expect(result.latitude).toBeCloseTo(51.5074); // should remain positive
+    expect(result.longitude).toBeCloseTo(0.1278); // should remain positive
   });
 
   it("omits GPS fields when only one of lat/lon is present", async () => {
     mockLoad.mockReturnValue(
-      makeTags({ GPSLatitude: { description: "48.8566" } }) // no GPSLongitude
+      makeTags({ GPSLatitude: { description: "48.8566" } }), // no GPSLongitude
     );
     const result = await extractExif(makeFile());
     expect(result.latitude).toBeUndefined();
@@ -135,7 +135,7 @@ describe("extractExif", () => {
       makeTags({
         Make: { description: "Apple" },
         Model: { description: "iPhone 15 Pro" },
-      })
+      }),
     );
     const result = await extractExif(makeFile());
     expect(result.make).toBe("Apple");
@@ -143,7 +143,9 @@ describe("extractExif", () => {
   });
 
   it("returns empty object when ExifReader throws", async () => {
-    mockLoad.mockImplementation(() => { throw new Error("not a JPEG"); });
+    mockLoad.mockImplementation(() => {
+      throw new Error("not a JPEG");
+    });
     const result = await extractExif(makeFile());
     expect(result).toEqual({});
   });

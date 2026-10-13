@@ -19,7 +19,14 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import type { PhotoFile } from "@/types/photo";
-import { MAX_PHOTOS, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES, DROP_ANIMATION_DURATION_MS, BLUESKY_IMAGES_EMBED_MAX, BLUESKY_GALLERY_ENABLED } from "@/lib/constants";
+import {
+  MAX_PHOTOS,
+  MAX_FILE_SIZE_MB,
+  DROP_ANIMATION_DURATION_MS,
+  BLUESKY_IMAGES_EMBED_MAX,
+  BLUESKY_GALLERY_ENABLED,
+} from "@/lib/constants";
+import { formatRejections, selectPhotos } from "@/lib/photo-validation";
 import SortablePhotoItem from "./SortablePhotoItem";
 
 interface PhotoUploaderProps {
@@ -30,7 +37,13 @@ interface PhotoUploaderProps {
   onReorderPhotos?: (oldIndex: number, newIndex: number) => void;
 }
 
-export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onClearAll, onReorderPhotos }: PhotoUploaderProps) {
+export default function PhotoUploader({
+  photos,
+  onAddPhotos,
+  onRemovePhoto,
+  onClearAll,
+  onReorderPhotos,
+}: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
@@ -42,7 +55,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const announcements: Announcements = useMemo(
@@ -70,7 +83,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         return `Dragging cancelled. Photo ${idx + 1} returned to its original position.`;
       },
     }),
-    [photos]
+    [photos],
   );
 
   const handleFiles = useCallback(
@@ -78,43 +91,21 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       if (!fileList) return;
       if (remaining <= 0) return;
 
-      const allValid: File[] = [];
-      const errors: string[] = [];
-      
-      Array.from(fileList).forEach((f) => {
-        if (!f.type.startsWith("image/")) {
-          errors.push(`${f.name}: Not an image file`);
-          return;
-        }
-        if (f.size > MAX_FILE_SIZE_BYTES) {
-          errors.push(`${f.name}: Exceeds ${MAX_FILE_SIZE_MB}MB limit`);
-          return;
-        }
-        if (f.size === 0) {
-          errors.push(`${f.name}: File is empty`);
-          return;
-        }
-        const ext = f.name.split('.').pop()?.toLowerCase();
-        const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'];
-        if (!ext || !validExtensions.includes(ext)) {
-          errors.push(`${f.name}: Unsupported file type`);
-          return;
-        }
-        allValid.push(f);
-      });
-      
-      if (errors.length > 0) {
-        toast.error(`Some files were rejected:\n${errors.slice(0, 3).join('\n')}${errors.length > 3 ? `\n...and ${errors.length - 3} more` : ''}`);
+      const { accepted, rejections, overflowCount } = selectPhotos(Array.from(fileList), remaining);
+
+      if (rejections.length > 0) {
+        toast.error(formatRejections(rejections));
       }
 
-      if (allValid.length > remaining) {
-        toast.warning(`You can only add up to ${MAX_PHOTOS} photos. ${allValid.length - remaining} photo${allValid.length - remaining === 1 ? " was" : "s were"} not added.`);
+      if (overflowCount > 0) {
+        toast.warning(
+          `You can only add up to ${MAX_PHOTOS} photos. ${overflowCount} photo${overflowCount === 1 ? " was" : "s were"} not added.`,
+        );
       }
 
-      const accepted = allValid.slice(0, remaining);
       if (accepted.length) onAddPhotos(accepted);
     },
-    [remaining, onAddPhotos]
+    [remaining, onAddPhotos],
   );
 
   // Clipboard paste support: Cmd/Ctrl+V on desktop, OS paste menu on mobile
@@ -123,11 +114,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       const target = e.target as HTMLElement | null;
       if (target) {
         const tag = target.tagName;
-        if (
-          tag === "INPUT" ||
-          tag === "TEXTAREA" ||
-          target.isContentEditable
-        ) {
+        if (tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable) {
           return;
         }
       }
@@ -138,7 +125,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       const files: File[] = [];
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        if (item.kind !== "file" || !item.type.startsWith("image/")) continue;
+        if (!item || item.kind !== "file" || !item.type.startsWith("image/")) continue;
         const file = item.getAsFile();
         if (!file) continue;
         // Clipboard images (e.g. screenshots) often lack a proper filename
@@ -174,7 +161,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         handleFiles(e.dataTransfer.files);
       }
     },
-    [handleFiles]
+    [handleFiles],
   );
 
   const onDragOver = useCallback((e: React.DragEvent) => {
@@ -203,7 +190,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         onReorderPhotos(oldIndex, newIndex);
       }
     },
-    [photos, onReorderPhotos]
+    [photos, onReorderPhotos],
   );
 
   const handleDragCancel = useCallback(() => {
@@ -216,7 +203,9 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       return;
     }
     if (!navigator.clipboard || typeof navigator.clipboard.read !== "function") {
-      toast.error("Your browser doesn't support pasting images. Try copying the image again or use the file picker.");
+      toast.error(
+        "Your browser doesn't support pasting images. Try copying the image again or use the file picker.",
+      );
       return;
     }
     try {
@@ -228,7 +217,9 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         const blob = await item.getType(imageType);
         const ext = imageType.split("/")[1] || "png";
         files.push(
-          new File([blob], `pasted-image-${Date.now()}.${ext}`, { type: imageType })
+          new File([blob], `pasted-image-${Date.now()}.${ext}`, {
+            type: imageType,
+          }),
         );
       }
       if (files.length === 0) {
@@ -249,7 +240,6 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
     }
   }, [remaining, handleFiles]);
 
-
   const activePhoto = activeDragId ? photos.find((p) => p.id === activeDragId) : null;
   const isEmpty = photos.length === 0;
   const sortableIds = photos.map((p) => p.id);
@@ -258,9 +248,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
   // flag so the visual layout stays consistent with posting behaviour.
   const { mode, slots, largeSlots, smallSlots } = useMemo(() => {
     const m: "embed" | "gallery" =
-      BLUESKY_GALLERY_ENABLED && photos.length > BLUESKY_IMAGES_EMBED_MAX
-        ? "gallery"
-        : "embed";
+      BLUESKY_GALLERY_ENABLED && photos.length > BLUESKY_IMAGES_EMBED_MAX ? "gallery" : "embed";
     const s = Array.from({ length: MAX_PHOTOS }, (_, i) => photos[i] ?? null);
     return {
       mode: m,
@@ -285,7 +273,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         key={`empty-${i}`}
         onClick={() => inputRef.current?.click()}
         aria-label={`Add photo, slot ${i + 1} of ${MAX_PHOTOS}`}
-        className="aspect-square w-full rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="aspect-square w-full rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <ImagePlus className="w-6 h-6 text-muted-foreground" />
         <span className="text-xs text-muted-foreground font-medium">Add photo</span>
@@ -299,7 +287,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           type="button"
           onClick={pasteFromClipboard}
           aria-label="Paste image from clipboard"
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <ClipboardPaste className="w-3.5 h-3.5" />
           Paste
@@ -308,7 +296,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           <button
             onClick={onClearAll}
             aria-label="Clear all photos"
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <X className="w-3.5 h-3.5" />
             Clear all
@@ -342,9 +330,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
                   ? "grid-cols-6 sm:grid-cols-12"
                   : "grid-cols-3 sm:grid-cols-4 md:grid-cols-5"
               } ${
-                isDraggingOver
-                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                  : ""
+                isDraggingOver ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
               }`}
             >
               {mode === "embed" ? (
@@ -366,8 +352,12 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
             </div>
           </SortableContext>
 
-
-          <DragOverlay dropAnimation={{ duration: DROP_ANIMATION_DURATION_MS, easing: "ease" }}>
+          <DragOverlay
+            dropAnimation={{
+              duration: DROP_ANIMATION_DURATION_MS,
+              easing: "ease",
+            }}
+          >
             {activePhoto ? (
               <div className="aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg ring-2 ring-primary/50">
                 <img
@@ -383,9 +373,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
 
       {/* Live region for screen readers */}
       <span className="sr-only" aria-live="polite">
-        {photos.length > 0
-          ? `${photos.length} of ${MAX_PHOTOS} photos added`
-          : "No photos added"}
+        {photos.length > 0 ? `${photos.length} of ${MAX_PHOTOS} photos added` : "No photos added"}
       </span>
 
       <p className="text-xs text-muted-foreground mt-2 text-center" aria-live="polite">

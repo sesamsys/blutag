@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { compressImageForBluesky } from "./image-compress";
-import {
-  BLUESKY_IMAGE_MAX_BYTES,
-  BLUESKY_IMAGE_MAX_DIMENSION,
-} from "./constants";
+import { BLUESKY_IMAGE_MAX_BYTES, BLUESKY_IMAGE_MAX_DIMENSION } from "./constants";
 
 // ---------------------------------------------------------------------------
 // Canvas / Image stubs
@@ -56,39 +53,42 @@ function setupImageMock(naturalWidth: number, naturalHeight: number, fail = fals
 
   // We use Object.defineProperty so the setter fires even though the Image
   // constructor sets `src` directly as a property assignment.
-  vi.stubGlobal("Image", function (this: {
-    onload: (() => void) | null;
-    onerror: ((e: unknown) => void) | null;
-    naturalWidth: number;
-    naturalHeight: number;
-    width: number;
-    height: number;
-    _src: string;
-  }) {
-    this.onload = null;
-    this.onerror = null;
-    this.naturalWidth = naturalWidth;
-    this.naturalHeight = naturalHeight;
-    this.width = naturalWidth;
-    this.height = naturalHeight;
-    this._src = "";
+  vi.stubGlobal(
+    "Image",
+    function (this: {
+      onload: (() => void) | null;
+      onerror: ((e: unknown) => void) | null;
+      naturalWidth: number;
+      naturalHeight: number;
+      width: number;
+      height: number;
+      _src: string;
+    }) {
+      this.onload = null;
+      this.onerror = null;
+      this.naturalWidth = naturalWidth;
+      this.naturalHeight = naturalHeight;
+      this.width = naturalWidth;
+      this.height = naturalHeight;
+      this._src = "";
 
-    Object.defineProperty(this, "src", {
-      get: () => this._src,
-      set: (value: string) => {
-        this._src = value;
-        // Use queueMicrotask so handlers have a chance to be assigned first,
-        // mirroring real browser behaviour.
-        queueMicrotask(() => {
-          if (fail) {
-            this.onerror?.(new Event("error"));
-          } else {
-            this.onload?.();
-          }
-        });
-      },
-    });
-  });
+      Object.defineProperty(this, "src", {
+        get: () => this._src,
+        set: (value: string) => {
+          this._src = value;
+          // Use queueMicrotask so handlers have a chance to be assigned first,
+          // mirroring real browser behaviour.
+          queueMicrotask(() => {
+            if (fail) {
+              this.onerror?.(new Event("error"));
+            } else {
+              this.onload?.();
+            }
+          });
+        },
+      });
+    },
+  );
 }
 
 beforeEach(() => {
@@ -162,7 +162,7 @@ describe("compressImageForBluesky", () => {
     const result = await compressImageForBluesky(file);
 
     expect(toBlobCalls.length).toBeGreaterThanOrEqual(3);
-    expect(toBlobCalls[1]).toBeLessThan(toBlobCalls[0]);
+    expect(toBlobCalls[1]).toBeLessThan(toBlobCalls[0] ?? 0);
     expect(result.blob.size).toBe(100);
   });
 

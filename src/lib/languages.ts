@@ -1,3 +1,6 @@
+/** Language used when no preference is stored or a code is unknown. */
+export const DEFAULT_LANGUAGE = "en";
+
 export interface Language {
   code: string;
   nameEn: string;
@@ -141,9 +144,7 @@ export const ALL_LANGUAGES: Language[] = [
   { code: "zu", nameEn: "Zulu", nativeName: "isiZulu" },
 ];
 
-const LANG_BY_CODE = new Map<string, Language>(
-  ALL_LANGUAGES.map((l) => [l.code, l])
-);
+const LANG_BY_CODE = new Map<string, Language>(ALL_LANGUAGES.map((l) => [l.code, l]));
 
 /** Validate BCP-47-ish code: 2-3 letter primary, optional region. */
 const LANG_CODE_RE = /^[a-z]{2,3}(-[A-Z]{2})?$/;
@@ -155,17 +156,45 @@ export function isValidLangCode(code: string | null | undefined): boolean {
 
 /** Normalize to primary subtag (e.g. "pt-BR" → "pt"). */
 export function normalizeLangCode(code: string | null | undefined): string {
-  if (!code) return "en";
+  if (!code) return DEFAULT_LANGUAGE;
   const trimmed = code.trim();
   const primary = trimmed.split("-")[0]?.toLowerCase();
-  if (!primary) return "en";
-  return LANG_BY_CODE.has(primary) ? primary : "en";
+  if (!primary) return DEFAULT_LANGUAGE;
+  return LANG_BY_CODE.has(primary) ? primary : DEFAULT_LANGUAGE;
 }
 
+const DEFAULT_LANGUAGE_ENTRY: Language = {
+  code: DEFAULT_LANGUAGE,
+  nameEn: "English",
+  nativeName: "English",
+};
+
 export function getLanguage(code: string): Language {
-  return LANG_BY_CODE.get(code) ?? LANG_BY_CODE.get("en")!;
+  return LANG_BY_CODE.get(code) ?? DEFAULT_LANGUAGE_ENTRY;
 }
 
 export function getLanguageName(code: string): string {
   return getLanguage(code).nameEn;
+}
+
+const POST_LANGUAGES_PREF_TYPE = "app.bsky.actor.defs#postLanguagesPref";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * Reads the user's Bluesky post-language preference from the raw
+ * `app.bsky.actor.getPreferences` list and returns valid, normalized codes
+ * in their original order. Unknown shapes are ignored rather than trusted.
+ */
+export function extractPostLanguages(preferences: readonly unknown[]): string[] {
+  const pref = preferences.find(
+    (p): p is Record<string, unknown> => isRecord(p) && p["$type"] === POST_LANGUAGES_PREF_TYPE,
+  );
+  const languages = pref?.["languages"];
+  if (!Array.isArray(languages)) return [];
+  return languages
+    .filter((code): code is string => typeof code === "string" && isValidLangCode(code))
+    .map(normalizeLangCode);
 }

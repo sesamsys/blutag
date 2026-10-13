@@ -12,7 +12,7 @@ describe("error-messages", () => {
   describe("AppError", () => {
     it("should create error with message and type", () => {
       const error = new AppError("Test error", ErrorType.NETWORK);
-      
+
       expect(error.message).toBe("Test error");
       expect(error.type).toBe(ErrorType.NETWORK);
       expect(error.retryable).toBe(true);
@@ -21,14 +21,14 @@ describe("error-messages", () => {
 
     it("should support non-retryable errors", () => {
       const error = new AppError("Quota exceeded", ErrorType.QUOTA, undefined, false);
-      
+
       expect(error.retryable).toBe(false);
     });
 
     it("should store original error", () => {
       const original = new Error("Original");
       const error = new AppError("Wrapped", ErrorType.UNKNOWN, original);
-      
+
       expect(error.originalError).toBe(original);
     });
   });
@@ -48,7 +48,6 @@ describe("error-messages", () => {
       const error = new Error("Request timeout");
       expect(getErrorMessage(error)).toBe(ERROR_MESSAGES.TIMEOUT_ERROR);
     });
-
 
     it("should detect rate limit errors", () => {
       const error = new Error("Rate limit exceeded (429)");
@@ -106,12 +105,11 @@ describe("error-messages", () => {
     });
   });
 
-
   describe("isRetryableError", () => {
     it("should return retryable flag from AppError", () => {
       const retryable = new AppError("Test", ErrorType.NETWORK, undefined, true);
       const notRetryable = new AppError("Test", ErrorType.QUOTA, undefined, false);
-      
+
       expect(isRetryableError(retryable)).toBe(true);
       expect(isRetryableError(notRetryable)).toBe(false);
     });

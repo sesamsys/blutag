@@ -10,8 +10,9 @@ import "fake-indexeddb/auto";
 import { IDBFactory } from "fake-indexeddb";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-// jsdom does not implement URL.createObjectURL — stub it globally.
-vi.stubGlobal("URL", {
+// jsdom does not implement URL.createObjectURL — stub the two static methods
+// only. Replacing the whole URL global breaks Vitest's module loader.
+Object.assign(URL, {
   createObjectURL: vi.fn(() => "blob:preview-stub"),
   revokeObjectURL: vi.fn(),
 });
@@ -32,13 +33,20 @@ function makeFile(content: string, name = "photo.jpg", type = "image/jpeg"): Fil
 }
 
 /** Minimal PhotoFile for testing. */
-function makePhotoFile(overrides: Partial<{
-  id: string;
-  altText: string;
-  fileName: string;
-  content: string;
-}> = {}) {
-  const { id = "abc123", altText = "A test photo", fileName = "test.jpg", content = "fake-jpeg-data" } = overrides;
+function makePhotoFile(
+  overrides: Partial<{
+    id: string;
+    altText: string;
+    fileName: string;
+    content: string;
+  }> = {},
+) {
+  const {
+    id = "abc123",
+    altText = "A test photo",
+    fileName = "test.jpg",
+    content = "fake-jpeg-data",
+  } = overrides;
   const file = makeFile(content, fileName);
   return {
     id,
@@ -66,7 +74,8 @@ describe("session-persistence", () => {
       expect(restored).not.toBeNull();
       expect(restored!.length).toBe(1);
 
-      const r = restored![0];
+      const r = restored?.[0];
+      if (!r) throw new Error("expected a restored photo");
       expect(r.id).toBe("p1");
       expect(r.altText).toBe("A sunset");
       expect(r.file).toBeInstanceOf(File);
@@ -102,7 +111,9 @@ describe("session-persistence", () => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = reject;
-        reader.readAsText(restored![0].file);
+        const file = restored?.[0]?.file;
+        if (!file) throw new Error("expected a restored file");
+        reader.readAsText(file);
       });
       expect(text).toBe(content);
     });
@@ -115,7 +126,7 @@ describe("session-persistence", () => {
 
       const restored = await loadPhotosSession();
       expect(restored!.length).toBe(1);
-      expect(restored![0].id).toBe("new");
+      expect(restored?.[0]?.id).toBe("new");
     });
 
     it("saves a photo with no alt text", async () => {
@@ -125,7 +136,7 @@ describe("session-persistence", () => {
       await savePhotosSession([photo]);
 
       const restored = await loadPhotosSession();
-      expect(restored![0].altText).toBeUndefined();
+      expect(restored?.[0]?.altText).toBeUndefined();
     });
   });
 
@@ -169,7 +180,7 @@ describe("session-persistence", () => {
       // The next operation should transparently reconnect
       const restored = await loadPhotosSession();
       expect(restored).not.toBeNull();
-      expect(restored![0].id).toBe("before-close");
+      expect(restored?.[0]?.id).toBe("before-close");
     });
   });
 
@@ -181,10 +192,7 @@ describe("session-persistence", () => {
       const photosB = [makePhotoFile({ id: "b1", altText: "B" })];
 
       // Fire save + load concurrently; the queue must serialize them.
-      await Promise.all([
-        savePhotosSession(photosA),
-        savePhotosSession(photosB),
-      ]);
+      await Promise.all([savePhotosSession(photosA), savePhotosSession(photosB)]);
 
       // Whichever save ran last wins — load must return a consistent result
       const restored = await loadPhotosSession();

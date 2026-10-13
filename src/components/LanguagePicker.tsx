@@ -1,10 +1,6 @@
 import { useMemo, useState } from "react";
 import { Globe, Check } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -14,12 +10,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  ALL_LANGUAGES,
-  CURATED_LANGUAGES,
-  getLanguage,
-  type Language,
-} from "@/lib/languages";
+import { ALL_LANGUAGES, CURATED_LANGUAGES, getLanguage, type Language } from "@/lib/languages";
 import { cn } from "@/lib/utils";
 
 interface LanguagePickerProps {
@@ -27,28 +18,19 @@ interface LanguagePickerProps {
   className?: string;
 }
 
-export default function LanguagePicker({
-  variant = "pill",
-  className,
-}: LanguagePickerProps) {
+export default function LanguagePicker({ variant = "pill", className }: LanguagePickerProps) {
   const { language, setLanguage, recent } = useLanguage();
   const [open, setOpen] = useState(false);
   const current = getLanguage(language);
 
   const recentLanguages: Language[] = useMemo(
-    () =>
-      recent
-        .filter((c) => c !== language)
-        .map((c) => getLanguage(c)),
-    [recent, language]
+    () => recent.filter((c) => c !== language).map((c) => getLanguage(c)),
+    [recent, language],
   );
 
   const curatedFiltered = useMemo(
-    () =>
-      CURATED_LANGUAGES.filter(
-        (l) => !recentLanguages.some((r) => r.code === l.code)
-      ),
-    [recentLanguages]
+    () => CURATED_LANGUAGES.filter((l) => !recentLanguages.some((r) => r.code === l.code)),
+    [recentLanguages],
   );
 
   // Show "other" languages: ALL minus what's already in curated/recent
@@ -67,8 +49,8 @@ export default function LanguagePicker({
 
   const triggerClasses =
     variant === "pill"
-      ? "inline-flex min-h-8 items-center gap-1.5 px-3 py-1.5 rounded-[0.5rem] border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap"
-      : "inline-flex min-h-7 items-center gap-1 underline-offset-2 hover:underline text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-[0.375rem] whitespace-nowrap";
+      ? "inline-flex min-h-8 items-center gap-1.5 px-3 py-1.5 rounded-[0.5rem] border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap"
+      : "inline-flex min-h-7 items-center gap-1 underline-offset-2 hover:underline text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-[0.375rem] whitespace-nowrap";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -151,9 +133,7 @@ function LangRow({
       <span className="flex flex-col">
         <span className="text-sm">{lang.nameEn}</span>
         {lang.nativeName !== lang.nameEn && (
-          <span className="text-xs text-muted-foreground">
-            {lang.nativeName}
-          </span>
+          <span className="text-xs text-muted-foreground">{lang.nativeName}</span>
         )}
       </span>
       {selected && <Check className="w-4 h-4 text-primary shrink-0" />}

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import { toast } from "sonner";
+import { logError } from "@/lib/error-messages";
 import type { PhotoFile } from "@/types/photo";
 import { MAX_ALT_TEXT_LENGTH, COPY_FEEDBACK_DURATION_MS } from "@/lib/constants";
 
@@ -15,7 +17,14 @@ export default function AltTextResult({ photo, index, onUpdateAltText }: AltText
 
   const handleCopy = async () => {
     if (!photo.altText) return;
-    await navigator.clipboard.writeText(photo.altText);
+    try {
+      await navigator.clipboard.writeText(photo.altText);
+    } catch (err) {
+      // Clipboard access can be denied (permissions, insecure context).
+      logError(err, { context: "alt_text_copy", photoId: photo.id });
+      toast.error("Couldn't copy to the clipboard. Select the text and copy it manually.");
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION_MS);
   };
@@ -35,7 +44,11 @@ export default function AltTextResult({ photo, index, onUpdateAltText }: AltText
       </div>
       <div className="flex-1 flex flex-col gap-2 min-w-0">
         {photo.analyzing ? (
-          <div className="flex items-center gap-2 h-full" role="status" aria-label="Analyzing photo">
+          <div
+            className="flex items-center gap-2 h-full"
+            role="status"
+            aria-label="Analyzing photo"
+          >
             <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
             <span className="text-sm text-muted-foreground">Analyzing…</span>
           </div>
@@ -45,21 +58,24 @@ export default function AltTextResult({ photo, index, onUpdateAltText }: AltText
               id={textareaId}
               aria-label="Alt text description"
               value={photo.altText ?? ""}
-              onChange={(e) => onUpdateAltText(photo.id, e.target.value.slice(0, MAX_ALT_TEXT_LENGTH))}
+              onChange={(e) =>
+                onUpdateAltText(photo.id, e.target.value.slice(0, MAX_ALT_TEXT_LENGTH))
+              }
               rows={3}
               maxLength={MAX_ALT_TEXT_LENGTH}
-              className="w-full resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-ring"
               placeholder="Alt text will appear here…"
             />
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground" aria-live="polite">
-                {(photo.altText?.length ?? 0).toLocaleString()}/{MAX_ALT_TEXT_LENGTH.toLocaleString()}
+                {(photo.altText?.length ?? 0).toLocaleString()}/
+                {MAX_ALT_TEXT_LENGTH.toLocaleString()}
               </span>
               <button
                 onClick={handleCopy}
                 disabled={!photo.altText}
                 aria-label={copied ? "Copied to clipboard" : "Copy alt text"}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? "Copied" : "Copy"}

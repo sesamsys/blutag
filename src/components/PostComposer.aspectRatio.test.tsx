@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import PostComposer from "./PostComposer";
-import {
-  BLUESKY_IMAGE_MAX_DIMENSION,
-  BLUESKY_IMAGE_MAX_BYTES,
-} from "@/lib/constants";
+import { BLUESKY_IMAGE_MAX_DIMENSION, BLUESKY_IMAGE_MAX_BYTES } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
 
 /**
@@ -21,9 +18,7 @@ const SOURCE_HEIGHT = 2250;
 
 /** Expected post-resize dimensions: longest edge clamped to the max dimension. */
 const EXPECTED_WIDTH = BLUESKY_IMAGE_MAX_DIMENSION;
-const EXPECTED_HEIGHT = Math.round(
-  (SOURCE_HEIGHT / SOURCE_WIDTH) * BLUESKY_IMAGE_MAX_DIMENSION,
-);
+const EXPECTED_HEIGHT = Math.round((SOURCE_HEIGHT / SOURCE_WIDTH) * BLUESKY_IMAGE_MAX_DIMENSION);
 
 // ── Mocks ─────────────────────────────────────────────────────────────
 
@@ -143,7 +138,9 @@ async function postLandscapePhoto(): Promise<UploadedImage> {
   const embed = call[0].record.embed;
   expect(embed?.$type).toBe("app.bsky.embed.images");
   expect(embed?.images).toHaveLength(1);
-  return embed!.images![0];
+  const image = embed?.images?.[0];
+  if (!image) throw new Error("expected an uploaded image in the embed");
+  return image;
 }
 
 /**
@@ -152,10 +149,7 @@ async function postLandscapePhoto(): Promise<UploadedImage> {
  * client would use for a fixed-width container. 100% means a square box —
  * i.e. a letterboxed landscape photo with top/bottom padding.
  */
-function reservedBoxPaddingPercent(aspectRatio?: {
-  width: number;
-  height: number;
-}): number {
+function reservedBoxPaddingPercent(aspectRatio?: { width: number; height: number }): number {
   if (!aspectRatio) return 100; // no ratio declared → square fallback
   return (aspectRatio.height / aspectRatio.width) * 100;
 }
@@ -196,8 +190,7 @@ describe("PostComposer → landscape photo aspect ratio", () => {
 
   it("preserves the source 16:9 ratio (no crop, no squaring)", async () => {
     const uploaded = await postLandscapePhoto();
-    const declared =
-      uploaded.aspectRatio!.width / uploaded.aspectRatio!.height;
+    const declared = uploaded.aspectRatio!.width / uploaded.aspectRatio!.height;
     const source = SOURCE_WIDTH / SOURCE_HEIGHT;
 
     expect(declared).toBeCloseTo(source, 2);

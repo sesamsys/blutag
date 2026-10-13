@@ -2,23 +2,24 @@
 
 > See also: [`code-review-rules.md`](./code-review-rules.md) — mandatory rules derived from past code review findings (cleanup, env validation, TypeScript casts, React effects/refs, client IP, branch and timer testing).
 
-
-
 ## Code Style & Conventions
 
 ### TypeScript
+
 - Use TypeScript for all new code
 - Define interfaces for all data structures (PhotoFile, ExifInfo, BlueskySession)
 - Use type imports: `import type { PhotoFile } from "@/types/photo"`
 - Prefer explicit return types for functions when not obvious
 
 ### React Patterns
+
 - Use functional components with hooks
 - Prefer custom hooks for reusable logic (useBlueskyAuth)
 - Use React.memo() for expensive components
 - Keep components focused on single responsibility
 
 ### File Organization
+
 - Components in `/src/components/` with PascalCase names
 - Pages in `/src/pages/` with PascalCase names
 - Custom hooks in `/src/hooks/` with `use-` prefix
@@ -28,6 +29,7 @@
 - OAuth metadata in `/public/oauth/client-metadata.json`
 
 ### Naming Conventions
+
 - Components: PascalCase (PhotoUploader.tsx)
 - Files: kebab-case (image-compress.ts)
 - Functions: camelCase (extractExif, compressImageForBluesky)
@@ -36,12 +38,14 @@
 ## Error Handling
 
 ### Frontend
+
 - Use try-catch blocks for async operations
 - Show user-friendly error messages via toast notifications
 - Log errors to console for debugging
 - Graceful degradation when features fail
 
 ### Backend (Edge Functions)
+
 - Return structured error responses with appropriate HTTP status codes
 - Include CORS headers in all responses
 - Handle rate limiting (429) and quota exceeded (402) from AI service
@@ -50,12 +54,14 @@
 ## Performance Guidelines
 
 ### Image Handling
+
 - Compress images client-side before upload
 - Use object URLs for previews, revoke when done
 - Implement progressive loading for large images
 - Respect Bluesky's 2MB image blob limit (lexicon raised from 1MB in Apr 2026)
 
 ### State Management
+
 - Use React Context for global state (auth, theme)
 - Use local state for component-specific data
 - Implement proper cleanup in useEffect hooks
@@ -64,6 +70,7 @@
 ## Security Best Practices
 
 ### Authentication
+
 - Use OAuth flow via `@atproto/oauth-client-browser`
 - No passwords or app passwords ever enter the application
 - Tokens stored in IndexedDB (managed by OAuth client)
@@ -72,6 +79,7 @@
 - Sessions persist across tabs (same origin)
 
 ### Data Privacy
+
 - Never store user images on server
 - Process images in memory only
 - Clear sensitive data from state on logout
@@ -81,6 +89,7 @@
 ## Platform Constraints
 
 ### Lovable Hosting
+
 - Application hosted on Lovable platform (https://lovable.dev)
 - Backend uses Lovable Cloud (managed Supabase)
 - No direct server or deployment access
@@ -88,6 +97,7 @@
 - Automatic deployment on code changes
 
 ### Package Manager
+
 - **Use Bun as the primary package manager** — Lovable's CD pipeline uses Bun internally
 - Standard commands: `bun install`, `bun run <script>`, `bun run test`
 - **Important**: Always use `bun run test` (runs Vitest) instead of `bun test` (runs Bun's native test runner, which has incomplete Vitest compatibility)

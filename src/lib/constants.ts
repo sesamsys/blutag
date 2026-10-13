@@ -36,10 +36,10 @@ export const BLUESKY_IMAGE_MAX_BYTES = 2_000_000;
 export const BLUESKY_IMAGE_MAX_DIMENSION = 2560;
 
 /** Initial JPEG quality for Bluesky image compression */
-export const BLUESKY_IMAGE_JPEG_QUALITY = 0.80;
+export const BLUESKY_IMAGE_JPEG_QUALITY = 0.8;
 
 /** Minimum JPEG quality floor when iteratively compressing */
-export const BLUESKY_IMAGE_JPEG_QUALITY_MIN = 0.50;
+export const BLUESKY_IMAGE_JPEG_QUALITY_MIN = 0.5;
 
 /** Quality step decrement when iteratively compressing */
 export const BLUESKY_IMAGE_JPEG_QUALITY_STEP = 0.05;

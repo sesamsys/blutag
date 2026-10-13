@@ -7,8 +7,8 @@ const DB_VERSION = 1;
 
 interface StoredPhoto {
   id: string;
-  altText?: string;
-  exifData?: ExifInfo;
+  altText?: string | undefined;
+  exifData?: ExifInfo | undefined;
   fileData: ArrayBuffer;
   fileName: string;
   fileType: string;
@@ -29,7 +29,10 @@ function getDB(): Promise<IDBDatabase> {
     };
     req.onsuccess = () => {
       dbInstance = req.result;
-      dbInstance.onclose = () => { dbInstance = null; dbPromise = null; };
+      dbInstance.onclose = () => {
+        dbInstance = null;
+        dbPromise = null;
+      };
       resolve(dbInstance);
     };
     req.onerror = () => {
@@ -47,7 +50,10 @@ let opQueue: Promise<unknown> = Promise.resolve();
 function enqueue<T>(fn: () => Promise<T>): Promise<T> {
   const next = opQueue.then(fn, fn);
   // Update the queue tail; swallow errors so the queue keeps flowing
-  opQueue = next.then(() => {}, () => {});
+  opQueue = next.then(
+    () => {},
+    () => {},
+  );
   return next;
 }
 
@@ -102,7 +108,7 @@ export function savePhotosSession(photos: PhotoFile[]): Promise<void> {
         fileData: await fileToArrayBuffer(p.file),
         fileName: p.file.name,
         fileType: p.file.type,
-      }))
+      })),
     );
     await idbPut(db, SESSION_KEY, stored);
   });

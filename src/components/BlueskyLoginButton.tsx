@@ -13,16 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-
-function isValidHandle(value: string): boolean {
-  const trimmed = value.trim();
-  return (
-    trimmed.length >= 3 &&
-    trimmed.includes(".") &&
-    !trimmed.includes("@") &&
-    !trimmed.includes(" ")
-  );
-}
+import { isValidHandle } from "@/lib/handle-validation";
 
 export default function BlueskyLoginButton() {
   const { handle, isLoggedIn, isLoading, signIn, logout } = useBlueskyAuth();
@@ -41,8 +32,7 @@ export default function BlueskyLoginButton() {
     try {
       await signIn(trimmed);
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Sign-in failed. Please try again.";
+      const msg = err instanceof Error ? err.message : "Sign-in failed. Please try again.";
       toast.error(msg);
       setSigningIn(false);
     }
@@ -66,8 +56,7 @@ export default function BlueskyLoginButton() {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground truncate max-w-[160px] transition-colors"
         >
-          <BlueskyIcon className="w-3.5 h-3.5 shrink-0" />
-          @{handle}
+          <BlueskyIcon className="w-3.5 h-3.5 shrink-0" />@{handle}
         </a>
         <Button variant="ghost" size="sm" onClick={logout} className="gap-1.5">
           <LogOut className="w-4 h-4" />
@@ -90,8 +79,8 @@ export default function BlueskyLoginButton() {
           <DialogHeader>
             <DialogTitle>Sign in with Bluesky</DialogTitle>
             <DialogDescription>
-              Enter your Bluesky handle to sign in securely via OAuth.
-              You'll be redirected to Bluesky to approve access.
+              Enter your Bluesky handle to sign in securely via OAuth. You'll be redirected to
+              Bluesky to approve access.
             </DialogDescription>
           </DialogHeader>
 

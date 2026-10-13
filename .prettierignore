@@ -1,0 +1,32 @@
+# Build output
+dist
+dist-ssr
+.output
+.vinxi
+.nitro
+.wrangler
+node_modules
+coverage
+
+# Generated files (recreated by tooling — formatting them is wasted churn)
+src/routeTree.gen.ts
+src/integrations/supabase/types.ts
+src/integrations/supabase/client.ts
+src/tailwind.config.lov.json
+
+# Tool-managed artifacts and plans (not source)
+.lovable
+.kiro
+.workspace
+
+# Deno backend functions (separate runtime and tooling)
+supabase/functions
+
+# Hand-authored documentation with intentional embedded code examples
+docs
+
+# Lockfiles
+bun.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

@@ -9,15 +9,15 @@ Review of the 7 steering files in `.kiro/steering/` to align future development 
 
 ## Steering Files Summary
 
-| File | Purpose |
-|------|---------|
-| `project-overview.md` | Project purpose, tech stack, architecture, target users |
-| `development-standards.md` | Code style, naming, error handling, security practices |
-| `documentation.md` | Where and how to document (constants in `/src/data`, docs in `/docs`) |
-| `api-integration.md` | Edge function structure, AT Protocol flow, AI gateway usage |
-| `ui-ux-guidelines.md` | shadcn-ui patterns, responsive design, accessibility |
-| `accessibility-alt-text.md` | Alt text generation principles, prompt engineering, testing |
-| `testing-deployment.md` | Vitest/Playwright setup, Lovable platform deployment |
+| File                        | Purpose                                                               |
+| --------------------------- | --------------------------------------------------------------------- |
+| `project-overview.md`       | Project purpose, tech stack, architecture, target users               |
+| `development-standards.md`  | Code style, naming, error handling, security practices                |
+| `documentation.md`          | Where and how to document (constants in `/src/data`, docs in `/docs`) |
+| `api-integration.md`        | Edge function structure, AT Protocol flow, AI gateway usage           |
+| `ui-ux-guidelines.md`       | shadcn-ui patterns, responsive design, accessibility                  |
+| `accessibility-alt-text.md` | Alt text generation principles, prompt engineering, testing           |
+| `testing-deployment.md`     | Vitest/Playwright setup, Lovable platform deployment                  |
 
 ## Key Architectural Decisions
 
@@ -29,14 +29,14 @@ Review of the 7 steering files in `.kiro/steering/` to align future development 
 
 ## Critical Constants (`src/lib/constants.ts`)
 
-| Constant | Value | Notes |
-|----------|-------|-------|
-| `MAX_PHOTOS` | 4 | Per session |
-| `MAX_FILE_SIZE_MB` | 25 | Per photo |
-| `MAX_ALT_TEXT_LENGTH` | 2000 | Bluesky limit |
-| `BLUESKY_POST_MAX_LENGTH` | 300 | Character limit |
-| `BLUESKY_IMAGE_MAX_BYTES` | 1,000,000 | 1 MB upload limit |
-| `BLUESKY_IMAGE_MAX_DIMENSION` | 2048 | Longest edge px |
+| Constant                      | Value     | Notes             |
+| ----------------------------- | --------- | ----------------- |
+| `MAX_PHOTOS`                  | 4         | Per session       |
+| `MAX_FILE_SIZE_MB`            | 25        | Per photo         |
+| `MAX_ALT_TEXT_LENGTH`         | 2000      | Bluesky limit     |
+| `BLUESKY_POST_MAX_LENGTH`     | 300       | Character limit   |
+| `BLUESKY_IMAGE_MAX_BYTES`     | 1,000,000 | 1 MB upload limit |
+| `BLUESKY_IMAGE_MAX_DIMENSION` | 2048      | Longest edge px   |
 
 ## File Organization Conventions
 

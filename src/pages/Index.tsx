@@ -11,17 +11,28 @@ import LanguagePicker from "@/components/LanguagePicker";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import { extractExif } from "@/lib/exif";
-import { supabase } from "@/integrations/supabase/client";
 import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
-import { MAX_PHOTOS, RATE_LIMIT_MAX_CALLS, RATE_LIMIT_WINDOW_MS, ANALYSIS_TIMEOUT_MS, ANALYSIS_CONCURRENCY, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
+import {
+  MAX_PHOTOS,
+  RATE_LIMIT_MAX_CALLS,
+  RATE_LIMIT_WINDOW_MS,
+  ANALYSIS_TIMEOUT_MS,
+  ANALYSIS_CONCURRENCY,
+  RETRY_MAX_ATTEMPTS,
+} from "@/lib/constants";
 import { compressImageForBluesky } from "@/lib/image-compress";
 import { runWithConcurrency } from "@/lib/concurrent";
 import { arrayMove } from "@dnd-kit/sortable";
-import { savePhotosSession, loadPhotosSession, clearPhotosSession } from "@/lib/session-persistence";
-import { ERROR_MESSAGES, getErrorMessage, logError, ErrorType, AppError } from "@/lib/error-messages";
+import {
+  savePhotosSession,
+  loadPhotosSession,
+  clearPhotosSession,
+} from "@/lib/session-persistence";
+import { ERROR_MESSAGES, getErrorMessage, logError } from "@/lib/error-messages";
 import { retryWithTimeout } from "@/lib/retry";
+import { requestAltText } from "@/lib/analyze-photo";
 import { createRateLimiter } from "@/lib/rate-limiter";
 
 function generateId() {
@@ -32,8 +43,13 @@ function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      const result = reader.result as string;
-      resolve(result.split(",")[1]);
+      const result = reader.result;
+      const base64 = typeof result === "string" ? result.split(",")[1] : undefined;
+      if (base64 === undefined) {
+        reject(new Error("Could not read image data"));
+        return;
+      }
+      resolve(base64);
     };
     reader.onerror = reject;
     reader.readAsDataURL(blob);
@@ -48,8 +64,12 @@ const Index = () => {
   const { language } = useLanguage();
 
   const rateLimiter = useMemo(
-    () => createRateLimiter({ maxCalls: RATE_LIMIT_MAX_CALLS, windowMs: RATE_LIMIT_WINDOW_MS }),
-    []
+    () =>
+      createRateLimiter({
+        maxCalls: RATE_LIMIT_MAX_CALLS,
+        windowMs: RATE_LIMIT_WINDOW_MS,
+      }),
+    [],
   );
 
   // Restore session from IndexedDB (survives OAuth redirects)
@@ -80,7 +100,8 @@ const Index = () => {
   const handleRemovePhoto = useCallback((index: number) => {
     setPhotos((prev) => {
       const copy = [...prev];
-      URL.revokeObjectURL(copy[index].preview);
+      const removed = copy[index];
+      if (removed) URL.revokeObjectURL(removed.preview);
       copy.splice(index, 1);
       return copy;
     });
@@ -98,9 +119,7 @@ const Index = () => {
   }, []);
 
   const handleUpdateAltText = useCallback((id: string, text: string) => {
-    setPhotos((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, altText: text } : p))
-    );
+    setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, altText: text } : p)));
   }, []);
 
   const runAnalysis = async (targetPhotos: PhotoFile[], targetLanguage: string) => {
@@ -119,9 +138,7 @@ const Index = () => {
     setIsAnalyzing(true);
     setHasResults(true);
     setResultsLanguage(targetLanguage);
-    setPhotos((prev) =>
-      prev.map((p) => (targetIds.has(p.id) ? { ...p, analyzing: true } : p))
-    );
+    setPhotos((prev) => prev.map((p) => (targetIds.has(p.id) ? { ...p, analyzing: true } : p)));
 
     const analyzeOne = async (photo: PhotoFile) => {
       try {
@@ -141,31 +158,7 @@ const Index = () => {
         // Retry with timeout (30 seconds per request, up to 3 attempts)
         const result = await retryWithTimeout(
           async () => {
-            const { data, error } = await supabase.functions.invoke("analyze-photo", {
-              body: { imageBase64: base64, exifData, language: targetLanguage },
-            });
-
-            if (error) {
-              // Check for specific error types
-              if (error.message?.includes("429")) {
-                throw new AppError(
-                  ERROR_MESSAGES.ALT_TEXT_RATE_LIMIT,
-                  ErrorType.RATE_LIMIT,
-                  error
-                );
-              }
-              if (error.message?.includes("402")) {
-                throw new AppError(
-                  ERROR_MESSAGES.ALT_TEXT_QUOTA_EXCEEDED,
-                  ErrorType.QUOTA,
-                  error,
-                  false // Not retryable
-                );
-              }
-              throw error;
-            }
-
-            return data;
+            return requestAltText({ imageBase64: base64, exifData, language: targetLanguage });
           },
           ANALYSIS_TIMEOUT_MS,
           {
@@ -173,15 +166,13 @@ const Index = () => {
             onRetry: (_error, attempt) => {
               toast.info(`Retrying analysis (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`);
             },
-          }
+          },
         );
 
         setPhotos((prev) =>
           prev.map((p) =>
-            p.id === photo.id
-              ? { ...p, altText: result.altText, exifData, analyzing: false }
-              : p
-          )
+            p.id === photo.id ? { ...p, altText: result, exifData, analyzing: false } : p,
+          ),
         );
       } catch (err) {
         logError(err, { context: "photo_analysis", photoId: photo.id });
@@ -189,11 +180,7 @@ const Index = () => {
         const errorMessage = getErrorMessage(err);
         toast.error(errorMessage);
 
-        setPhotos((prev) =>
-          prev.map((p) =>
-            p.id === photo.id ? { ...p, analyzing: false } : p
-          )
-        );
+        setPhotos((prev) => prev.map((p) => (p.id === photo.id ? { ...p, analyzing: false } : p)));
       }
     };
 
@@ -238,7 +225,7 @@ const Index = () => {
               e.preventDefault();
               handleReset();
             }}
-            className="flex items-center gap-3 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="flex items-center gap-3 rounded-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Blutag home"
           >
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
@@ -269,12 +256,11 @@ const Index = () => {
             {/* Hero */}
             <div className="text-center space-y-2">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                AI-powered alt text for{" "}
-                <span className="text-primary">Bluesky</span>
+                AI-powered alt text for <span className="text-primary">Bluesky</span>
               </h2>
               <p className="text-muted-foreground text-base max-w-md mx-auto">
-                Upload your photos and get meaningful, descriptive alt text to
-                make your posts accessible to everyone.
+                Upload your photos and get meaningful, descriptive alt text to make your posts
+                accessible to everyone.
               </p>
             </div>
 

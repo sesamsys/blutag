@@ -1,8 +1,15 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
-import { BrowserOAuthClient, type OAuthSession } from "@atproto/oauth-client-browser";
+import { useRouter } from "@tanstack/react-router";
+import type { BrowserOAuthClient, OAuthSession } from "@atproto/oauth-client-browser";
 import { Agent } from "@atproto/api";
 import { toast } from "sonner";
-import { ERROR_MESSAGES, AppError, ErrorType, getErrorMessage, logError } from "@/lib/error-messages";
+import {
+  ERROR_MESSAGES,
+  AppError,
+  ErrorType,
+  getErrorMessage,
+  logError,
+} from "@/lib/error-messages";
 
 interface BlueskyAuthContextValue {
   agent: Agent | null;
@@ -37,10 +44,14 @@ let clientPromise: Promise<BrowserOAuthClient> | null = null;
 
 function getClient(): Promise<BrowserOAuthClient> {
   if (!clientPromise) {
-    clientPromise = BrowserOAuthClient.load({
-      clientId: CLIENT_ID,
-      handleResolver: "https://bsky.social",
-    });
+    // Imported lazily: the OAuth client is browser-only (IndexedDB, WebCrypto)
+    // and must never be evaluated during server rendering.
+    clientPromise = import("@atproto/oauth-client-browser").then(({ BrowserOAuthClient: Client }) =>
+      Client.load({
+        clientId: CLIENT_ID,
+        handleResolver: "https://bsky.social",
+      }),
+    );
   }
   return clientPromise;
 }
@@ -50,6 +61,7 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
   const [handle, setHandle] = useState<string | null>(null);
   const [did, setDid] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   const establishSession = useCallback(async (oauthSession: OAuthSession) => {
     try {
@@ -63,16 +75,15 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
         setHandle(profile.data.handle);
       } catch (profileError) {
         // Fallback to DID if profile fetch fails (non-critical)
-        logError(profileError, { context: "profile_fetch", did: oauthSession.did });
+        logError(profileError, {
+          context: "profile_fetch",
+          did: oauthSession.did,
+        });
         setHandle(oauthSession.did);
       }
     } catch (error) {
       logError(error, { context: "establish_session" });
-      throw new AppError(
-        ERROR_MESSAGES.AUTH_FAILED,
-        ErrorType.AUTHENTICATION,
-        error
-      );
+      throw new AppError(ERROR_MESSAGES.AUTH_FAILED, ErrorType.AUTHENTICATION, error);
     }
   }, []);
 
@@ -90,9 +101,8 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
           await establishSession(result.session);
 
           // If this was a callback (has state), redirect to home
-          if (result.state != null && window.location.pathname !== "/") {
-            window.history.replaceState(null, "", "/");
-            window.dispatchEvent(new PopStateEvent("popstate"));
+          if (result.state != null && router.state.location.pathname !== "/") {
+            void router.navigate({ to: "/", replace: true });
           }
 
           toast.success("Signed in to Bluesky");
@@ -108,7 +118,7 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
     return () => {
       mounted = false;
     };
-  }, [establishSession]);
+  }, [establishSession, router]);
 
   const signIn = useCallback(async (inputHandle: string) => {
     try {
@@ -119,10 +129,10 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
       // Redirects to Bluesky — execution stops here
     } catch (err) {
       logError(err, { context: "oauth_signin", handle: inputHandle });
-      
+
       const errorMessage = err instanceof Error ? err.message : String(err);
       let message: string;
-      
+
       if (errorMessage.includes("client_metadata")) {
         message = ERROR_MESSAGES.AUTH_CLIENT_METADATA_ERROR;
       } else if (errorMessage.includes("resolve")) {
@@ -130,7 +140,7 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
       } else {
         message = getErrorMessage(err);
       }
-      
+
       throw new AppError(message, ErrorType.AUTHENTICATION, err);
     }
   }, []);
