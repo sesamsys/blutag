@@ -1,0 +1,12 @@
+{
+  "customizations": [
+    { "token": "@font-face Inter (self-hosted latin + latin-ext)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "@font-face Caveat (self-hosted latin + latin-ext)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--primary (Bluesky blue 214 100% 50%)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--secondary / --accent (Bluesky tints)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": ".dark navy palette (--background 216 30% 12%, --muted-foreground 214 20% 73%)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--radius: 9999px (pill buttons)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--font-sans Inter stack", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "container center + 2rem padding + 2xl 1400px", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" }
+  ]
+}
