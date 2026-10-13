@@ -10,7 +10,12 @@ import {
   getErrorMessage,
   logError,
 } from "@/lib/error-messages";
-import { getLoopbackIpUrl, getOAuthClientId } from "@/lib/oauth-client-id";
+import {
+  CANONICAL_CLIENT_METADATA,
+  getLoopbackIpUrl,
+  getOAuthClientId,
+  isLoopbackHost,
+} from "@/lib/oauth-client-id";
 
 interface BlueskyAuthContextValue {
   agent: Agent | null;
@@ -30,11 +35,19 @@ function getClient(): Promise<BrowserOAuthClient> {
   if (!clientPromise) {
     // Imported lazily: the OAuth client is browser-only (IndexedDB, WebCrypto)
     // and must never be evaluated during server rendering.
-    clientPromise = import("@atproto/oauth-client-browser").then(({ BrowserOAuthClient: Client }) =>
-      Client.load({
-        clientId: getOAuthClientId(window.location),
-        handleResolver: "https://bsky.social",
-      }),
+    clientPromise = import("@atproto/oauth-client-browser").then(
+      ({ BrowserOAuthClient: Client }) =>
+        isLoopbackHost(window.location.hostname)
+          ? Client.load({
+              clientId: getOAuthClientId(window.location),
+              handleResolver: "https://bsky.social",
+            })
+          : // Hosted aliases (previews, www) can't fetch the canonical metadata
+            // cross-origin (no CORS header → "Load failed"), so pass it inline.
+            new Client({
+              clientMetadata: CANONICAL_CLIENT_METADATA,
+              handleResolver: "https://bsky.social",
+            }),
     );
   }
   return clientPromise;

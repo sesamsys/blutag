@@ -25,6 +25,7 @@ Entries are dated by release date (`YYYY-MM-DD`); changes are released the same 
 
 ### Fixed
 
+- Signing in from the preview or `www` showed a "Load failed" toast: the sign-in setup is now built in instead of fetched from blutag.app, which browsers block cross-origin
 - Local development sign-in failed with "Invalid loopback client ID: Value must not contain a path component"; local OAuth now uses a path-less loopback client ID and redirects `localhost` to `127.0.0.1`
 - Copying alt text when clipboard access is denied now shows an error instead of failing silently
 - Retry tests no longer leave unhandled promise rejections

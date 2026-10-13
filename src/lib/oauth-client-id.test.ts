@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  CANONICAL_CLIENT_METADATA,
   CANONICAL_CLIENT_ID,
   OAUTH_SCOPE,
   getLoopbackIpUrl,
@@ -56,5 +57,15 @@ describe("getLoopbackIpUrl", () => {
   it("leaves other hosts alone", () => {
     expect(getLoopbackIpUrl("http://127.0.0.1:8080/")).toBeNull();
     expect(getLoopbackIpUrl("https://blutag.app/")).toBeNull();
+  });
+});
+
+describe("sign-in on preview shows 'Load failed'", () => {
+  it("inline metadata matches the published client metadata document", async () => {
+    const { readFileSync } = await import("node:fs");
+    const published: unknown = JSON.parse(
+      readFileSync("public/oauth/client-metadata.json", "utf8"),
+    );
+    expect(CANONICAL_CLIENT_METADATA).toEqual(published);
   });
 });
