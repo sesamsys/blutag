@@ -23,8 +23,10 @@ vi.mock("@atproto/api", () => ({
 
 const navigate = vi.fn();
 const routerState = { location: { pathname: "/" } };
+// The real router is a stable singleton; return the same object every render.
+const router = { navigate, state: routerState };
 vi.mock("@tanstack/react-router", () => ({
-  useRouter: () => ({ navigate, state: routerState }),
+  useRouter: () => router,
 }));
 
 vi.mock("sonner", () => ({

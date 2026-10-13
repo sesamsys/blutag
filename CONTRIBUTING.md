@@ -31,10 +31,16 @@ cp .env.example .env
 bun run dev
 ```
 
-### Running Tests
+Open `http://127.0.0.1:8080` — Bluesky sign-in requires a loopback IP, so `localhost` redirects there.
+
+### Running Checks
 
 ```bash
-bun run test
+bun run test        # unit tests
+bun run typecheck   # strict TypeScript
+bun run lint        # ESLint + Prettier rules
+bun run format      # auto-format with Prettier
+bun run build       # production build
 ```
 
 ## How to Contribute
@@ -65,9 +71,9 @@ Open an issue tagged **enhancement** describing:
    git checkout -b feat/my-feature
    ```
 3. **Make your changes** — keep commits focused and atomic
-4. **Run tests** to make sure nothing is broken:
+4. **Run the checks** CI will run:
    ```bash
-   bun run test
+   bun run typecheck && bun run test && bun run lint && bun run format:check && bun run build
    ```
 5. **Push** your branch and open a **Pull Request**
 
@@ -106,7 +112,9 @@ Include:
 - **TypeScript** — strict mode, no `any` unless absolutely necessary
 - **React** — functional components with hooks
 - **Tailwind CSS** — use semantic design tokens from the design system; avoid hardcoded color values
-- **Formatting** — follow the existing ESLint configuration
+- **Formatting** — Prettier (`.prettierrc.json`, 100 columns); run `bun run format` before committing
+- **Routing** — TanStack Router file routes in `src/routes/`; use its `Link` / `useNavigate`
+- **Tests** — follow the three test phases in `AGENTS.md`; bug fixes include a regression test
 
 ## Project Structure
 
@@ -118,7 +126,9 @@ src/
 ├── contexts/       # React context providers
 ├── hooks/          # Custom React hooks
 ├── lib/            # Utilities, helpers, constants
-├── pages/          # Route-level page components
+├── pages/          # Page components rendered by routes
+├── routes/         # TanStack Router file routes (__root.tsx = shell, providers, <head>)
+├── test/           # Shared test setup, mocks and render helpers
 └── types/          # TypeScript type definitions
 supabase/
 └── functions/      # Edge functions (Deno runtime)

@@ -4,7 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.5.0] - 2026-10-13
+
+### Added
+
+- Prettier (`.prettierrc.json`, `.prettierignore`) with `format` / `format:check` scripts, enforced through ESLint
+- GitHub Actions CI (`.github/workflows/ci.yml`) running typecheck, tests with coverage, lint, format check and build on pull requests and every push to `main`, so Lovable commits are checked too
+- Three-phase unit test coverage: pure logic (handle/post/photo validation, languages, language preference, utils, OAuth client ID), contexts and data (Bluesky auth, language, photo analysis client), and route/component smoke tests (routing, photo uploader, alt text editor, language picker) — 222 tests
+- `test:coverage` and `typecheck` scripts; V8 coverage reports
+- `AGENTS.md` with architecture, tooling and testing rules
+
+### Changed
+
+- Migrated from Vite + React Router to TanStack Start with native file-based routes (`src/routes/`); providers, page metadata and the dark-mode bootstrap now live in `__root.tsx`
+- Upgraded to React 19 and Tailwind CSS v4; theme colors, fonts and pill radius carried over unchanged
+- TypeScript strict mode (including unused locals/parameters) across the codebase
+- The Bluesky OAuth client loads lazily and the OAuth callback page renders only in the browser
+- Validation for photos, handles and posts extracted into tested helpers
+- README, CONTRIBUTING and steering docs updated for the new stack and checks
+
+### Fixed
+
+- Local development sign-in failed with "Invalid loopback client ID: Value must not contain a path component"; local OAuth now uses a path-less loopback client ID and redirects `localhost` to `127.0.0.1`
+- Copying alt text when clipboard access is denied now shows an error instead of failing silently
+- Retry tests no longer leave unhandled promise rejections
+
+### Removed
+
+- Unused shadcn UI components, legacy Radix toast files, the class-based error boundary and unused dependencies (including `react-router-dom` and the unused Playwright scaffold)
+
+## [0.4.1] - 2026-08-12
 
 ### Added
 

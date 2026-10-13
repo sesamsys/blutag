@@ -2,6 +2,17 @@
 
 ## Testing Strategy
 
+Tests are rolled out in three phases (see `AGENTS.md`):
+
+1. **Pure logic** — `src/lib/**` helpers (validation, languages, embeds, compression)
+2. **Contexts, hooks and data** — `BlueskyAuthContext`, `LanguageContext`, `analyze-photo`
+   client, using mocks in `src/test/mocks/` and `src/test/render-with-providers.tsx`
+3. **Routes and components** — route matching (`src/test/app-routing.test.tsx`) and smoke tests
+   for the uploader, alt text editor, composer and language picker
+
+CI (`.github/workflows/ci.yml`) runs typecheck, `test:coverage`, lint, format check and build on
+pull requests and every push to `main` (Lovable commits land directly on `main`).
+
 ### Unit Testing
 
 - Use Vitest for unit tests
@@ -38,7 +49,7 @@
 
 ### Local Development
 
-- Use `bun run dev` for development server
+- Use `bun run dev` and open `http://127.0.0.1:8080` (OAuth requires a loopback IP; `localhost` redirects)
 - Hot reload for rapid iteration
 - Use browser dev tools for debugging
 - Test with real images and EXIF data
@@ -97,7 +108,6 @@
 - Code splitting for route-based chunks
 - Lazy loading for non-critical components
 - Image optimization and compression
-- Service worker for offline functionality
 
 ### Backend
 
@@ -108,7 +118,7 @@
 
 ### Monitoring Tools
 
-- Supabase dashboard for function metrics
+- Lovable Cloud function logs for function metrics
 - Browser dev tools for performance profiling
 - Lighthouse for web vitals
 - Real user monitoring for production insights

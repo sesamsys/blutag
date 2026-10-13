@@ -10,6 +10,7 @@ import {
   getErrorMessage,
   logError,
 } from "@/lib/error-messages";
+import { getLoopbackIpUrl, getOAuthClientId } from "@/lib/oauth-client-id";
 
 interface BlueskyAuthContextValue {
   agent: Agent | null;
@@ -23,23 +24,6 @@ interface BlueskyAuthContextValue {
 
 const BlueskyAuthContext = createContext<BlueskyAuthContextValue | null>(null);
 
-/**
- * AT Protocol OAuth requires the `client_id` URL to exactly match the URL
- * the metadata document is served from. We pin all production hosts
- * (blutag.app, www.blutag.app, *.lovable.app previews) to the canonical
- * `https://blutag.app/oauth/client-metadata.json` so OAuth always works
- * regardless of which alias the user visits — the callback then lands on
- * the canonical domain. For local development we fall back to the current
- * origin (atproto's BrowserOAuthClient allows http://localhost in dev mode).
- */
-const CANONICAL_CLIENT_ID = "https://blutag.app/oauth/client-metadata.json";
-const isLocalhost =
-  typeof window !== "undefined" &&
-  /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname);
-const CLIENT_ID = isLocalhost
-  ? `${window.location.origin}/oauth/client-metadata.json`
-  : CANONICAL_CLIENT_ID;
-
 let clientPromise: Promise<BrowserOAuthClient> | null = null;
 
 function getClient(): Promise<BrowserOAuthClient> {
@@ -48,7 +32,7 @@ function getClient(): Promise<BrowserOAuthClient> {
     // and must never be evaluated during server rendering.
     clientPromise = import("@atproto/oauth-client-browser").then(({ BrowserOAuthClient: Client }) =>
       Client.load({
-        clientId: CLIENT_ID,
+        clientId: getOAuthClientId(window.location),
         handleResolver: "https://bsky.social",
       }),
     );
@@ -88,6 +72,14 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // AT Protocol only accepts loopback IP literals for local OAuth; move
+    // http://localhost to 127.0.0.1 before the client throws on init.
+    const loopbackIpUrl = getLoopbackIpUrl(window.location.href);
+    if (loopbackIpUrl) {
+      window.location.replace(loopbackIpUrl);
+      return;
+    }
+
     let mounted = true;
 
     (async () => {
