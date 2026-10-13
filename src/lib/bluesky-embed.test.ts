@@ -54,7 +54,7 @@ describe("buildPostEmbed", () => {
       }
       expect(truncatedCount).toBe(3);
       expect(warnSpy).toHaveBeenCalledOnce();
-      expect(warnSpy.mock.calls[0][0]).toMatch(/3 photo\(s\)/);
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/3 photo\(s\)/);
     });
 
     it("does not warn or truncate when gallery is disabled but ≤4 images", () => {
