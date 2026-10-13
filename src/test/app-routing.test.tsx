@@ -23,7 +23,11 @@ describe("App routing", () => {
   });
 
   it("matches the OAuth return URL with callback query parameters", () => {
-    const matches = makeRouter().matchRoutes("/oauth/callback?code=abc&state=xyz&iss=bsky");
+    const matches = makeRouter().matchRoutes("/oauth/callback", {
+      code: "abc",
+      state: "xyz",
+      iss: "bsky",
+    });
     expect(matches.at(-1)?.routeId).toBe("/oauth/callback");
   });
 
