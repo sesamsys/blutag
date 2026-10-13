@@ -37,3 +37,7 @@ package-lock.json
 .vinxi
 *.tsbuildinfo
 coverage
+
+# Agent/tooling working directories (temporary, not tracked)
+.agents
+.worktrees

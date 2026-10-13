@@ -18,6 +18,8 @@ src/tailwind.config.lov.json
 .lovable
 .kiro
 .workspace
+.agents
+.worktrees
 
 # Deno backend functions (separate runtime and tooling)
 supabase/functions
