@@ -30,3 +30,10 @@ dist-ssr
 
 # Bun as preferred package manager
 package-lock.json
+# Build output and generated caches
+.output
+.nitro
+.tanstack
+.vinxi
+*.tsbuildinfo
+coverage
