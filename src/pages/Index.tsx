@@ -11,7 +11,6 @@ import LanguagePicker from "@/components/LanguagePicker";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import { extractExif } from "@/lib/exif";
-import { supabase } from "@/integrations/supabase/client";
 import { metaData } from "@/lib/metaData";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
@@ -39,6 +38,7 @@ import {
   AppError,
 } from "@/lib/error-messages";
 import { retryWithTimeout } from "@/lib/retry";
+import { requestAltText } from "@/lib/analyze-photo";
 import { createRateLimiter } from "@/lib/rate-limiter";
 
 function generateId() {
@@ -164,31 +164,7 @@ const Index = () => {
         // Retry with timeout (30 seconds per request, up to 3 attempts)
         const result = await retryWithTimeout(
           async () => {
-            const { data, error } = await supabase.functions.invoke("analyze-photo", {
-              body: {
-                imageBase64: base64,
-                exifData,
-                language: targetLanguage,
-              },
-            });
-
-            if (error) {
-              // Check for specific error types
-              if (error.message?.includes("429")) {
-                throw new AppError(ERROR_MESSAGES.ALT_TEXT_RATE_LIMIT, ErrorType.RATE_LIMIT, error);
-              }
-              if (error.message?.includes("402")) {
-                throw new AppError(
-                  ERROR_MESSAGES.ALT_TEXT_QUOTA_EXCEEDED,
-                  ErrorType.QUOTA,
-                  error,
-                  false, // Not retryable
-                );
-              }
-              throw error;
-            }
-
-            return data;
+            return requestAltText({ imageBase64: base64, exifData, language: targetLanguage });
           },
           ANALYSIS_TIMEOUT_MS,
           {
@@ -201,7 +177,7 @@ const Index = () => {
 
         setPhotos((prev) =>
           prev.map((p) =>
-            p.id === photo.id ? { ...p, altText: result.altText, exifData, analyzing: false } : p,
+            p.id === photo.id ? { ...p, altText: result, exifData, analyzing: false } : p,
           ),
         );
       } catch (err) {

@@ -13,13 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-
-function isValidHandle(value: string): boolean {
-  const trimmed = value.trim();
-  return (
-    trimmed.length >= 3 && trimmed.includes(".") && !trimmed.includes("@") && !trimmed.includes(" ")
-  );
-}
+import { isValidHandle } from "@/lib/handle-validation";
 
 export default function BlueskyLoginButton() {
   const { handle, isLoggedIn, isLoading, signIn, logout } = useBlueskyAuth();

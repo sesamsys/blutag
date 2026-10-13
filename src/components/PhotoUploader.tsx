@@ -27,6 +27,7 @@ import {
   BLUESKY_IMAGES_EMBED_MAX,
   BLUESKY_GALLERY_ENABLED,
 } from "@/lib/constants";
+import { formatRejections, selectPhotos } from "@/lib/photo-validation";
 import SortablePhotoItem from "./SortablePhotoItem";
 
 interface PhotoUploaderProps {
@@ -91,44 +92,18 @@ export default function PhotoUploader({
       if (!fileList) return;
       if (remaining <= 0) return;
 
-      const allValid: File[] = [];
-      const errors: string[] = [];
+      const { accepted, rejections, overflowCount } = selectPhotos(Array.from(fileList), remaining);
 
-      Array.from(fileList).forEach((f) => {
-        if (!f.type.startsWith("image/")) {
-          errors.push(`${f.name}: Not an image file`);
-          return;
-        }
-        if (f.size > MAX_FILE_SIZE_BYTES) {
-          errors.push(`${f.name}: Exceeds ${MAX_FILE_SIZE_MB}MB limit`);
-          return;
-        }
-        if (f.size === 0) {
-          errors.push(`${f.name}: File is empty`);
-          return;
-        }
-        const ext = f.name.split(".").pop()?.toLowerCase();
-        const validExtensions = ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif"];
-        if (!ext || !validExtensions.includes(ext)) {
-          errors.push(`${f.name}: Unsupported file type`);
-          return;
-        }
-        allValid.push(f);
-      });
-
-      if (errors.length > 0) {
-        toast.error(
-          `Some files were rejected:\n${errors.slice(0, 3).join("\n")}${errors.length > 3 ? `\n...and ${errors.length - 3} more` : ""}`,
-        );
+      if (rejections.length > 0) {
+        toast.error(formatRejections(rejections));
       }
 
-      if (allValid.length > remaining) {
+      if (overflowCount > 0) {
         toast.warning(
-          `You can only add up to ${MAX_PHOTOS} photos. ${allValid.length - remaining} photo${allValid.length - remaining === 1 ? " was" : "s were"} not added.`,
+          `You can only add up to ${MAX_PHOTOS} photos. ${overflowCount} photo${overflowCount === 1 ? " was" : "s were"} not added.`,
         );
       }
 
-      const accepted = allValid.slice(0, remaining);
       if (accepted.length) onAddPhotos(accepted);
     },
     [remaining, onAddPhotos],

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import { toast } from "sonner";
+import { logError } from "@/lib/error-messages";
 import type { PhotoFile } from "@/types/photo";
 import { MAX_ALT_TEXT_LENGTH, COPY_FEEDBACK_DURATION_MS } from "@/lib/constants";
 
@@ -15,7 +17,14 @@ export default function AltTextResult({ photo, index, onUpdateAltText }: AltText
 
   const handleCopy = async () => {
     if (!photo.altText) return;
-    await navigator.clipboard.writeText(photo.altText);
+    try {
+      await navigator.clipboard.writeText(photo.altText);
+    } catch (err) {
+      // Clipboard access can be denied (permissions, insecure context).
+      logError(err, { context: "alt_text_copy", photoId: photo.id });
+      toast.error("Couldn't copy to the clipboard. Select the text and copy it manually.");
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION_MS);
   };

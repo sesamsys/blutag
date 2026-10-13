@@ -21,7 +21,7 @@ export function getFileRejectionReason(file: File): string | null {
   if (file.size > MAX_FILE_SIZE_BYTES) return `${file.name}: Exceeds ${MAX_FILE_SIZE_MB}MB limit`;
   if (file.size === 0) return `${file.name}: File is empty`;
   const ext = file.name.split(".").pop()?.toLowerCase();
-  if (!ext || !file.name.includes(".") || !ACCEPTED_IMAGE_EXTENSIONS.includes(ext)) {
+  if (!ext || !ACCEPTED_IMAGE_EXTENSIONS.includes(ext)) {
     return `${file.name}: Unsupported file type`;
   }
   return null;

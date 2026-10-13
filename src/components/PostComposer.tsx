@@ -11,12 +11,7 @@ import { compressImageForBluesky } from "@/lib/image-compress";
 import { buildPostEmbed } from "@/lib/bluesky-embed";
 import { RichText, type BlobRef } from "@atproto/api";
 import { toast } from "sonner";
-import {
-  BLUESKY_POST_MAX_LENGTH,
-  MAX_ALT_TEXT_LENGTH,
-  MAX_PHOTOS,
-  RETRY_MAX_ATTEMPTS,
-} from "@/lib/constants";
+import { BLUESKY_POST_MAX_LENGTH, MAX_PHOTOS, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
 import {
   ERROR_MESSAGES,
@@ -26,6 +21,7 @@ import {
   ErrorType,
 } from "@/lib/error-messages";
 import { retryWithBackoff } from "@/lib/retry";
+import { remainingPostCharacters, validatePostDraft } from "@/lib/post-validation";
 
 interface PostComposerProps {
   photos: PhotoFile[];
@@ -61,23 +57,9 @@ export default function PostComposer({ photos }: PostComposerProps) {
 
   const handlePost = async () => {
     if (posting) return;
-    if (text.length > BLUESKY_POST_MAX_LENGTH) {
-      toast.error(`Post text exceeds ${BLUESKY_POST_MAX_LENGTH} character limit`);
-      return;
-    }
-
-    // Validate we have photos with alt text
-    if (photosWithAltText.length === 0) {
-      toast.error("No photos with alt text to post");
-      return;
-    }
-
-    // Validate alt text lengths
-    const invalidAltText = photosWithAltText.find(
-      (p) => !p.altText || p.altText.length === 0 || p.altText.length > MAX_ALT_TEXT_LENGTH,
-    );
-    if (invalidAltText) {
-      toast.error(`All photos must have alt text (max ${MAX_ALT_TEXT_LENGTH} characters)`);
+    const validationError = validatePostDraft(text, photosWithAltText);
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
 
@@ -194,7 +176,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
     }
   };
 
-  const remaining = BLUESKY_POST_MAX_LENGTH - text.length;
+  const remaining = remainingPostCharacters(text);
 
   if (postUrl) {
     return (
