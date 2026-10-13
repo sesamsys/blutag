@@ -6,7 +6,7 @@ Blutag is a web application that helps users generate AI-powered alternative tex
 
 ## Core Functionality
 
-- Upload up to 4 photos (max 25MB each)
+- Upload up to 10 photos (max 25MB each)
 - AI-powered alt text generation using Google Gemini 2.5 Flash
 - EXIF metadata extraction for context (date, GPS, camera info)
 - Bluesky OAuth authentication (no passwords in app)
@@ -16,7 +16,7 @@ Blutag is a web application that helps users generate AI-powered alternative tex
 
 ## Tech Stack
 
-- **Frontend**: React 18 + TypeScript + Vite (SWC)
+- **Frontend**: React 19 + TypeScript + TanStack Start (file-based TanStack Router, SSR)
 - **UI**: shadcn-ui components + Tailwind CSS
 - **Backend**: Supabase Edge Functions (Deno)
 - **AI**: Lovable AI Gateway (Google Gemini 2.5 Flash)
@@ -35,7 +35,7 @@ Blutag is a web application that helps users generate AI-powered alternative tex
 
 ## Architecture
 
-Single-page React application with client-side OAuth and one Supabase Edge Function:
+TanStack Start application (server-rendered shell, client-side OAuth) with one backend function:
 
 1. `analyze-photo` - AI alt text generation via Lovable AI Gateway
 

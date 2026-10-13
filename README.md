@@ -34,25 +34,35 @@ bun install
 # Copy environment template and fill in your values
 cp .env.example .env
 
-# Start the dev server
+# Start the dev server, then open http://127.0.0.1:8080
 bun run dev
 ```
 
+Bluesky sign-in only works on a loopback IP locally, so `http://localhost:8080` redirects to
+`http://127.0.0.1:8080` automatically.
+
 See `.env.example` for the required environment variables. The app uses [Lovable Cloud](https://lovable.dev) as its backend (Supabase under the hood).
 
-### Running Tests
+### Checks
 
 ```bash
-bun run test
+bun run test           # unit tests (Vitest)
+bun run test:coverage  # tests with a coverage report in coverage/
+bun run typecheck      # strict TypeScript
+bun run lint           # ESLint (includes Prettier)
+bun run format         # format everything with Prettier
+bun run build          # production build
 ```
+
+The same checks run in GitHub Actions on every pull request and every push to `main`.
 
 ## Tech Stack
 
 | Layer    | Technology                                     |
 | -------- | ---------------------------------------------- |
-| Frontend | React 18, TypeScript, Vite                     |
-| UI       | shadcn/ui, Tailwind CSS                        |
-| Backend  | Supabase Edge Functions (Deno)                 |
+| Frontend | React 19, TypeScript, TanStack Start / Router  |
+| UI       | shadcn/ui, Tailwind CSS v4                     |
+| Backend  | Lovable Cloud function (Deno)                  |
 | AI       | Google Gemini 2.5 Flash via Lovable AI Gateway |
 | Social   | AT Protocol (`@atproto/oauth-client-browser`)  |
 | Hosting  | [Lovable](https://lovable.dev)                 |
