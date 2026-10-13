@@ -67,8 +67,8 @@ export default function LanguagePicker({
 
   const triggerClasses =
     variant === "pill"
-      ? "inline-flex min-h-8 items-center gap-1.5 px-3 py-1.5 rounded-[0.5rem] border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap"
-      : "inline-flex min-h-7 items-center gap-1 underline-offset-2 hover:underline text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-[0.375rem] whitespace-nowrap";
+      ? "inline-flex min-h-8 items-center gap-1.5 px-3 py-1.5 rounded-[0.5rem] border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap"
+      : "inline-flex min-h-7 items-center gap-1 underline-offset-2 hover:underline text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-[0.375rem] whitespace-nowrap";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

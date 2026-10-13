@@ -285,7 +285,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
         key={`empty-${i}`}
         onClick={() => inputRef.current?.click()}
         aria-label={`Add photo, slot ${i + 1} of ${MAX_PHOTOS}`}
-        className="aspect-square w-full rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="aspect-square w-full rounded-2xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/50 hover:bg-accent transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <ImagePlus className="w-6 h-6 text-muted-foreground" />
         <span className="text-xs text-muted-foreground font-medium">Add photo</span>
@@ -299,7 +299,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           type="button"
           onClick={pasteFromClipboard}
           aria-label="Paste image from clipboard"
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <ClipboardPaste className="w-3.5 h-3.5" />
           Paste
@@ -308,7 +308,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
           <button
             onClick={onClearAll}
             aria-label="Clear all photos"
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <X className="w-3.5 h-3.5" />
             Clear all

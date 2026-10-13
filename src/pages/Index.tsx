@@ -238,7 +238,7 @@ const Index = () => {
               e.preventDefault();
               handleReset();
             }}
-            className="flex items-center gap-3 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="flex items-center gap-3 rounded-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Blutag home"
           >
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">

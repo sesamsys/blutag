@@ -48,7 +48,7 @@ export default function AltTextResult({ photo, index, onUpdateAltText }: AltText
               onChange={(e) => onUpdateAltText(photo.id, e.target.value.slice(0, MAX_ALT_TEXT_LENGTH))}
               rows={3}
               maxLength={MAX_ALT_TEXT_LENGTH}
-              className="w-full resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-ring"
               placeholder="Alt text will appear here…"
             />
             <div className="flex items-center justify-between">
@@ -59,7 +59,7 @@ export default function AltTextResult({ photo, index, onUpdateAltText }: AltText
                 onClick={handleCopy}
                 disabled={!photo.altText}
                 aria-label={copied ? "Copied to clipboard" : "Copy alt text"}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? "Copied" : "Copy"}
