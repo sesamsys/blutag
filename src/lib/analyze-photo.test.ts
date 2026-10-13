@@ -71,7 +71,7 @@ describe("requestAltText", () => {
       await expect(
         retryWithTimeout(() => requestAltText(REQUEST), 1_000, {
           maxAttempts: 3,
-          initialDelay: 1,
+          initialDelayMs: 1,
         }),
       ).rejects.toMatchObject({ type: ErrorType.QUOTA });
       expect(mockInvoke).toHaveBeenCalledTimes(1);
@@ -86,7 +86,7 @@ describe("requestAltText", () => {
 
         const promise = retryWithTimeout(() => requestAltText(REQUEST), 1_000, {
           maxAttempts: 3,
-          initialDelay: 10,
+          initialDelayMs: 10,
         });
         await vi.advanceTimersByTimeAsync(50);
 
