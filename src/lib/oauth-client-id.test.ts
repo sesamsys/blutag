@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import {
+  CANONICAL_CLIENT_METADATA,
   CANONICAL_CLIENT_METADATA,
   CANONICAL_CLIENT_ID,
   OAUTH_SCOPE,
