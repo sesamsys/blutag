@@ -177,7 +177,7 @@ export function logError(error: unknown, context?: Record<string, unknown>): voi
   console.error("Error:", error, context);
 
   // TODO: In production, send to error tracking service (Sentry, LogRocket, etc.)
-  // if (process.env.NODE_ENV === "production") {
+  // if (import.meta.env.PROD) {
   //   Sentry.captureException(error, { extra: context });
   // }
 }

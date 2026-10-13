@@ -1,7 +1,9 @@
-import "./lib/error-capture";
-
-import { consumeLastCapturedError } from "./lib/error-capture";
+import { consumeLastCapturedError, installErrorCapture } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+
+// Install the console.error patch once, as early as possible on the server path,
+// so h3's swallowed SSR errors are expanded and recorded before anything renders.
+installErrorCapture();
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;

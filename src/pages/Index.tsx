@@ -219,12 +219,9 @@ const Index = () => {
       {/* Header */}
       <header className="w-full border-b border-border">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <a
-            href="/"
-            onClick={(e) => {
-              e.preventDefault();
-              handleReset();
-            }}
+          <button
+            type="button"
+            onClick={handleReset}
             className="flex items-center gap-3 rounded-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Blutag home"
           >
@@ -244,7 +241,7 @@ const Index = () => {
               </svg>
             </div>
             <h1 className="text-lg font-bold tracking-tight">Blutag</h1>
-          </a>
+          </button>
           <BlueskyLoginButton />
         </div>
       </header>
