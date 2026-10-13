@@ -1,3 +1,10 @@
-{"functions": [
-  {"name": "analyze-photo", "classification": "internal-only", "signal": "called from src/pages/Index.tsx via supabase.functions.invoke; kept on the backend per the user-approved plan (cf-connecting-ip rate limiting, large image payloads)", "outcome": "left"}
-]}
+{
+  "functions": [
+    {
+      "name": "analyze-photo",
+      "classification": "internal-only",
+      "signal": "called from src/pages/Index.tsx via supabase.functions.invoke; kept on the backend per the user-approved plan (cf-connecting-ip rate limiting, large image payloads)",
+      "outcome": "left"
+    }
+  ]
+}

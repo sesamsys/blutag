@@ -12,7 +12,7 @@ describe("error-messages", () => {
   describe("AppError", () => {
     it("should create error with message and type", () => {
       const error = new AppError("Test error", ErrorType.NETWORK);
-      
+
       expect(error.message).toBe("Test error");
       expect(error.type).toBe(ErrorType.NETWORK);
       expect(error.retryable).toBe(true);
@@ -20,15 +20,20 @@ describe("error-messages", () => {
     });
 
     it("should support non-retryable errors", () => {
-      const error = new AppError("Quota exceeded", ErrorType.QUOTA, undefined, false);
-      
+      const error = new AppError(
+        "Quota exceeded",
+        ErrorType.QUOTA,
+        undefined,
+        false,
+      );
+
       expect(error.retryable).toBe(false);
     });
 
     it("should store original error", () => {
       const original = new Error("Original");
       const error = new AppError("Wrapped", ErrorType.UNKNOWN, original);
-      
+
       expect(error.originalError).toBe(original);
     });
   });
@@ -49,7 +54,6 @@ describe("error-messages", () => {
       expect(getErrorMessage(error)).toBe(ERROR_MESSAGES.TIMEOUT_ERROR);
     });
 
-
     it("should detect rate limit errors", () => {
       const error = new Error("Rate limit exceeded (429)");
       expect(getErrorMessage(error)).toBe(ERROR_MESSAGES.ALT_TEXT_RATE_LIMIT);
@@ -57,7 +61,9 @@ describe("error-messages", () => {
 
     it("should detect quota errors", () => {
       const error = new Error("Quota exceeded (402)");
-      expect(getErrorMessage(error)).toBe(ERROR_MESSAGES.ALT_TEXT_QUOTA_EXCEEDED);
+      expect(getErrorMessage(error)).toBe(
+        ERROR_MESSAGES.ALT_TEXT_QUOTA_EXCEEDED,
+      );
     });
 
     it("should return original message if user-friendly", () => {
@@ -78,7 +84,9 @@ describe("error-messages", () => {
     });
 
     it("should handle non-Error objects", () => {
-      expect(getErrorMessage("string error")).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
+      expect(getErrorMessage("string error")).toBe(
+        ERROR_MESSAGES.UNKNOWN_ERROR,
+      );
       expect(getErrorMessage(null)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
       expect(getErrorMessage(undefined)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
     });
@@ -106,12 +114,21 @@ describe("error-messages", () => {
     });
   });
 
-
   describe("isRetryableError", () => {
     it("should return retryable flag from AppError", () => {
-      const retryable = new AppError("Test", ErrorType.NETWORK, undefined, true);
-      const notRetryable = new AppError("Test", ErrorType.QUOTA, undefined, false);
-      
+      const retryable = new AppError(
+        "Test",
+        ErrorType.NETWORK,
+        undefined,
+        true,
+      );
+      const notRetryable = new AppError(
+        "Test",
+        ErrorType.QUOTA,
+        undefined,
+        false,
+      );
+
       expect(isRetryableError(retryable)).toBe(true);
       expect(isRetryableError(notRetryable)).toBe(false);
     });

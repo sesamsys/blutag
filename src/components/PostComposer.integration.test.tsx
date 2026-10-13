@@ -80,7 +80,7 @@ async function postAndGetEmbed(photoCount: number) {
   fireEvent.click(screen.getByRole("button", { name: /post to bluesky/i }));
   await waitFor(() => expect(createRecord).toHaveBeenCalled());
   const call = createRecord.mock.calls[0] as unknown as [
-    { record: { embed?: EmbedShape } }
+    { record: { embed?: EmbedShape } },
   ];
   return call[0].record.embed;
 }

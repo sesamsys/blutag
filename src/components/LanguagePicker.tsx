@@ -36,19 +36,16 @@ export default function LanguagePicker({
   const current = getLanguage(language);
 
   const recentLanguages: Language[] = useMemo(
-    () =>
-      recent
-        .filter((c) => c !== language)
-        .map((c) => getLanguage(c)),
-    [recent, language]
+    () => recent.filter((c) => c !== language).map((c) => getLanguage(c)),
+    [recent, language],
   );
 
   const curatedFiltered = useMemo(
     () =>
       CURATED_LANGUAGES.filter(
-        (l) => !recentLanguages.some((r) => r.code === l.code)
+        (l) => !recentLanguages.some((r) => r.code === l.code),
       ),
-    [recentLanguages]
+    [recentLanguages],
   );
 
   // Show "other" languages: ALL minus what's already in curated/recent

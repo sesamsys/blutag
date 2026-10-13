@@ -19,7 +19,8 @@ Object.assign(URL, {
 
 // Each test gets a fresh IDB so state never leaks between cases.
 beforeEach(() => {
-  (globalThis as unknown as { indexedDB: IDBFactory }).indexedDB = new IDBFactory();
+  (globalThis as unknown as { indexedDB: IDBFactory }).indexedDB =
+    new IDBFactory();
   // Reset the module's singleton DB/promise so it opens a fresh database.
   vi.resetModules();
 });
@@ -28,18 +29,29 @@ beforeEach(() => {
 async function getPersistence() {
   return import("./session-persistence");
 }
-function makeFile(content: string, name = "photo.jpg", type = "image/jpeg"): File {
+function makeFile(
+  content: string,
+  name = "photo.jpg",
+  type = "image/jpeg",
+): File {
   return new File([content], name, { type });
 }
 
 /** Minimal PhotoFile for testing. */
-function makePhotoFile(overrides: Partial<{
-  id: string;
-  altText: string;
-  fileName: string;
-  content: string;
-}> = {}) {
-  const { id = "abc123", altText = "A test photo", fileName = "test.jpg", content = "fake-jpeg-data" } = overrides;
+function makePhotoFile(
+  overrides: Partial<{
+    id: string;
+    altText: string;
+    fileName: string;
+    content: string;
+  }> = {},
+) {
+  const {
+    id = "abc123",
+    altText = "A test photo",
+    fileName = "test.jpg",
+    content = "fake-jpeg-data",
+  } = overrides;
   const file = makeFile(content, fileName);
   return {
     id,
@@ -88,7 +100,11 @@ describe("session-persistence", () => {
 
       const restored = await loadPhotosSession();
       expect(restored!.map((p) => p.id)).toEqual(["a", "b", "c"]);
-      expect(restored!.map((p) => p.altText)).toEqual(["First", "Second", "Third"]);
+      expect(restored!.map((p) => p.altText)).toEqual([
+        "First",
+        "Second",
+        "Third",
+      ]);
     });
 
     it("reconstructs File content correctly", async () => {
@@ -135,7 +151,8 @@ describe("session-persistence", () => {
 
   describe("clearPhotosSession", () => {
     it("returns null after clearing", async () => {
-      const { savePhotosSession, loadPhotosSession, clearPhotosSession } = await getPersistence();
+      const { savePhotosSession, loadPhotosSession, clearPhotosSession } =
+        await getPersistence();
 
       await savePhotosSession([makePhotoFile()]);
       await clearPhotosSession();

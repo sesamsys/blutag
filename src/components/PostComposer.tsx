@@ -11,9 +11,20 @@ import { compressImageForBluesky } from "@/lib/image-compress";
 import { buildPostEmbed } from "@/lib/bluesky-embed";
 import { RichText, type BlobRef } from "@atproto/api";
 import { toast } from "sonner";
-import { BLUESKY_POST_MAX_LENGTH, MAX_ALT_TEXT_LENGTH, MAX_PHOTOS, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
+import {
+  BLUESKY_POST_MAX_LENGTH,
+  MAX_ALT_TEXT_LENGTH,
+  MAX_PHOTOS,
+  RETRY_MAX_ATTEMPTS,
+} from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
-import { ERROR_MESSAGES, getErrorMessage, logError, AppError, ErrorType } from "@/lib/error-messages";
+import {
+  ERROR_MESSAGES,
+  getErrorMessage,
+  logError,
+  AppError,
+  ErrorType,
+} from "@/lib/error-messages";
 import { retryWithBackoff } from "@/lib/retry";
 
 interface PostComposerProps {
@@ -41,7 +52,8 @@ export default function PostComposer({ photos }: PostComposerProps) {
         </div>
         <p className="font-semibold">Post to Bluesky with alt text</p>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Sign in to post your photos with the generated alt text directly to Bluesky.
+          Sign in to post your photos with the generated alt text directly to
+          Bluesky.
         </p>
         <BlueskyLoginButton />
       </div>
@@ -51,22 +63,29 @@ export default function PostComposer({ photos }: PostComposerProps) {
   const handlePost = async () => {
     if (posting) return;
     if (text.length > BLUESKY_POST_MAX_LENGTH) {
-      toast.error(`Post text exceeds ${BLUESKY_POST_MAX_LENGTH} character limit`);
+      toast.error(
+        `Post text exceeds ${BLUESKY_POST_MAX_LENGTH} character limit`,
+      );
       return;
     }
-    
+
     // Validate we have photos with alt text
     if (photosWithAltText.length === 0) {
       toast.error("No photos with alt text to post");
       return;
     }
-    
+
     // Validate alt text lengths
-    const invalidAltText = photosWithAltText.find(p =>
-      !p.altText || p.altText.length === 0 || p.altText.length > MAX_ALT_TEXT_LENGTH
+    const invalidAltText = photosWithAltText.find(
+      (p) =>
+        !p.altText ||
+        p.altText.length === 0 ||
+        p.altText.length > MAX_ALT_TEXT_LENGTH,
     );
     if (invalidAltText) {
-      toast.error(`All photos must have alt text (max ${MAX_ALT_TEXT_LENGTH} characters)`);
+      toast.error(
+        `All photos must have alt text (max ${MAX_ALT_TEXT_LENGTH} characters)`,
+      );
       return;
     }
 
@@ -81,10 +100,10 @@ export default function PostComposer({ photos }: PostComposerProps) {
     setPosting(true);
     try {
       // Compress and upload all images
-      const embeddedImages: Array<{ 
-        alt: string; 
-        image: BlobRef; 
-        aspectRatio?: { width: number; height: number } 
+      const embeddedImages: Array<{
+        alt: string;
+        image: BlobRef;
+        aspectRatio?: { width: number; height: number };
       }> = [];
 
       for (const photo of photosWithAltText) {
@@ -97,9 +116,11 @@ export default function PostComposer({ photos }: PostComposerProps) {
             {
               maxAttempts: RETRY_MAX_ATTEMPTS,
               onRetry: (_error, attempt) => {
-                toast.info(`Retrying image upload (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`);
+                toast.info(
+                  `Retrying image upload (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`,
+                );
               },
-            }
+            },
           );
 
           embeddedImages.push({
@@ -114,7 +135,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
           throw new AppError(
             ERROR_MESSAGES.POST_IMAGE_UPLOAD_FAILED,
             ErrorType.SERVICE,
-            uploadError
+            uploadError,
           );
         }
       }
@@ -147,17 +168,20 @@ export default function PostComposer({ photos }: PostComposerProps) {
 
       // Post with retry
       const result = await retryWithBackoff(
-        () => agent.com.atproto.repo.createRecord({
-          repo: did,
-          collection: "app.bsky.feed.post",
-          record,
-        }),
+        () =>
+          agent.com.atproto.repo.createRecord({
+            repo: did,
+            collection: "app.bsky.feed.post",
+            record,
+          }),
         {
           maxAttempts: RETRY_MAX_ATTEMPTS,
           onRetry: (_error, attempt) => {
-            toast.info(`Retrying post (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`);
+            toast.info(
+              `Retrying post (attempt ${attempt + 1}/${RETRY_MAX_ATTEMPTS})...`,
+            );
           },
-        }
+        },
       );
 
       // Build URL from AT URI
@@ -168,8 +192,11 @@ export default function PostComposer({ photos }: PostComposerProps) {
       setPostUrl(url);
       toast.success("Posted to Bluesky!");
     } catch (err) {
-      logError(err, { context: "bluesky_post", photoCount: photosWithAltText.length });
-      
+      logError(err, {
+        context: "bluesky_post",
+        photoCount: photosWithAltText.length,
+      });
+
       const errorMessage = getErrorMessage(err);
       toast.error(errorMessage);
     } finally {
@@ -203,7 +230,9 @@ export default function PostComposer({ photos }: PostComposerProps) {
       <div className="space-y-1.5">
         <Textarea
           value={text}
-          onChange={(e) => setText(e.target.value.slice(0, BLUESKY_POST_MAX_LENGTH))}
+          onChange={(e) =>
+            setText(e.target.value.slice(0, BLUESKY_POST_MAX_LENGTH))
+          }
           maxLength={BLUESKY_POST_MAX_LENGTH}
           placeholder="What's on your mind?"
           rows={3}
@@ -219,17 +248,14 @@ export default function PostComposer({ photos }: PostComposerProps) {
           </span>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground hidden sm:inline">
-              {photosWithAltText.length} photo{photosWithAltText.length !== 1 ? "s" : ""}
+              {photosWithAltText.length} photo
+              {photosWithAltText.length !== 1 ? "s" : ""}
             </span>
             <LanguagePicker variant="pill" />
           </div>
         </div>
       </div>
-      <Button
-        onClick={handlePost}
-        disabled={posting}
-        className="w-full gap-2"
-      >
+      <Button onClick={handlePost} disabled={posting} className="w-full gap-2">
         <Send className="w-4 h-4" />
         {posting ? "Posting…" : "Post to Bluesky"}
       </Button>

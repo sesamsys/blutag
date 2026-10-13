@@ -42,6 +42,7 @@ Add Bluesky authentication (via AT Protocol app passwords) and a "Post to Bluesk
 ## Files Created/Modified
 
 ### New files
+
 - `src/lib/constants.ts` — Bluesky constants (post length, image limits, compression settings)
 - `src/lib/image-compress.ts` — Client-side image resize/compress utility
 - `src/contexts/BlueskyAuthContext.tsx` — Auth context with sessionStorage persistence
@@ -51,6 +52,7 @@ Add Bluesky authentication (via AT Protocol app passwords) and a "Post to Bluesk
 - `supabase/functions/bsky-post/index.ts` — Edge function for uploadBlob + createRecord
 
 ### Modified files
+
 - `src/App.tsx` — Wrapped in BlueskyAuthProvider
 - `src/pages/Index.tsx` — Added BlueskyLoginButton to header, PostComposer to results
 - `supabase/config.toml` — Added bsky-login and bsky-post function configs

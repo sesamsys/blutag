@@ -29,44 +29,47 @@ const DEFAULT_OPTIONS: Required<RetryOptions> = {
  */
 export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): Promise<T> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   let lastError: unknown;
-  
+
   for (let attempt = 1; attempt <= opts.maxAttempts; attempt++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error;
-      
+
       // Don't retry if this is the last attempt
       if (attempt === opts.maxAttempts) {
         break;
       }
-      
+
       // Check if we should retry this error
       if (!opts.shouldRetry(error, attempt)) {
         break;
       }
-      
+
       // Calculate delay with exponential backoff
       const delay = Math.min(
         opts.initialDelayMs * Math.pow(opts.backoffMultiplier, attempt - 1),
-        opts.maxDelayMs
+        opts.maxDelayMs,
       );
-      
+
       // Log retry attempt
       logError(error, { attempt, delay, willRetry: true });
       opts.onRetry(error, attempt);
-      
+
       // Wait before retrying
       await sleep(delay);
     }
   }
-  
+
   // All retries failed
-  logError(lastError, { maxAttempts: opts.maxAttempts, allRetriesFailed: true });
+  logError(lastError, {
+    maxAttempts: opts.maxAttempts,
+    allRetriesFailed: true,
+  });
   throw lastError;
 }
 
@@ -76,7 +79,7 @@ export async function retryWithBackoff<T>(
 export async function withTimeout<T>(
   fn: () => Promise<T>,
   timeoutMs: number,
-  timeoutError: Error = new Error("Operation timed out")
+  timeoutError: Error = new Error("Operation timed out"),
 ): Promise<T> {
   const fnPromise = fn();
   // Attach a no-op catch so that if the timeout wins the race, the fn()
@@ -104,10 +107,7 @@ function sleep(ms: number): Promise<void> {
 export async function retryWithTimeout<T>(
   fn: () => Promise<T>,
   timeoutMs: number,
-  retryOptions: RetryOptions = {}
+  retryOptions: RetryOptions = {},
 ): Promise<T> {
-  return retryWithBackoff(
-    () => withTimeout(fn, timeoutMs),
-    retryOptions
-  );
+  return retryWithBackoff(() => withTimeout(fn, timeoutMs), retryOptions);
 }

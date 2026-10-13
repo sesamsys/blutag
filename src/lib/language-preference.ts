@@ -1,4 +1,8 @@
-import { DEFAULT_LANGUAGE, isValidLangCode, normalizeLangCode } from "./languages";
+import {
+  DEFAULT_LANGUAGE,
+  isValidLangCode,
+  normalizeLangCode,
+} from "./languages";
 
 const LAST_KEY = "blutag.lang.last";
 const RECENT_KEY = "blutag.lang.recent";

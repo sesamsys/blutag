@@ -16,7 +16,11 @@ interface RouteErrorViewProps {
  * Shared fallback for route `errorComponent`s. Logs the technical error,
  * reports it, and shows a user-friendly message with retry / home actions.
  */
-export function RouteErrorView({ error, reset, boundary }: RouteErrorViewProps) {
+export function RouteErrorView({
+  error,
+  reset,
+  boundary,
+}: RouteErrorViewProps) {
   const router = useRouter();
 
   useEffect(() => {
@@ -34,7 +38,10 @@ export function RouteErrorView({ error, reset, boundary }: RouteErrorViewProps) 
       <div className="max-w-md w-full space-y-6 text-center">
         <div className="flex justify-center">
           <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
-            <AlertTriangle className="w-8 h-8 text-destructive" aria-hidden="true" />
+            <AlertTriangle
+              className="w-8 h-8 text-destructive"
+              aria-hidden="true"
+            />
           </div>
         </div>
 
@@ -47,7 +54,9 @@ export function RouteErrorView({ error, reset, boundary }: RouteErrorViewProps) 
 
         {import.meta.env.DEV && (
           <div className="text-left bg-muted p-4 rounded-lg overflow-auto max-h-48">
-            <p className="text-sm font-mono text-destructive">{getErrorMessage(error)}</p>
+            <p className="text-sm font-mono text-destructive">
+              {getErrorMessage(error)}
+            </p>
           </div>
         )}
 

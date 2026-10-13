@@ -145,7 +145,7 @@ export const ALL_LANGUAGES: Language[] = [
 ];
 
 const LANG_BY_CODE = new Map<string, Language>(
-  ALL_LANGUAGES.map((l) => [l.code, l])
+  ALL_LANGUAGES.map((l) => [l.code, l]),
 );
 
 /** Validate BCP-47-ish code: 2-3 letter primary, optional region. */
@@ -190,13 +190,19 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * `app.bsky.actor.getPreferences` list and returns valid, normalized codes
  * in their original order. Unknown shapes are ignored rather than trusted.
  */
-export function extractPostLanguages(preferences: readonly unknown[]): string[] {
+export function extractPostLanguages(
+  preferences: readonly unknown[],
+): string[] {
   const pref = preferences.find(
-    (p): p is Record<string, unknown> => isRecord(p) && p["$type"] === POST_LANGUAGES_PREF_TYPE,
+    (p): p is Record<string, unknown> =>
+      isRecord(p) && p["$type"] === POST_LANGUAGES_PREF_TYPE,
   );
   const languages = pref?.["languages"];
   if (!Array.isArray(languages)) return [];
   return languages
-    .filter((code): code is string => typeof code === "string" && isValidLangCode(code))
+    .filter(
+      (code): code is string =>
+        typeof code === "string" && isValidLangCode(code),
+    )
     .map(normalizeLangCode);
 }

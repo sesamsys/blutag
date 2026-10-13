@@ -13,7 +13,11 @@ import {
   getRecentLanguages,
   setActiveLanguage as persistActiveLanguage,
 } from "@/lib/language-preference";
-import { DEFAULT_LANGUAGE, extractPostLanguages, normalizeLangCode } from "@/lib/languages";
+import {
+  DEFAULT_LANGUAGE,
+  extractPostLanguages,
+  normalizeLangCode,
+} from "@/lib/languages";
 import { useBlueskyAuth } from "./BlueskyAuthContext";
 import { logError } from "@/lib/error-messages";
 

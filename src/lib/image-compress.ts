@@ -40,7 +40,9 @@ export interface CompressedImage {
  * the embed's `aspectRatio` — without it, Bluesky clients letterbox
  * non-square images into a square frame.
  */
-export async function compressImageForBluesky(file: File): Promise<CompressedImage> {
+export async function compressImageForBluesky(
+  file: File,
+): Promise<CompressedImage> {
   const img = await loadImage(file);
 
   // Calculate target dimensions
@@ -72,7 +74,7 @@ export async function compressImageForBluesky(file: File): Promise<CompressedIma
 
   while (quality >= BLUESKY_IMAGE_JPEG_QUALITY_MIN) {
     blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob((b) => resolve(b), "image/jpeg", quality)
+      canvas.toBlob((b) => resolve(b), "image/jpeg", quality),
     );
 
     if (blob && blob.size <= BLUESKY_IMAGE_MAX_BYTES) {
@@ -87,7 +89,11 @@ export async function compressImageForBluesky(file: File): Promise<CompressedIma
 
   // Fallback — shouldn't happen
   const fallback = await new Promise<Blob>((resolve) =>
-    canvas.toBlob((b) => resolve(b!), "image/jpeg", BLUESKY_IMAGE_JPEG_QUALITY_MIN)
+    canvas.toBlob(
+      (b) => resolve(b!),
+      "image/jpeg",
+      BLUESKY_IMAGE_JPEG_QUALITY_MIN,
+    ),
   );
   return { blob: fallback, width, height };
 }

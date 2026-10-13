@@ -13,7 +13,10 @@ describe("createRateLimiter", () => {
 
   it("frees slots after the window expires", () => {
     let time = 0;
-    const limiter = createRateLimiter({ maxCalls: 2, windowMs: 100 }, () => time);
+    const limiter = createRateLimiter(
+      { maxCalls: 2, windowMs: 100 },
+      () => time,
+    );
 
     limiter.record(); // t=0
     time = 50;
@@ -27,7 +30,10 @@ describe("createRateLimiter", () => {
 
   it("returns correct msUntilNextSlot", () => {
     let time = 0;
-    const limiter = createRateLimiter({ maxCalls: 1, windowMs: 1000 }, () => time);
+    const limiter = createRateLimiter(
+      { maxCalls: 1, windowMs: 1000 },
+      () => time,
+    );
 
     expect(limiter.msUntilNextSlot()).toBe(0);
     limiter.record(); // t=0
@@ -48,7 +54,10 @@ describe("createRateLimiter", () => {
 
   it("currentCount reflects active window only", () => {
     let time = 0;
-    const limiter = createRateLimiter({ maxCalls: 10, windowMs: 100 }, () => time);
+    const limiter = createRateLimiter(
+      { maxCalls: 10, windowMs: 100 },
+      () => time,
+    );
 
     limiter.record(); // t=0
     limiter.record(); // t=0

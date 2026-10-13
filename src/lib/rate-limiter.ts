@@ -40,7 +40,7 @@ export interface RateLimiter {
 export function createRateLimiter(
   options: RateLimiterOptions,
   /** Overridable clock for testing */
-  now: () => number = Date.now
+  now: () => number = Date.now,
 ): RateLimiter {
   const { maxCalls, windowMs } = options;
   let timestamps: number[] = [];

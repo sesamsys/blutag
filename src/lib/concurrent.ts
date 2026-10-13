@@ -25,17 +25,20 @@ export async function runWithConcurrency<T, R>(
   const NO_ERROR = Symbol("no_error");
   let firstError: unknown = NO_ERROR;
 
-  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
-      const i = cursor++;
-      if (i >= items.length) return;
-      try {
-        results[i] = await worker(items[i] as T, i);
-      } catch (err) {
-        if (firstError === NO_ERROR) firstError = err;
+  const runners = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (true) {
+        const i = cursor++;
+        if (i >= items.length) return;
+        try {
+          results[i] = await worker(items[i] as T, i);
+        } catch (err) {
+          if (firstError === NO_ERROR) firstError = err;
+        }
       }
-    }
-  });
+    },
+  );
 
   await Promise.all(runners);
   if (firstError !== NO_ERROR) throw firstError;

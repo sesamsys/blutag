@@ -84,7 +84,10 @@ Length:
 - Maximum ${MAX_ALT_TEXT_LENGTH} characters.`;
 
 /** User prompt when EXIF context is available */
-export const USER_PROMPT_WITH_CONTEXT = (contextInfo: string, language: string) =>
+export const USER_PROMPT_WITH_CONTEXT = (
+  contextInfo: string,
+  language: string,
+) =>
   `Additional context from photo metadata: ${contextInfo}\n\nPlease write concise alt text for this image, focusing on the main theme.\n\n${languageInstruction(language)}`;
 
 /** User prompt when no EXIF context is available */

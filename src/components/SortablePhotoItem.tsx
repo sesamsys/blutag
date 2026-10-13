@@ -29,7 +29,13 @@ interface SortablePhotoItemProps {
   showNumber?: boolean;
 }
 
-const SortablePhotoItem = memo(function SortablePhotoItem({ id, preview, index, onRemove, showNumber }: SortablePhotoItemProps) {
+const SortablePhotoItem = memo(function SortablePhotoItem({
+  id,
+  preview,
+  index,
+  onRemove,
+  showNumber,
+}: SortablePhotoItemProps) {
   const {
     attributes,
     listeners,

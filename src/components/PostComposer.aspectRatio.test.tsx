@@ -118,9 +118,13 @@ function installBrowserStubs() {
 function makeLandscapePhoto(): PhotoFile {
   return {
     id: "photo-landscape",
-    file: new File([new Uint8Array([0xff, 0xd8, 0xff, 0xd9])], "landscape.jpg", {
-      type: "image/jpeg",
-    }),
+    file: new File(
+      [new Uint8Array([0xff, 0xd8, 0xff, 0xd9])],
+      "landscape.jpg",
+      {
+        type: "image/jpeg",
+      },
+    ),
     preview: "blob:fake/0",
     altText: "A car dashboard photographed from the driver's seat.",
     analyzing: false,
@@ -198,8 +202,7 @@ describe("PostComposer → landscape photo aspect ratio", () => {
 
   it("preserves the source 16:9 ratio (no crop, no squaring)", async () => {
     const uploaded = await postLandscapePhoto();
-    const declared =
-      uploaded.aspectRatio!.width / uploaded.aspectRatio!.height;
+    const declared = uploaded.aspectRatio!.width / uploaded.aspectRatio!.height;
     const source = SOURCE_WIDTH / SOURCE_HEIGHT;
 
     expect(declared).toBeCloseTo(source, 2);

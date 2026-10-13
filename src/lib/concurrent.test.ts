@@ -44,7 +44,11 @@ describe("runWithConcurrency", () => {
   });
 
   it("handles an empty input", async () => {
-    const result = await runWithConcurrency<number, number>([], 3, async (n) => n);
+    const result = await runWithConcurrency<number, number>(
+      [],
+      3,
+      async (n) => n,
+    );
     expect(result).toEqual([]);
   });
 });

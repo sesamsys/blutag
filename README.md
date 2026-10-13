@@ -48,14 +48,14 @@ bun run test
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18, TypeScript, Vite |
-| UI | shadcn/ui, Tailwind CSS |
-| Backend | Supabase Edge Functions (Deno) |
-| AI | Google Gemini 2.5 Flash via Lovable AI Gateway |
-| Social | AT Protocol (`@atproto/oauth-client-browser`) |
-| Hosting | [Lovable](https://lovable.dev) |
+| Layer    | Technology                                     |
+| -------- | ---------------------------------------------- |
+| Frontend | React 18, TypeScript, Vite                     |
+| UI       | shadcn/ui, Tailwind CSS                        |
+| Backend  | Supabase Edge Functions (Deno)                 |
+| AI       | Google Gemini 2.5 Flash via Lovable AI Gateway |
+| Social   | AT Protocol (`@atproto/oauth-client-browser`)  |
+| Hosting  | [Lovable](https://lovable.dev)                 |
 
 ## Contributing
 

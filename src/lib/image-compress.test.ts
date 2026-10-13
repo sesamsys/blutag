@@ -34,7 +34,11 @@ function setupCanvasMock(blobSizeForQuality: (quality: number) => number) {
       width: 0,
       height: 0,
       getContext: () => ({ drawImage: vi.fn() }),
-      toBlob: (cb: (b: Blob | null) => void, _type: string, quality: number) => {
+      toBlob: (
+        cb: (b: Blob | null) => void,
+        _type: string,
+        quality: number,
+      ) => {
         toBlobCalls.push(quality);
         cb(makeBlob(blobSizeForQuality(quality)));
       },
@@ -48,7 +52,11 @@ function setupCanvasMock(blobSizeForQuality: (quality: number) => number) {
  * synchronously when `src` is assigned, so the promise in loadImage()
  * settles within the same microtask queue flush.
  */
-function setupImageMock(naturalWidth: number, naturalHeight: number, fail = false) {
+function setupImageMock(
+  naturalWidth: number,
+  naturalHeight: number,
+  fail = false,
+) {
   vi.stubGlobal("URL", {
     createObjectURL: vi.fn(() => "blob:mock"),
     revokeObjectURL: vi.fn(),
@@ -56,39 +64,42 @@ function setupImageMock(naturalWidth: number, naturalHeight: number, fail = fals
 
   // We use Object.defineProperty so the setter fires even though the Image
   // constructor sets `src` directly as a property assignment.
-  vi.stubGlobal("Image", function (this: {
-    onload: (() => void) | null;
-    onerror: ((e: unknown) => void) | null;
-    naturalWidth: number;
-    naturalHeight: number;
-    width: number;
-    height: number;
-    _src: string;
-  }) {
-    this.onload = null;
-    this.onerror = null;
-    this.naturalWidth = naturalWidth;
-    this.naturalHeight = naturalHeight;
-    this.width = naturalWidth;
-    this.height = naturalHeight;
-    this._src = "";
+  vi.stubGlobal(
+    "Image",
+    function (this: {
+      onload: (() => void) | null;
+      onerror: ((e: unknown) => void) | null;
+      naturalWidth: number;
+      naturalHeight: number;
+      width: number;
+      height: number;
+      _src: string;
+    }) {
+      this.onload = null;
+      this.onerror = null;
+      this.naturalWidth = naturalWidth;
+      this.naturalHeight = naturalHeight;
+      this.width = naturalWidth;
+      this.height = naturalHeight;
+      this._src = "";
 
-    Object.defineProperty(this, "src", {
-      get: () => this._src,
-      set: (value: string) => {
-        this._src = value;
-        // Use queueMicrotask so handlers have a chance to be assigned first,
-        // mirroring real browser behaviour.
-        queueMicrotask(() => {
-          if (fail) {
-            this.onerror?.(new Event("error"));
-          } else {
-            this.onload?.();
-          }
-        });
-      },
-    });
-  });
+      Object.defineProperty(this, "src", {
+        get: () => this._src,
+        set: (value: string) => {
+          this._src = value;
+          // Use queueMicrotask so handlers have a chance to be assigned first,
+          // mirroring real browser behaviour.
+          queueMicrotask(() => {
+            if (fail) {
+              this.onerror?.(new Event("error"));
+            } else {
+              this.onload?.();
+            }
+          });
+        },
+      });
+    },
+  );
 }
 
 beforeEach(() => {
@@ -133,7 +144,9 @@ describe("compressImageForBluesky", () => {
     const result = await compressImageForBluesky(file);
 
     expect(result.width).toBe(BLUESKY_IMAGE_MAX_DIMENSION);
-    expect(result.height).toBe(Math.round((bigH / bigW) * BLUESKY_IMAGE_MAX_DIMENSION));
+    expect(result.height).toBe(
+      Math.round((bigH / bigW) * BLUESKY_IMAGE_MAX_DIMENSION),
+    );
   });
 
   it("scales down a portrait image that exceeds max dimension", async () => {
@@ -146,7 +159,9 @@ describe("compressImageForBluesky", () => {
     const result = await compressImageForBluesky(file);
 
     expect(result.height).toBe(BLUESKY_IMAGE_MAX_DIMENSION);
-    expect(result.width).toBe(Math.round((bigW / bigH) * BLUESKY_IMAGE_MAX_DIMENSION));
+    expect(result.width).toBe(
+      Math.round((bigW / bigH) * BLUESKY_IMAGE_MAX_DIMENSION),
+    );
   });
 
   it("reduces quality iteratively until blob fits within size limit", async () => {

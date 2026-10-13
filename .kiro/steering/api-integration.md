@@ -3,12 +3,14 @@
 ## Supabase Edge Functions
 
 ### Function Structure
+
 - Use Deno runtime with standard library imports
 - Include CORS headers in all responses
 - Handle OPTIONS requests for preflight
 - Return JSON responses with appropriate status codes
 
 ### Error Response Format
+
 ```typescript
 {
   error: string,
@@ -17,6 +19,7 @@
 ```
 
 ### Success Response Format
+
 ```typescript
 {
   // Function-specific data
@@ -27,6 +30,7 @@
 ## Bluesky AT Protocol Integration
 
 ### OAuth Authentication Flow
+
 1. User enters Bluesky handle (e.g., alice.bsky.social)
 2. `BrowserOAuthClient.signIn()` redirects to Bluesky authorization page
 3. User approves access on Bluesky's official page
@@ -36,15 +40,18 @@
 7. Agent instance created for API calls
 
 ### OAuth Client Configuration
+
 - Client metadata: `public/oauth/client-metadata.json`
 - Client ID: `${window.location.origin}/oauth/client-metadata.json`
 - Handle resolver: `https://bsky.social`
 - Library: `@atproto/oauth-client-browser`
 
 ### Direct API Calls via Agent
+
 All Bluesky API calls made client-side using authenticated Agent:
 
 **Image Upload:**
+
 ```typescript
 const response = await agent.uploadBlob(compressedImage, {
   encoding: "image/jpeg",
@@ -81,6 +88,7 @@ await agent.com.atproto.repo.createRecord({
 **Important:** Without facets, URLs appear as plain text and mentions are not linked to profiles. Always use `RichText.detectFacets()` before creating posts.
 
 ### Security Features
+
 - **No passwords in app**: OAuth flow handled by Bluesky
 - **DPoP-bound tokens**: Prevents token replay attacks
 - **IndexedDB storage**: More secure than localStorage
@@ -90,11 +98,13 @@ await agent.com.atproto.repo.createRecord({
 ## AI Service Integration
 
 ### Lovable AI Gateway
+
 - Endpoint: `https://ai.gateway.lovable.dev/v1/chat/completions`
 - Model: `google/gemini-2.5-flash`
 - Supports vision capabilities for image analysis
 
 ### Request Format
+
 ```typescript
 {
   model: "google/gemini-2.5-flash",
@@ -102,7 +112,7 @@ await agent.com.atproto.repo.createRecord({
     role: "system",
     content: SYSTEM_PROMPT
   }, {
-    role: "user", 
+    role: "user",
     content: [
       { type: "image_url", image_url: { url: "data:image/jpeg;base64,..." }},
       { type: "text", text: USER_PROMPT }
@@ -112,6 +122,7 @@ await agent.com.atproto.repo.createRecord({
 ```
 
 ### Error Handling
+
 - 429: Rate limit exceeded - show user-friendly message
 - 402: Credit limit exceeded - inform user of quota
 - 500: Service error - retry with exponential backoff
@@ -119,17 +130,20 @@ await agent.com.atproto.repo.createRecord({
 ## Environment Variables
 
 ### Required Variables
+
 - `LOVABLE_API_KEY`: For AI service authentication
 - `VITE_SUPABASE_URL`: Supabase project URL (Lovable Cloud)
 - `VITE_SUPABASE_PUBLISHABLE_KEY`: Supabase anon key
 
 ### Lovable Cloud Configuration
+
 - Backend uses Lovable Cloud (managed Supabase instance)
 - Environment variables configured through Lovable platform
 - No direct access to Supabase dashboard
 - Edge functions deployed automatically by Lovable
 
 ### Security Notes
+
 - Never expose API keys in frontend code
 - Use Supabase environment variables for edge functions
 - Validate environment variables on function startup

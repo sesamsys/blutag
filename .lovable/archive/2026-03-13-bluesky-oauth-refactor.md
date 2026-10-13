@@ -29,10 +29,12 @@ User clicks "Sign in with Bluesky"
 - **Sessions persist across tabs** (same origin, IndexedDB is origin-scoped).
 
 ## Files Created
+
 - `public/oauth/client-metadata.json` — OAuth client identity for Bluesky auth server
 - `src/pages/OAuthCallback.tsx` — Loading page during OAuth redirect processing
 
 ## Files Modified
+
 - `src/contexts/BlueskyAuthContext.tsx` — Full rewrite to use BrowserOAuthClient
 - `src/components/BlueskyLoginButton.tsx` — Handle input instead of password form
 - `src/components/PostComposer.tsx` — Uses Agent directly for blob upload + post creation
@@ -40,10 +42,12 @@ User clicks "Sign in with Bluesky"
 - `supabase/config.toml` — Removed bsky-login, bsky-post entries
 
 ## Files Deleted
+
 - `supabase/functions/bsky-login/index.ts` — No longer needed
 - `supabase/functions/bsky-post/index.ts` — No longer needed (Agent posts directly)
 
 ## Security Properties
+
 - No passwords or app passwords ever enter the app
 - DPoP-bound access tokens (cannot be replayed)
 - Automatic token refresh handled by library

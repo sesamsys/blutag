@@ -12,7 +12,8 @@ describe("retry utilities", () => {
     });
 
     it("should retry on failure and eventually succeed", async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error("fail 1"))
         .mockRejectedValueOnce(new Error("fail 2"))
         .mockResolvedValue("success");
@@ -35,14 +36,15 @@ describe("retry utilities", () => {
           maxAttempts: 2,
           initialDelayMs: 5,
           shouldRetry: () => true,
-        })
+        }),
       ).rejects.toThrow("always fails");
 
       expect(fn).toHaveBeenCalledTimes(2);
     });
 
     it("should call onRetry callback", async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error("fail"))
         .mockResolvedValue("success");
       const onRetry = vi.fn();
@@ -62,14 +64,15 @@ describe("retry utilities", () => {
       const fn = vi.fn().mockRejectedValue(new Error("quota exceeded 402"));
 
       await expect(
-        retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 5 })
+        retryWithBackoff(fn, { maxAttempts: 3, initialDelayMs: 5 }),
       ).rejects.toThrow("quota exceeded");
 
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
     it("should retry network errors by default", async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error("network failed"))
         .mockResolvedValue("success");
 
@@ -132,7 +135,8 @@ describe("retry utilities", () => {
 
   describe("retryWithTimeout", () => {
     it("should combine retry and timeout", async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error("network failed"))
         .mockResolvedValue("success");
 
@@ -154,7 +158,9 @@ describe("retry utilities", () => {
         const fn = vi.fn().mockReturnValue(slow);
 
         const promise = retryWithTimeout(fn, 100, { maxAttempts: 1 });
-        const assertion = expect(promise).rejects.toThrow("Operation timed out");
+        const assertion = expect(promise).rejects.toThrow(
+          "Operation timed out",
+        );
         await vi.advanceTimersByTimeAsync(200);
         await assertion;
         await vi.runAllTimersAsync();
