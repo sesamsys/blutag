@@ -30,7 +30,7 @@ export async function runWithConcurrency<T, R>(
       const i = cursor++;
       if (i >= items.length) return;
       try {
-        results[i] = await worker(items[i], i);
+        results[i] = await worker(items[i] as T, i);
       } catch (err) {
         if (firstError === NO_ERROR) firstError = err;
       }

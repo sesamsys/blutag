@@ -132,7 +132,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
       };
 
       if (richText.facets && richText.facets.length > 0) {
-        record.facets = richText.facets;
+        record["facets"] = richText.facets;
       }
 
       const { embed, truncatedCount } = buildPostEmbed(embeddedImages);
@@ -142,7 +142,7 @@ export default function PostComposer({ photos }: PostComposerProps) {
         );
       }
       if (embed) {
-        record.embed = embed;
+        record["embed"] = embed;
       }
 
       // Post with retry

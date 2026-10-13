@@ -7,8 +7,8 @@ const DB_VERSION = 1;
 
 interface StoredPhoto {
   id: string;
-  altText?: string;
-  exifData?: ExifInfo;
+  altText?: string | undefined;
+  exifData?: ExifInfo | undefined;
   fileData: ArrayBuffer;
   fileName: string;
   fileType: string;

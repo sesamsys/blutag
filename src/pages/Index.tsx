@@ -80,7 +80,8 @@ const Index = () => {
   const handleRemovePhoto = useCallback((index: number) => {
     setPhotos((prev) => {
       const copy = [...prev];
-      URL.revokeObjectURL(copy[index].preview);
+      const removed = copy[index];
+      if (removed) URL.revokeObjectURL(removed.preview);
       copy.splice(index, 1);
       return copy;
     });

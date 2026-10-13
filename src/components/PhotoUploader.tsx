@@ -138,7 +138,7 @@ export default function PhotoUploader({ photos, onAddPhotos, onRemovePhoto, onCl
       const files: File[] = [];
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        if (item.kind !== "file" || !item.type.startsWith("image/")) continue;
+        if (!item || item.kind !== "file" || !item.type.startsWith("image/")) continue;
         const file = item.getAsFile();
         if (!file) continue;
         // Clipboard images (e.g. screenshots) often lack a proper filename
