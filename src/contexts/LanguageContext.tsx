@@ -13,7 +13,7 @@ import {
   getRecentLanguages,
   setActiveLanguage as persistActiveLanguage,
 } from "@/lib/language-preference";
-import { isValidLangCode, normalizeLangCode } from "@/lib/languages";
+import { DEFAULT_LANGUAGE, isValidLangCode, normalizeLangCode } from "@/lib/languages";
 import { useBlueskyAuth } from "./BlueskyAuthContext";
 import { logError } from "@/lib/error-messages";
 
@@ -26,12 +26,20 @@ interface LanguageContextValue {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<string>(() => getActiveLanguage());
-  const [recent, setRecent] = useState<string[]>(() => getRecentLanguages());
+  const [language, setLanguageState] = useState<string>(DEFAULT_LANGUAGE);
+  const [recent, setRecent] = useState<string[]>([]);
   const userTouchedRef = useRef(false);
   const lastDidRef = useRef<string | null>(null);
 
   const { agent, did } = useBlueskyAuth();
+
+  // Stored preferences live in localStorage, which only exists in the browser:
+  // render the default on the server and first client pass, then hydrate here.
+  useEffect(() => {
+    if (userTouchedRef.current) return;
+    setLanguageState(getActiveLanguage());
+    setRecent(getRecentLanguages());
+  }, []);
 
   const setLanguage = useCallback((code: string) => {
     const normalized = normalizeLangCode(code);
