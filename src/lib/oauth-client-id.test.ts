@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { CANONICAL_CLIENT_ID, OAUTH_SCOPE, getOAuthClientId, isLoopbackHost } from "./oauth-client-id";
+import {
+  CANONICAL_CLIENT_ID,
+  OAUTH_SCOPE,
+  getOAuthClientId,
+  isLoopbackHost,
+} from "./oauth-client-id";
 
 describe("isLoopbackHost", () => {
   it.each(["localhost", "127.0.0.1", "[::1]"])("treats %s as loopback", (host) => {
@@ -29,9 +34,7 @@ describe("getOAuthClientId", () => {
 
     expect(id.origin).toBe("http://localhost");
     expect(id.pathname).toBe("/");
-    expect(getOAuthClientId({ hostname: "localhost", port: "8080" })).not.toContain(
-      "localhost/",
-    );
+    expect(getOAuthClientId({ hostname: "localhost", port: "8080" })).not.toContain("localhost/");
     expect(id.searchParams.get("redirect_uri")).toBe("http://127.0.0.1:8080/oauth/callback");
     expect(id.searchParams.get("scope")).toBe(OAUTH_SCOPE);
   });
