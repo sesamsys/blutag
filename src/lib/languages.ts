@@ -1,3 +1,6 @@
+/** Language used when no preference is stored or a code is unknown. */
+export const DEFAULT_LANGUAGE = "en";
+
 export interface Language {
   code: string;
   nameEn: string;
@@ -155,15 +158,21 @@ export function isValidLangCode(code: string | null | undefined): boolean {
 
 /** Normalize to primary subtag (e.g. "pt-BR" → "pt"). */
 export function normalizeLangCode(code: string | null | undefined): string {
-  if (!code) return "en";
+  if (!code) return DEFAULT_LANGUAGE;
   const trimmed = code.trim();
   const primary = trimmed.split("-")[0]?.toLowerCase();
-  if (!primary) return "en";
-  return LANG_BY_CODE.has(primary) ? primary : "en";
+  if (!primary) return DEFAULT_LANGUAGE;
+  return LANG_BY_CODE.has(primary) ? primary : DEFAULT_LANGUAGE;
 }
 
+const DEFAULT_LANGUAGE_ENTRY: Language = {
+  code: DEFAULT_LANGUAGE,
+  nameEn: "English",
+  nativeName: "English",
+};
+
 export function getLanguage(code: string): Language {
-  return LANG_BY_CODE.get(code) ?? LANG_BY_CODE.get("en")!;
+  return LANG_BY_CODE.get(code) ?? DEFAULT_LANGUAGE_ENTRY;
 }
 
 export function getLanguageName(code: string): string {

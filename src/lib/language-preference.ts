@@ -1,4 +1,4 @@
-import { isValidLangCode, normalizeLangCode } from "./languages";
+import { DEFAULT_LANGUAGE, isValidLangCode, normalizeLangCode } from "./languages";
 
 const LAST_KEY = "blutag.lang.last";
 const RECENT_KEY = "blutag.lang.recent";
@@ -23,7 +23,7 @@ function safeSet(key: string, value: string) {
 export function getActiveLanguage(): string {
   const stored = safeGet(LAST_KEY);
   if (stored && isValidLangCode(stored)) return normalizeLangCode(stored);
-  return "en";
+  return DEFAULT_LANGUAGE;
 }
 
 export function setActiveLanguage(code: string) {
