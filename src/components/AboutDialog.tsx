@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Info } from "lucide-react";
 import { AI_MODEL_DISPLAY_NAME } from "@/lib/constants";
-import { metaData } from "@/lib/metaData";
+import { metaData } from "@/lib/meta-data";
 
 export default function AboutDialog() {
   return (

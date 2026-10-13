@@ -1,3 +1,5 @@
+> _Superseded by the 2026-10-13 TanStack Start refactor. Kept for history; may not reflect the current architecture._
+
 # Input Validation Implementation
 
 **Date**: March 13, 2026  

@@ -9,7 +9,7 @@ import LanguagePicker from "@/components/LanguagePicker";
 import BlueskyLoginButton from "@/components/BlueskyLoginButton";
 import { compressImageForBluesky } from "@/lib/image-compress";
 import { buildPostEmbed } from "@/lib/bluesky-embed";
-import { RichText, type BlobRef } from "@atproto/api";
+import type { BlobRef } from "@atproto/api";
 import { toast } from "sonner";
 import { BLUESKY_POST_MAX_LENGTH, MAX_PHOTOS, RETRY_MAX_ATTEMPTS } from "@/lib/constants";
 import type { PhotoFile } from "@/types/photo";
@@ -114,7 +114,9 @@ export default function PostComposer({ photos }: PostComposerProps) {
         }
       }
 
-      // Detect facets (links, mentions, hashtags) using RichText
+      // Detect facets (links, mentions, hashtags) using RichText.
+      // Imported lazily to keep @atproto/api (~1.5 MB) off the critical path.
+      const { RichText } = await import("@atproto/api");
       const richText = new RichText({ text: text || "" });
       await richText.detectFacets(agent);
 

@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { useRouter } from "@tanstack/react-router";
 import type { BrowserOAuthClient, OAuthSession } from "@atproto/oauth-client-browser";
-import { Agent } from "@atproto/api";
+import type { Agent } from "@atproto/api";
 import { toast } from "sonner";
 import {
   ERROR_MESSAGES,
@@ -24,7 +24,7 @@ interface BlueskyAuthContextValue {
   isLoggedIn: boolean;
   isLoading: boolean;
   signIn: (handle: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const BlueskyAuthContext = createContext<BlueskyAuthContextValue | null>(null);
@@ -62,6 +62,10 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
 
   const establishSession = useCallback(async (oauthSession: OAuthSession) => {
     try {
+      // Imported lazily: @atproto/api (~1.5 MB) is the largest dependency and
+      // must stay off the SSR/initial-client critical path. The Agent is only
+      // constructed after a session exists.
+      const { Agent } = await import("@atproto/api");
       const newAgent = new Agent(oauthSession);
       setAgent(newAgent);
       setDid(oauthSession.did);

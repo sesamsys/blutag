@@ -11,7 +11,7 @@ import LanguagePicker from "@/components/LanguagePicker";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { BlueskyIcon } from "@/components/icons/BlueskyIcon";
 import { extractExif } from "@/lib/exif";
-import { metaData } from "@/lib/metaData";
+import { metaData } from "@/lib/meta-data";
 import type { PhotoFile } from "@/types/photo";
 import { toast } from "sonner";
 import {
