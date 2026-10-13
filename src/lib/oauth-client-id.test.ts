@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   CANONICAL_CLIENT_ID,
   OAUTH_SCOPE,
+  getLoopbackIpUrl,
   getOAuthClientId,
   isLoopbackHost,
 } from "./oauth-client-id";
