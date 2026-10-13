@@ -178,3 +178,25 @@ export function getLanguage(code: string): Language {
 export function getLanguageName(code: string): string {
   return getLanguage(code).nameEn;
 }
+
+const POST_LANGUAGES_PREF_TYPE = "app.bsky.actor.defs#postLanguagesPref";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * Reads the user's Bluesky post-language preference from the raw
+ * `app.bsky.actor.getPreferences` list and returns valid, normalized codes
+ * in their original order. Unknown shapes are ignored rather than trusted.
+ */
+export function extractPostLanguages(preferences: readonly unknown[]): string[] {
+  const pref = preferences.find(
+    (p): p is Record<string, unknown> => isRecord(p) && p["$type"] === POST_LANGUAGES_PREF_TYPE,
+  );
+  const languages = pref?.["languages"];
+  if (!Array.isArray(languages)) return [];
+  return languages
+    .filter((code): code is string => typeof code === "string" && isValidLangCode(code))
+    .map(normalizeLangCode);
+}

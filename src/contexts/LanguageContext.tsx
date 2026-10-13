@@ -13,7 +13,7 @@ import {
   getRecentLanguages,
   setActiveLanguage as persistActiveLanguage,
 } from "@/lib/language-preference";
-import { DEFAULT_LANGUAGE, isValidLangCode, normalizeLangCode } from "@/lib/languages";
+import { DEFAULT_LANGUAGE, extractPostLanguages, normalizeLangCode } from "@/lib/languages";
 import { useBlueskyAuth } from "./BlueskyAuthContext";
 import { logError } from "@/lib/error-messages";
 
@@ -67,18 +67,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const res = await agent.app.bsky.actor.getPreferences();
-        const prefs = res.data.preferences as Array<Record<string, unknown>>;
-        const langPref = prefs.find(
-          (p) => p?.$type === "app.bsky.actor.defs#postLanguagesPref"
-        );
-        const codes = (langPref?.languages as string[] | undefined) ?? [];
-        const valid = codes.filter((c) => isValidLangCode(c)).map(normalizeLangCode);
-        if (cancelled || valid.length === 0) return;
+        const valid = extractPostLanguages(res.data.preferences);
+        const first = valid[0];
+        if (cancelled || first === undefined) return;
 
         // Set the first as active (only because user hasn't touched it)
         if (!userTouchedRef.current) {
-          setLanguageState(valid[0]);
-          persistActiveLanguage(valid[0]);
+          setLanguageState(first);
+          persistActiveLanguage(first);
           // Merge all into recents
           let merged = getRecentLanguages();
           for (const code of [...valid].reverse()) {
