@@ -30,13 +30,7 @@ import {
   loadPhotosSession,
   clearPhotosSession,
 } from "@/lib/session-persistence";
-import {
-  ERROR_MESSAGES,
-  getErrorMessage,
-  logError,
-  ErrorType,
-  AppError,
-} from "@/lib/error-messages";
+import { ERROR_MESSAGES, getErrorMessage, logError } from "@/lib/error-messages";
 import { retryWithTimeout } from "@/lib/retry";
 import { requestAltText } from "@/lib/analyze-photo";
 import { createRateLimiter } from "@/lib/rate-limiter";

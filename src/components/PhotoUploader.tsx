@@ -22,7 +22,6 @@ import type { PhotoFile } from "@/types/photo";
 import {
   MAX_PHOTOS,
   MAX_FILE_SIZE_MB,
-  MAX_FILE_SIZE_BYTES,
   DROP_ANIMATION_DURATION_MS,
   BLUESKY_IMAGES_EMBED_MAX,
   BLUESKY_GALLERY_ENABLED,
