@@ -82,7 +82,6 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
 
     let mounted = true;
 
-
     (async () => {
       try {
         const client = await getClient();
