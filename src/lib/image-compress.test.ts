@@ -162,7 +162,7 @@ describe("compressImageForBluesky", () => {
     const result = await compressImageForBluesky(file);
 
     expect(toBlobCalls.length).toBeGreaterThanOrEqual(3);
-    expect(toBlobCalls[1]).toBeLessThan(toBlobCalls[0]);
+    expect(toBlobCalls[1]).toBeLessThan(toBlobCalls[0] ?? 0);
     expect(result.blob.size).toBe(100);
   });
 

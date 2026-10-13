@@ -66,7 +66,8 @@ describe("session-persistence", () => {
       expect(restored).not.toBeNull();
       expect(restored!.length).toBe(1);
 
-      const r = restored![0];
+      const r = restored?.[0];
+      if (!r) throw new Error("expected a restored photo");
       expect(r.id).toBe("p1");
       expect(r.altText).toBe("A sunset");
       expect(r.file).toBeInstanceOf(File);
@@ -102,7 +103,9 @@ describe("session-persistence", () => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = reject;
-        reader.readAsText(restored![0].file);
+        const file = restored?.[0]?.file;
+        if (!file) throw new Error("expected a restored file");
+        reader.readAsText(file);
       });
       expect(text).toBe(content);
     });
@@ -115,7 +118,7 @@ describe("session-persistence", () => {
 
       const restored = await loadPhotosSession();
       expect(restored!.length).toBe(1);
-      expect(restored![0].id).toBe("new");
+      expect(restored?.[0]?.id).toBe("new");
     });
 
     it("saves a photo with no alt text", async () => {
@@ -125,7 +128,7 @@ describe("session-persistence", () => {
       await savePhotosSession([photo]);
 
       const restored = await loadPhotosSession();
-      expect(restored![0].altText).toBeUndefined();
+      expect(restored?.[0]?.altText).toBeUndefined();
     });
   });
 
@@ -169,7 +172,7 @@ describe("session-persistence", () => {
       // The next operation should transparently reconnect
       const restored = await loadPhotosSession();
       expect(restored).not.toBeNull();
-      expect(restored![0].id).toBe("before-close");
+      expect(restored?.[0]?.id).toBe("before-close");
     });
   });
 

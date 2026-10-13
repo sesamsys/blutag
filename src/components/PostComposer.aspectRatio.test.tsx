@@ -143,7 +143,9 @@ async function postLandscapePhoto(): Promise<UploadedImage> {
   const embed = call[0].record.embed;
   expect(embed?.$type).toBe("app.bsky.embed.images");
   expect(embed?.images).toHaveLength(1);
-  return embed!.images![0];
+  const image = embed?.images?.[0];
+  if (!image) throw new Error("expected an uploaded image in the embed");
+  return image;
 }
 
 /**
