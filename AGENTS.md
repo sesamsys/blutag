@@ -49,5 +49,5 @@ Detailed review rules live in `.kiro/steering/` — read `code-review-rules.md` 
 
 ## Changelog
 
-- Every change updates `CHANGELOG.md` (Keep a Changelog) under the release date
-  (`YYYY-MM-DD`), never `[Unreleased]`. Why: changes are released the same day.
+- `CHANGELOG.md` is a simple dated changelog: entries are headed by the release date
+  (`YYYY-MM-DD`), never version numbers or `[Unreleased]`. Why: changes are released the same day.

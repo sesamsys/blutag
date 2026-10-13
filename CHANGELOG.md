@@ -2,9 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+Entries are dated by release date (`YYYY-MM-DD`); changes are released the same day they are made.
 
-## [0.5.0] - 2026-10-13
+## 2026-10-13
 
 ### Added
 
@@ -33,7 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Unused shadcn UI components, legacy Radix toast files, the class-based error boundary and unused dependencies (including `react-router-dom` and the unused Playwright scaffold)
 
-## [0.4.1] - 2026-08-12
+## 2026-08-12
 
 ### Added
 
@@ -45,7 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Landscape and portrait photos were posted without an `aspectRatio`, so Bluesky clients letterboxed them into a square frame with top/bottom (or side) padding. `compressImageForBluesky` now returns the final rendered dimensions and `PostComposer` attaches `aspectRatio` to every image in both `app.bsky.embed.images` and `app.bsky.embed.gallery` embeds.
 - Build errors: removed the unused shadcn `sidebar` scaffold component (imported a missing `use-mobile` hook) and fixed an unsound cast in `src/lib/exif.test.ts`
 
-## [0.4.0] - 2026-06-11
+## 2026-06-11
 
 ### Added
 
@@ -69,7 +69,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Replaced "Supabase dashboard" references with "Lovable Cloud" in steering docs
 - `PostComposer` now shows a toast warning when photos exceed the limit and are truncated before posting
 
-## [0.3.0] - 2026-03-14
+## 2026-03-14
 
 ### Added
 
@@ -86,7 +86,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Improved AT Protocol type safety — replaced `as any` casts with proper `OAuthSession` and `BlobRef` types
 
-## [0.2.0] - 2026-03-13
+## 2026-03-13
 
 ### Added
 
@@ -97,6 +97,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Production readiness infrastructure: error handling utilities, rate limiter, retry logic, input validation
 - Unit tests for error messages, rate limiter, and retry utilities
 - `ErrorBoundary` component for graceful crash recovery
+- Initial photo upload and alt text generation workflow
+- Bluesky login via AT Protocol app passwords (edge functions)
+- AI-powered alt text generation using Lovable AI Gateway (Google Gemini)
+- Client-side image compression (max 2048px, JPEG ≤1MB)
+- EXIF metadata extraction for contextual alt text
+- Post composer with 300-character limit and multi-image support
+- shadcn/ui design system with Tailwind CSS semantic tokens
+- Responsive mobile-first layout
 
 ### Changed
 
@@ -112,16 +120,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - No passwords or app passwords ever enter the application
 - Tokens stored in IndexedDB (managed by OAuth client), not localStorage
 - Automatic token refresh handled by library
-
-## [0.1.0] - 2026-03-13
-
-### Added
-
-- Initial photo upload and alt text generation workflow
-- Bluesky login via AT Protocol app passwords (edge functions)
-- AI-powered alt text generation using Lovable AI Gateway (Google Gemini)
-- Client-side image compression (max 2048px, JPEG ≤1MB)
-- EXIF metadata extraction for contextual alt text
-- Post composer with 300-character limit and multi-image support
-- shadcn/ui design system with Tailwind CSS semantic tokens
-- Responsive mobile-first layout
