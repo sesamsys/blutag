@@ -59,14 +59,17 @@ export function getLoopbackIpUrl(href: string): string | null {
  * that can't fetch the canonical document cross-origin.
  */
 export const CANONICAL_CLIENT_METADATA = {
-  client_id: CANONICAL_CLIENT_ID,
-  application_type: "web",
+  client_id: CANONICAL_CLIENT_ID as `https://${string}`,
+  application_type: "web" as const,
   client_name: "Blutag",
   client_uri: "https://blutag.app",
   dpop_bound_access_tokens: true,
-  grant_types: ["authorization_code", "refresh_token"],
-  response_types: ["code"],
-  redirect_uris: ["https://blutag.app/oauth/callback"],
+  grant_types: ["authorization_code" as const, "refresh_token" as const] as [
+    "authorization_code",
+    "refresh_token",
+  ],
+  response_types: ["code" as const] as ["code"],
+  redirect_uris: ["https://blutag.app/oauth/callback"] as [string, ...string[]],
   scope: OAUTH_SCOPE,
-  token_endpoint_auth_method: "none",
-} as const;
+  token_endpoint_auth_method: "none" as const,
+};

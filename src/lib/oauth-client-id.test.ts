@@ -1,5 +1,4 @@
-import { CANONICAL_CLIENT_METADATA, describe, expect, it } from "vitest";
-import {
+import { describe, expect, it } from "vitest";
   CANONICAL_CLIENT_METADATA,
   CANONICAL_CLIENT_ID,
   OAUTH_SCOPE,
