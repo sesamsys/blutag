@@ -10,6 +10,7 @@ Entries are dated by release date (`YYYY-MM-DD`); changes are released the same 
 
 - Prettier (`.prettierrc.json`, `.prettierignore`) with `format` / `format:check` scripts, enforced through ESLint
 - GitHub Actions CI (`.github/workflows/ci.yml`) running typecheck, tests with coverage, lint, format check and build on pull requests and every push to `main`, so Lovable commits are checked too
+- Pinned the Node runtime to 22 across CI (`actions/setup-node`), `.nvmrc` and a package.json `engines` constraint (`>=22 <24`), matching the Lovable build sandbox so local, CI and hosted test runs agree
 - Three-phase unit test coverage: pure logic (handle/post/photo validation, languages, language preference, utils, OAuth client ID), contexts and data (Bluesky auth, language, photo analysis client), and route/component smoke tests (routing, photo uploader, alt text editor, language picker) — 222 tests
 - `test:coverage` and `typecheck` scripts; V8 coverage reports
 - `AGENTS.md` with architecture, tooling and testing rules
@@ -20,6 +21,8 @@ Entries are dated by release date (`YYYY-MM-DD`); changes are released the same 
 - Upgraded to React 19 and Tailwind CSS v4; theme colors, fonts and pill radius carried over unchanged
 - TypeScript strict mode (including unused locals/parameters) across the codebase
 - The Bluesky OAuth client loads lazily and the OAuth callback page renders only in the browser
+- `@atproto/api` now loads dynamically at point of use (Agent creation, post facet detection) instead of in a root provider, dropping the largest client chunk from ~1 MB to ~124 kB and moving `@atproto/api` off the initial critical path
+- Renamed `src/lib/metaData.ts` to `src/lib/meta-data.ts` to follow the kebab-case convention for lib files
 - Validation for photos, handles and posts extracted into tested helpers
 - README, CONTRIBUTING and steering docs updated for the new stack and checks
 
@@ -30,6 +33,8 @@ Entries are dated by release date (`YYYY-MM-DD`); changes are released the same 
 - Local development sign-in failed with "Invalid loopback client ID: Value must not contain a path component"; local OAuth now uses a path-less loopback client ID and redirects `localhost` to `127.0.0.1`
 - Copying alt text when clipboard access is denied now shows an error instead of failing silently
 - Retry tests no longer leave unhandled promise rejections
+- Unit tests failed on Node 24+ (native `localStorage` shadowed jsdom's); pinning the test runtime to Node 22 keeps the suite green locally and in CI
+- Corrected the auth context `logout` type from `() => void` to `() => Promise<void>` to reflect its async implementation
 
 ### Removed
 
