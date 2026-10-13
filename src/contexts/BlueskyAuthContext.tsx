@@ -31,10 +31,14 @@ function getClient(): Promise<BrowserOAuthClient> {
     // Imported lazily: the OAuth client is browser-only (IndexedDB, WebCrypto)
     // and must never be evaluated during server rendering.
     clientPromise = import("@atproto/oauth-client-browser").then(({ BrowserOAuthClient: Client }) =>
-      Client.load({
-        clientId: getOAuthClientId(window.location),
-        handleResolver: "https://bsky.social",
-      }),
+      isLoopbackHost(window.location.hostname)
+        ? Client.load({
+            clientId: getOAuthClientId(window.location),
+            handleResolver: "https://bsky.social",
+          })
+        : // Hosted aliases (previews, www) can't fetch the canonical metadata
+          // cross-origin (no CORS header → "Load failed"), so pass it inline.
+          new Client({ clientMetadata: CANONICAL_CLIENT_METADATA, handleResolver: "https://bsky.social" }),
     );
   }
   return clientPromise;
