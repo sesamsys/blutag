@@ -44,3 +44,16 @@ describe("getOAuthClientId", () => {
     expect(id.searchParams.get("redirect_uri")).toBe("http://127.0.0.1/oauth/callback");
   });
 });
+
+describe("getLoopbackIpUrl", () => {
+  it("moves localhost to 127.0.0.1, keeping port, path and query", () => {
+    expect(getLoopbackIpUrl("http://localhost:8080/oauth/callback?code=a")).toBe(
+      "http://127.0.0.1:8080/oauth/callback?code=a",
+    );
+  });
+
+  it("leaves other hosts alone", () => {
+    expect(getLoopbackIpUrl("http://127.0.0.1:8080/")).toBeNull();
+    expect(getLoopbackIpUrl("https://blutag.app/")).toBeNull();
+  });
+});

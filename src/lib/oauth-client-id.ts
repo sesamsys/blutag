@@ -42,3 +42,14 @@ export function getOAuthClientId(location: LocationLike): string {
   });
   return `http://localhost?${params.toString()}`;
 }
+
+/**
+ * Returns the same URL on `127.0.0.1` when visited on `localhost`, or `null`
+ * when no move is needed. The OAuth client refuses to run on `localhost`.
+ */
+export function getLoopbackIpUrl(href: string): string | null {
+  const url = new URL(href);
+  if (url.hostname !== "localhost") return null;
+  url.hostname = "127.0.0.1";
+  return url.toString();
+}

@@ -10,7 +10,7 @@ import {
   getErrorMessage,
   logError,
 } from "@/lib/error-messages";
-import { getOAuthClientId } from "@/lib/oauth-client-id";
+import { getLoopbackIpUrl, getOAuthClientId } from "@/lib/oauth-client-id";
 
 interface BlueskyAuthContextValue {
   agent: Agent | null;
@@ -72,7 +72,16 @@ export function BlueskyAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // AT Protocol only accepts loopback IP literals for local OAuth; move
+    // http://localhost to 127.0.0.1 before the client throws on init.
+    const loopbackIpUrl = getLoopbackIpUrl(window.location.href);
+    if (loopbackIpUrl) {
+      window.location.replace(loopbackIpUrl);
+      return;
+    }
+
     let mounted = true;
+
 
     (async () => {
       try {
